@@ -884,3 +884,259 @@ p { margin: 0; }
   .chip-toggle[aria-pressed='true'] svg { animation: none; }
   .stage canvas { transition: none; }
 }
+
+/* =========================================================
+   Игра с компьютером
+   ========================================================= */
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 24px;
+}
+.hero-actions .btn-link { margin-top: 0; }
+
+.btn-gold,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+.btn-gold {
+  border: 0;
+  color: #1a140b;
+  background: linear-gradient(160deg, var(--gold-2), var(--gold));
+  box-shadow: 0 8px 24px rgba(212, 175, 106, 0.22);
+}
+.btn-gold:hover { filter: brightness(1.07); transform: translateY(-1px); }
+.btn-gold span { font-size: 18px; line-height: 1; }
+.btn-ghost {
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--text-2);
+}
+.btn-ghost:hover:not(:disabled) { border-color: rgba(212, 175, 106, 0.5); color: var(--gold-2); }
+.btn-ghost:disabled { opacity: 0.4; cursor: default; }
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+}
+.mode-switch button,
+.seg button {
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.mode-switch button:hover,
+.seg button:hover { color: var(--text); background: var(--surface-2); }
+.mode-switch button[aria-pressed='true'] {
+  color: var(--gold-2);
+  background: var(--gold-soft);
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 106, 0.45);
+}
+.panel-legends .game-tabs { margin-bottom: 14px; }
+
+.opt-row {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.opt-label { color: var(--muted); font-size: 13px; }
+.seg {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.25);
+}
+.seg button { flex: 1; padding: 7px 4px; font-size: 13px; }
+.seg button[aria-pressed='true'] { color: #1a140b; background: linear-gradient(160deg, var(--gold-2), var(--gold)); }
+
+.play-status {
+  margin: 16px 0 14px;
+  font-family: var(--serif);
+  font-size: 24px;
+  font-style: italic;
+  line-height: 1.2;
+  color: var(--text);
+}
+.play-status[data-kind='think'] { color: var(--muted); }
+.play-status[data-kind='check'] { color: #ff8a73; }
+.play-status[data-kind='win'] { color: var(--gold-2); }
+.play-status[data-kind='lose'] { color: #ff8a73; }
+.play-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.play-actions > * { flex: 1 1 140px; }
+.play-hint { margin-top: 12px; color: var(--dim); font-size: 12.5px; line-height: 1.5; }
+
+/* статус и выбор превращения поверх доски */
+.stage-status {
+  position: absolute;
+  top: calc(var(--header-h) + 14px);
+  left: calc(50% + var(--shift-x) * 100%);
+  transform: translateX(-50%);
+  z-index: 3;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: rgba(16, 15, 14, 0.78);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.hero.is-play .stage-status:not(:empty) { display: inline-flex; }
+.stage-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.stage-status[data-kind='think']::before { background: var(--muted); animation: pulse 1s ease-in-out infinite; }
+.stage-status[data-kind='check']::before,
+.stage-status[data-kind='lose']::before { background: #ff6b52; }
+.stage-status[data-kind='check'] { border-color: rgba(255, 107, 82, 0.5); }
+.stage-status[data-kind='win'] { color: #1a140b; background: linear-gradient(160deg, var(--gold-2), var(--gold)); border-color: transparent; }
+.stage-status[data-kind='win']::before { background: #1a140b; }
+@keyframes pulse { 50% { opacity: 0.25; } }
+
+.promo {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + var(--shift-x) * 100%);
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  padding: 18px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  background: rgba(16, 15, 14, 0.92);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+.promo[hidden] { display: none; }
+.promo p { margin-bottom: 12px; color: var(--muted); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.promo-options { display: grid; grid-template-columns: repeat(4, 76px); gap: 8px; }
+.promo-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.promo-options button span { font-size: 34px; line-height: 1; color: var(--gold); }
+.promo-options button:hover,
+.promo-options button:focus-visible { border-color: var(--gold); color: var(--gold-2); }
+
+.hero.is-play .transport .icon-btn { display: none; }
+.hero.is-play .counter { margin-left: 4px; }
+.hero.is-play .moves .mv { pointer-events: none; }
+.hero.is-play [data-mode-go] { display: none; }
+
+@media (max-width: 900px) {
+  .hero.is-play { grid-template-areas: "copy" "stage" "card" "bar"; }
+  .hero.is-play .lead,
+  .hero.is-play .eyebrow { display: none; }
+  .hero.is-play .stage { height: clamp(320px, 112vw, 62svh); }
+  .hero.is-play .hero-actions { display: none; }
+  .hero.is-play .game-card { margin-top: 12px; margin-bottom: 14px; }
+  .stage-status { top: 10px; }
+  .hero-actions .btn-link { display: none; }
+}
+
+@media (max-width: 600px) {
+  .hero.is-play .counter { position: static; }
+  .hero.is-play .transport { justify-content: flex-start; min-height: 0; }
+  .opt-row { grid-template-columns: 1fr; gap: 6px; }
+  .promo-options { grid-template-columns: repeat(4, minmax(60px, 1fr)); }
+  .promo { width: calc(100% - 32px); max-width: 360px; }
+}
+
+@media (max-width: 900px) {
+  .stage-hint { white-space: normal; text-align: center; width: max-content; max-width: calc(100% - 24px); }
+}
+@media (max-width: 360px) {
+  .logo > span:not(.logo-mark) { display: none; }
+}
+
+/* ---------------- Блок «приложение» ---------------- */
+
+.get-app {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 28px 40px;
+  max-width: 1240px;
+  margin: 0 auto clamp(56px, 8vw, 104px);
+  padding: clamp(24px, 4vw, 44px);
+  width: calc(100% - 2 * var(--gutter));
+  border: 1px solid rgba(212, 175, 106, 0.28);
+  border-radius: 28px;
+  background:
+    radial-gradient(70% 120% at 0% 0%, rgba(212, 175, 106, 0.12), rgba(212, 175, 106, 0) 60%),
+    linear-gradient(160deg, rgba(30, 26, 22, 0.8), rgba(14, 13, 12, 0.8));
+}
+.get-app-icon img { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); }
+.get-app h2 { margin: 12px 0 10px; font-size: clamp(30px, 3.4vw, 44px); }
+.get-app-body > p:not(.eyebrow) { color: var(--text-2); max-width: 46ch; }
+.get-app-steps {
+  margin: 16px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.get-app-steps b { color: var(--text-2); font-weight: 600; }
+.get-app-btn { min-height: 52px; padding: 0 26px; font-size: 15.5px; text-decoration: none; white-space: nowrap; }
+.get-app-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.is-native .get-app { display: none; }
+
+@media (max-width: 900px) {
+  .get-app { grid-template-columns: auto 1fr; }
+  .get-app-btn { grid-column: 1 / -1; justify-self: start; }
+}
+@media (max-width: 600px) {
+  .get-app { grid-template-columns: 1fr; gap: 18px; }
+  .get-app-icon img { width: 72px; height: 72px; border-radius: 18px; }
+  .get-app-btn { width: 100%; }
+}

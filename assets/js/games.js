@@ -54,29 +54,45 @@ const START = {
 for (const f of 'abcdefgh') { START[f + '2'] = 'wP'; START[f + '7'] = 'bP'; }
 
 /**
- * Прогоняет партию и возвращает список фигур и состояние доски после каждого хода.
- * state[i].where[id] = 'e4' | { grave: 'w'|'b', slot: n }
- * state[i].type[id]  = 'P' | 'N' | ... (меняется при превращении пешки)
+ * Отслеживает, где находится каждая из 32 фигур, ход за ходом.
+ * states[i].where[id] = 'e4' | { grave: 'w'|'b', slot: n }
+ * states[i].type[id]  = 'P' | 'N' | ... (меняется при превращении пешки)
+ * Используется и для исторических партий, и для живой игры с компьютером.
  */
-export function simulate(uci) {
-  const pieces = [];
-  const board = {};
-  for (const [sq, code] of Object.entries(START)) {
-    const id = pieces.length;
-    pieces.push({ id, color: code[0], type: code[1], home: sq });
-    board[sq] = id;
+export class Tracker {
+  constructor() {
+    this.pieces = [];
+    const board = {};
+    for (const [sq, code] of Object.entries(START)) {
+      const id = this.pieces.length;
+      this.pieces.push({ id, color: code[0], type: code[1], home: sq });
+      board[sq] = id;
+    }
+    this.states = [{
+      where: this.pieces.map((p) => p.home),
+      type: this.pieces.map((p) => p.type),
+      board,
+      grave: { w: 0, b: 0 },
+    }];
+    this.moves = [];
+    this.san = [];
   }
-  const where = pieces.map((p) => p.home);
-  const type = pieces.map((p) => p.type);
-  const graveCount = { w: 0, b: 0 };
-  const states = [{ where: where.slice(), type: type.slice() }];
-  const moves = [];
 
-  for (const mv of uci.trim().split(/\s+/)) {
-    const from = mv.slice(0, 2);
-    const to = mv.slice(2, 4);
-    const promo = mv[4] ? mv[4].toUpperCase() : null;
+  get ply() {
+    return this.moves.length;
+  }
+
+  apply(uci, san) {
+    const prev = this.states[this.states.length - 1];
+    const where = prev.where.slice();
+    const type = prev.type.slice();
+    const board = { ...prev.board };
+    const grave = { ...prev.grave };
+    const from = uci.slice(0, 2);
+    const to = uci.slice(2, 4);
+    const promo = uci[4] ? uci[4].toUpperCase() : null;
     const id = board[from];
+    if (id === undefined) throw new Error(`Нет фигуры на ${from}`);
     const info = { id, from, to, captured: null, rook: null, promo, knight: type[id] === 'N' };
 
     let capSq = board[to] !== undefined ? to : null;
@@ -86,8 +102,8 @@ export function simulate(uci) {
     }
     if (capSq) {
       const cid = board[capSq];
-      const c = pieces[cid].color;
-      where[cid] = { grave: c, slot: graveCount[c]++ };
+      const c = this.pieces[cid].color;
+      where[cid] = { grave: c, slot: grave[c]++ };
       delete board[capSq];
       info.captured = cid;
     }
@@ -108,8 +124,24 @@ export function simulate(uci) {
     where[id] = to;
     if (promo) type[id] = promo;
 
-    moves.push(info);
-    states.push({ where: where.slice(), type: type.slice() });
+    this.moves.push(info);
+    this.states.push({ where, type, board, grave });
+    this.san.push(san || '');
+    return info;
   }
-  return { pieces, states, moves };
+
+  pop() {
+    if (!this.moves.length) return;
+    this.moves.pop();
+    this.states.pop();
+    this.san.pop();
+  }
+}
+
+/** Прогоняет всю партию сразу. */
+export function simulate(uci, san = '') {
+  const t = new Tracker();
+  const sans = san ? san.split(' ') : [];
+  uci.trim().split(/\s+/).forEach((mv, i) => t.apply(mv, sans[i]));
+  return t;
 }

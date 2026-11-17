@@ -365,6 +365,27 @@ export class ChessScene {
     });
     this.controls = controls;
 
+    // выбор поля касанием/кликом (короткое нажатие без перетаскивания)
+    this.onPick = null;
+    this.raycaster = new THREE.Raycaster();
+    this.pointer = new THREE.Vector2();
+    this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    canvas.addEventListener('pointerdown', (e) => {
+      this.downAt = { x: e.clientX, y: e.clientY, t: performance.now() };
+    });
+    canvas.addEventListener('pointerup', (e) => {
+      const d = this.downAt;
+      this.downAt = null;
+      if (!d || !this.onPick) return;
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 10 || performance.now() - d.t > 700) return;
+      this.onPick(this.pickSquare(e.clientX, e.clientY));
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!this.onPick || e.pointerType !== 'mouse' || this.downAt) return;
+      const sq = this.pickSquare(e.clientX, e.clientY);
+      canvas.style.cursor = sq && this.isPickable?.(sq) ? 'pointer' : '';
+    });
+
     this.buildLights(coarse);
     this.buildBoard();
     this.geoms = buildGeometries();
@@ -492,6 +513,31 @@ export class ChessScene {
         transparent: true, depthWrite: false,
       }),
     );
+    // выбранная фигура и возможные ходы
+    this.hlSel = new THREE.Mesh(
+      hlGeo,
+      new THREE.MeshBasicMaterial({ color: 0x8fd3ff, transparent: true, opacity: 0.45, depthWrite: false }),
+    );
+    this.hlSel.position.y = 0.009;
+    this.hlSel.visible = false;
+    this.hlSel.renderOrder = 2;
+    s.add(this.hlSel);
+    const dotGeo = new THREE.CircleGeometry(0.15, 28);
+    dotGeo.rotateX(-Math.PI / 2);
+    const ringGeo = new THREE.RingGeometry(0.36, 0.46, 40);
+    ringGeo.rotateX(-Math.PI / 2);
+    const markMat = new THREE.MeshBasicMaterial({ color: 0x8fd3ff, transparent: true, opacity: 0.8, depthWrite: false });
+    this.marks = [];
+    for (let i = 0; i < 28; i++) {
+      const dot = new THREE.Mesh(dotGeo, markMat);
+      const ring = new THREE.Mesh(ringGeo, markMat);
+      for (const m of [dot, ring]) {
+        m.visible = false;
+        m.renderOrder = 3;
+        s.add(m);
+      }
+      this.marks.push({ dot, ring });
+    }
     for (const m of [this.hlFrom, this.hlTo, this.hlCheck]) {
       m.position.y = 0.006;
       m.visible = false;
@@ -516,9 +562,10 @@ export class ChessScene {
 
   /* ---------- фигуры и партия ---------- */
 
-  setGame(sim) {
+  setGame(sim, ply = 0) {
     const first = !this.meshes.length;
     this.sim = sim;
+    this.clearSelection();
     if (first) {
       for (const p of sim.pieces) {
         const mesh = new THREE.Mesh(this.geoms[p.type], this.materials[p.color]);
@@ -529,11 +576,11 @@ export class ChessScene {
         this.scene.add(mesh);
         this.meshes.push(mesh);
       }
-      this.ply = 0;
-      this.intro();
+      this.ply = ply;
+      this.intro(ply);
     } else {
       this.ply = -1;
-      this.show(0, { animate: true });
+      this.show(ply, { animate: true });
     }
   }
 
@@ -544,11 +591,14 @@ export class ChessScene {
     mesh.rotation.y = type === 'N' ? (mesh.userData.color === 'w' ? Math.PI / 2 + 0.9 : -Math.PI / 2 + 0.9) : 0;
   }
 
-  intro() {
-    const st = this.sim.states[0];
+  intro(ply = 0) {
+    const st = this.sim.states[ply];
     const now = performance.now() / 1000;
     this.meshes.forEach((m, id) => {
-      const to = this.posOf(st.where[id]);
+      const w = st.where[id];
+      const to = this.posOf(w);
+      this.setType(m, st.type[id]);
+      if (typeof w !== 'string') m.scale.setScalar(GRAVE_SCALE);
       if (this.reduceMotion) {
         m.position.copy(to);
         return;
@@ -556,7 +606,7 @@ export class ChessScene {
       m.position.set(to.x, to.y + 5 + Math.random() * 2, to.z);
       this.addTween(id, to, { t0: now + 0.25 + id * 0.035, dur: 0.9, arc: 0 });
     });
-    this.updateHighlights(0);
+    this.updateHighlights(ply);
   }
 
   addTween(id, to, { t0, dur, arc = 0, scale = null, onDone = null }) {
@@ -646,13 +696,61 @@ export class ChessScene {
     }
   }
 
+  /* ---------- выбор полей ---------- */
+
+  squareAt(x, z) {
+    const f = Math.floor(x + 4);
+    const r = Math.floor(4 - z);
+    if (f < 0 || f > 7 || r < 0 || r > 7) return null;
+    return 'abcdefgh'[f] + (r + 1);
+  }
+
+  pickSquare(clientX, clientY) {
+    if (!this.sim) return null;
+    const rect = this.canvas.getBoundingClientRect();
+    this.pointer.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    const st = this.sim.states[this.ply];
+    const onBoard = this.meshes.filter((m, id) => typeof st.where[id] === 'string');
+    const hit = this.raycaster.intersectObjects(onBoard, false)[0];
+    if (hit) return st.where[this.meshes.indexOf(hit.object)];
+    const p = new THREE.Vector3();
+    if (!this.raycaster.ray.intersectPlane(this.groundPlane, p)) return null;
+    return this.squareAt(p.x, p.z);
+  }
+
+  setSelection(square, targets = []) {
+    this.hlSel.visible = !!square;
+    if (square) this.hlSel.position.copy(this.posOf(square)).setY(0.009);
+    this.marks.forEach((mk, i) => {
+      const t = targets[i];
+      mk.dot.visible = !!t && !t.capture;
+      mk.ring.visible = !!t && t.capture;
+      if (t) {
+        const p = this.posOf(t.to);
+        mk.dot.position.set(p.x, 0.012, p.z);
+        mk.ring.position.set(p.x, 0.012, p.z);
+      }
+    });
+  }
+
+  clearSelection() {
+    if (this.hlSel) this.setSelection(null);
+  }
+
   /* ---------- камера ---------- */
 
   setAutoRotate(v) {
     this.autoRotate = v;
   }
 
-  view(name) {
+  setTight(v) {
+    if (this.tight === v) return;
+    this.tight = v;
+    this.resize();
+  }
+
+  view(name, phi) {
     const presets = {
       white: { theta: 0, phi: 0.92 },
       black: { theta: Math.PI, phi: 0.92 },
@@ -666,7 +764,7 @@ export class ChessScene {
     dTheta = Math.atan2(Math.sin(dTheta), Math.cos(dTheta));
     this.camTween = {
       t0: performance.now() / 1000, dur: this.reduceMotion ? 0.01 : 1.3,
-      theta0: sph.theta, theta1: sph.theta + dTheta, phi0: sph.phi, phi1: p.phi,
+      theta0: sph.theta, theta1: sph.theta + dTheta, phi0: sph.phi, phi1: phi ?? p.phi,
     };
   }
 
@@ -693,9 +791,12 @@ export class ChessScene {
     const vfov = THREE.MathUtils.degToRad(cam.fov);
     const effAspect = (w * (1 - 2 * Math.abs(sx))) / (h * (1 - 2 * Math.abs(sy)));
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * effAspect);
-    const dist = Math.max(6.2 / Math.sin(vfov / 2) * 0.9, 6.5 / Math.sin(hfov / 2));
+    // при игре камера не вращается — доску можно кадрировать плотнее
+    const rv = this.tight ? 5.5 : 6.2;
+    const rh = this.tight ? 5.35 : 6.5;
+    const dist = Math.max(rv / Math.sin(vfov / 2) * 0.9, rh / Math.sin(hfov / 2));
     const prev = this.dist;
-    this.dist = clamp(dist, 16, 44);
+    this.dist = clamp(dist, 14, 44);
     if (prev) {
       const off = this.camera.position.clone().sub(this.target).setLength(this.dist);
       this.camera.position.copy(this.target).add(off);

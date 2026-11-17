@@ -1,0 +1,10 @@
+{
+  "appId": "com.gambit.chess3d",
+  "appName": "Гамбит",
+  "webDir": "www",
+  "backgroundColor": "#09090b",
+  "android": {
+    "backgroundColor": "#09090b",
+    "adjustMarginsForEdgeToEdge": "auto"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "gambit-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Android-приложение «Гамбит» (Capacitor) — обёртка над сайтом из корня репозитория.",
+  "scripts": {
+    "copy-web": "node scripts/copy-web.mjs",
+    "sync": "npm run copy-web && cap sync android",
+    "build:apk": "npm run sync && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "7.6.10",
+    "@capacitor/core": "7.6.10"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.6.10"
+  }
+}

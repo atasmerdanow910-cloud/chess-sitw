@@ -9,12 +9,17 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Гамбит — шахматы в 3D и легенды шахмат">
   <meta property="og:description" content="Великие партии на трёхмерной доске и истории пяти чемпионов мира.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2309090b'/%3E%3Ctext x='32' y='47' font-size='42' text-anchor='middle' fill='%23d4af6a' font-family='serif'%3E%E2%99%9E%3C/text%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Гамбит">
+  <link rel="preload" href="assets/fonts/playfair-display-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/fonts.css">
   <link rel="stylesheet" href="assets/css/style.css">
-  <script>document.documentElement.classList.add('js');</script>
+  <script>document.documentElement.classList.add('js'); if (window.Capacitor) document.documentElement.classList.add('is-native');</script>
   <script type="importmap">
     {
       "imports": {
@@ -44,10 +49,20 @@
     <!-- ============ HERO: 3D-доска ============ -->
     <section class="hero" id="board" aria-label="Трёхмерная доска">
       <div class="stage" id="stage">
-        <canvas id="scene" role="img" aria-label="Трёхмерная шахматная доска, на которой разыгрывается историческая партия"></canvas>
+        <canvas id="scene" role="img" aria-label="Трёхмерная шахматная доска"></canvas>
         <div class="stage-fallback" aria-hidden="true">
           <div class="css-board"></div>
           <p>3D-режим недоступен в этом браузере — ходы партии по-прежнему можно листать ниже.</p>
+        </div>
+        <p class="stage-status" id="stage-status" role="status" aria-live="polite"></p>
+        <div class="promo" id="promo" hidden>
+          <p>Превратить пешку в</p>
+          <div class="promo-options">
+            <button type="button" data-promo="q"><span aria-hidden="true">&#x265B;&#xFE0E;</span>Ферзь</button>
+            <button type="button" data-promo="r"><span aria-hidden="true">&#x265C;&#xFE0E;</span>Ладья</button>
+            <button type="button" data-promo="b"><span aria-hidden="true">&#x265D;&#xFE0E;</span>Слон</button>
+            <button type="button" data-promo="n"><span aria-hidden="true">&#x265E;&#xFE0E;</span>Конь</button>
+          </div>
         </div>
         <p class="stage-hint" id="stage-hint" aria-hidden="true">
           <span class="hint-desktop">Потяните доску мышью, чтобы повернуть её</span>
@@ -59,19 +74,53 @@
         <p class="eyebrow">Интерактивная 3D-доска</p>
         <h1>Королевская <em>игра</em></h1>
         <p class="lead">Шестьдесят четыре клетки, тридцать две фигуры и полторы тысячи лет истории. Смотрите, как великие чемпионы разыгрывали свои легендарные партии — ход за ходом, прямо на доске.</p>
-        <a class="btn-link" href="#legends">Легенды шахмат <span aria-hidden="true">↓</span></a>
+        <div class="hero-actions">
+          <button type="button" class="btn-gold" data-mode-go="play"><span aria-hidden="true">&#x265E;&#xFE0E;</span> Сыграть с компьютером</button>
+          <a class="btn-link" href="#legends">Легенды шахмат <span aria-hidden="true">↓</span></a>
+        </div>
       </div>
 
       <div class="game-card">
-        <div class="game-tabs" role="group" aria-label="Выбор партии">
-          <button type="button" data-game-tab="fischer" aria-pressed="true">Фишер<small>1956</small></button>
-          <button type="button" data-game-tab="kasparov" aria-pressed="false">Каспаров<small>1999</small></button>
-          <button type="button" data-game-tab="carlsen" aria-pressed="false">Карлсен<small>2004</small></button>
+        <div class="mode-switch" role="group" aria-label="Режим">
+          <button type="button" data-mode="legends" aria-pressed="true">Партии легенд</button>
+          <button type="button" data-mode="play" aria-pressed="false">Игра с компьютером</button>
         </div>
-        <p class="game-kicker">Сейчас на доске</p>
-        <h2 class="game-title" id="game-title">«Партия века»</h2>
-        <p class="game-meta" id="game-meta"><span>Дональд Бирн — Роберт Фишер</span><span>Нью-Йорк, 1956</span><span>0–1</span></p>
-        <p class="game-note" id="game-note"></p>
+
+        <div class="panel-legends">
+          <div class="game-tabs" role="group" aria-label="Выбор партии">
+            <button type="button" data-game-tab="fischer" aria-pressed="true">Фишер<small>1956</small></button>
+            <button type="button" data-game-tab="kasparov" aria-pressed="false">Каспаров<small>1999</small></button>
+            <button type="button" data-game-tab="carlsen" aria-pressed="false">Карлсен<small>2004</small></button>
+          </div>
+          <p class="game-kicker">Сейчас на доске</p>
+          <h2 class="game-title" id="game-title">«Партия века»</h2>
+          <p class="game-meta" id="game-meta"><span>Дональд Бирн — Роберт Фишер</span><span>Нью-Йорк, 1956</span><span>0–1</span></p>
+          <p class="game-note" id="game-note"></p>
+        </div>
+
+        <div class="panel-play" hidden>
+          <div class="opt-row">
+            <span class="opt-label" id="lbl-color">Ваш цвет</span>
+            <div class="seg" role="group" aria-labelledby="lbl-color">
+              <button type="button" data-color="w" aria-pressed="true">Белые</button>
+              <button type="button" data-color="b" aria-pressed="false">Чёрные</button>
+            </div>
+          </div>
+          <div class="opt-row">
+            <span class="opt-label" id="lbl-level">Сложность</span>
+            <div class="seg" role="group" aria-labelledby="lbl-level">
+              <button type="button" data-level="easy" aria-pressed="false">Новичок</button>
+              <button type="button" data-level="medium" aria-pressed="true">Любитель</button>
+              <button type="button" data-level="hard" aria-pressed="false">Мастер</button>
+            </div>
+          </div>
+          <p class="play-status" id="play-status" data-kind="turn">Ваш ход</p>
+          <div class="play-actions">
+            <button type="button" class="btn-gold" id="btn-new">Новая партия</button>
+            <button type="button" class="btn-ghost" id="btn-undo">Отменить ход</button>
+          </div>
+          <p class="play-hint">Нажмите на свою фигуру, затем на поле, куда хотите пойти.</p>
+        </div>
       </div>
 
       <div class="hero-bar" role="region" aria-label="Управление партией">
@@ -251,6 +300,25 @@
           <button type="button" class="watch" data-watch="carlsen"><span aria-hidden="true">▶</span> Смотреть на 3D-доске</button>
         </div>
       </article>
+    </section>
+
+    <!-- ============ Приложение ============ -->
+    <section class="get-app reveal" id="app" aria-labelledby="app-title">
+      <div class="get-app-icon" aria-hidden="true"><img src="assets/icons/icon-192.png" alt="" width="96" height="96"></div>
+      <div class="get-app-body">
+        <p class="eyebrow">Android-приложение</p>
+        <h2 id="app-title">Гамбит в кармане</h2>
+        <p>Вся доска, партии легенд и игра с компьютером — в приложении для Android. Работает без интернета.</p>
+        <ol class="get-app-steps">
+          <li>Скачайте файл <b>gambit.apk</b> на телефон.</li>
+          <li>Откройте его и разрешите установку из этого источника, если Android спросит.</li>
+          <li>Нажмите «Установить» — иконка с золотым конём появится на экране.</li>
+        </ol>
+      </div>
+      <a class="btn-gold get-app-btn" href="downloads/gambit.apk" download>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+        Скачать APK
+      </a>
     </section>
   </main>
 
