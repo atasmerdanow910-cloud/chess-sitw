@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Гамбит — шахматы в 3D и легенды шахмат</title>
+  <meta name="description" content="Интерактивная 3D-доска с великими партиями и истории легенд шахмат: Таль, Фишер, Карпов, Каспаров, Карлсен.">
+  <meta name="theme-color" content="#09090b">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Гамбит — шахматы в 3D и легенды шахмат">
+  <meta property="og:description" content="Великие партии на трёхмерной доске и истории пяти чемпионов мира.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2309090b'/%3E%3Ctext x='32' y='47' font-size='42' text-anchor='middle' fill='%23d4af6a' font-family='serif'%3E%E2%99%9E%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>document.documentElement.classList.add('js');</script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.min.js",
+        "three/addons/": "./vendor/three/addons/"
+      }
+    }
+  </script>
+  <script type="module" src="assets/js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#legends">Перейти к легендам</a>
+
+  <header class="site-header">
+    <a class="logo" href="#board" aria-label="Гамбит — к доске">
+      <span class="logo-mark" aria-hidden="true">&#x265E;&#xFE0E;</span>
+      <span>Гамбит</span>
+    </a>
+    <nav class="site-nav" aria-label="Разделы">
+      <a href="#board">Доска</a>
+      <a href="#facts">Факты</a>
+      <a href="#legends">Легенды</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ HERO: 3D-доска ============ -->
+    <section class="hero" id="board" aria-label="Трёхмерная доска">
+      <div class="stage" id="stage">
+        <canvas id="scene" role="img" aria-label="Трёхмерная шахматная доска, на которой разыгрывается историческая партия"></canvas>
+        <div class="stage-fallback" aria-hidden="true">
+          <div class="css-board"></div>
+          <p>3D-режим недоступен в этом браузере — ходы партии по-прежнему можно листать ниже.</p>
+        </div>
+        <p class="stage-hint" id="stage-hint" aria-hidden="true">
+          <span class="hint-desktop">Потяните доску мышью, чтобы повернуть её</span>
+          <span class="hint-touch">Проведите по доске влево-вправо, чтобы повернуть</span>
+        </p>
+      </div>
+
+      <div class="hero-copy">
+        <p class="eyebrow">Интерактивная 3D-доска</p>
+        <h1>Королевская <em>игра</em></h1>
+        <p class="lead">Шестьдесят четыре клетки, тридцать две фигуры и полторы тысячи лет истории. Смотрите, как великие чемпионы разыгрывали свои легендарные партии — ход за ходом, прямо на доске.</p>
+        <a class="btn-link" href="#legends">Легенды шахмат <span aria-hidden="true">↓</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="game-tabs" role="group" aria-label="Выбор партии">
+          <button type="button" data-game-tab="fischer" aria-pressed="true">Фишер<small>1956</small></button>
+          <button type="button" data-game-tab="kasparov" aria-pressed="false">Каспаров<small>1999</small></button>
+          <button type="button" data-game-tab="carlsen" aria-pressed="false">Карлсен<small>2004</small></button>
+        </div>
+        <p class="game-kicker">Сейчас на доске</p>
+        <h2 class="game-title" id="game-title">«Партия века»</h2>
+        <p class="game-meta" id="game-meta"><span>Дональд Бирн — Роберт Фишер</span><span>Нью-Йорк, 1956</span><span>0–1</span></p>
+        <p class="game-note" id="game-note"></p>
+      </div>
+
+      <div class="hero-bar" role="region" aria-label="Управление партией">
+        <span class="progress" aria-hidden="true"><span id="progress"></span></span>
+        <div class="transport">
+          <button type="button" class="icon-btn" id="btn-first" aria-label="В начало">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 6l-8 6 8 6z"/></svg>
+          </button>
+          <button type="button" class="icon-btn" id="btn-prev" aria-label="Предыдущий ход">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+          <button type="button" class="icon-btn play" id="btn-play" aria-label="Воспроизвести" aria-pressed="false">
+            <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z"/></svg>
+          </button>
+          <button type="button" class="icon-btn" id="btn-next" aria-label="Следующий ход">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+          <span class="counter" id="counter" aria-live="polite"></span>
+        </div>
+        <div class="moves" id="moves" aria-label="Ходы партии"></div>
+        <div class="views" role="group" aria-label="Ракурс камеры">
+          <button type="button" class="chip" data-view="white">Белые</button>
+          <button type="button" class="chip" data-view="black">Чёрные</button>
+          <button type="button" class="chip" data-view="top">Сверху</button>
+          <button type="button" class="chip chip-toggle" id="btn-orbit" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
+            Облёт
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Факты ============ -->
+    <section class="facts" id="facts" aria-label="Шахматы в цифрах">
+      <div class="fact reveal">
+        <span class="fact-num">64</span>
+        <span class="fact-text">клетки — и бесконечность идей на них</span>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">10<sup>120</sup></span>
+        <span class="fact-text">возможных партий — так называемое число Шеннона</span>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">~1500</span>
+        <span class="fact-text">лет истории — от индийской чатуранги до наших дней</span>
+      </div>
+      <div class="fact reveal">
+        <span class="fact-num">1886</span>
+        <span class="fact-text">первый официальный матч за звание чемпиона мира</span>
+      </div>
+    </section>
+
+    <!-- ============ Легенды ============ -->
+    <section class="legends" id="legends">
+      <header class="section-head reveal">
+        <p class="eyebrow">Пять эпох — пять корон</p>
+        <h2>Легенды шахмат</h2>
+        <p>Чемпионы мира, каждый из которых изменил представление о том, как вообще можно играть в шахматы: от безрассудных жертв Таля до компьютерной точности Карлсена.</p>
+      </header>
+
+      <ol class="timeline reveal" aria-label="Хронология">
+        <li><a href="#tal"><span class="tl-year">1960</span><span class="tl-name">Таль</span></a></li>
+        <li><a href="#fischer"><span class="tl-year">1972</span><span class="tl-name">Фишер</span></a></li>
+        <li><a href="#karpov"><span class="tl-year">1975</span><span class="tl-name">Карпов</span></a></li>
+        <li><a href="#kasparov"><span class="tl-year">1985</span><span class="tl-name">Каспаров</span></a></li>
+        <li><a href="#carlsen"><span class="tl-year">2013</span><span class="tl-name">Карлсен</span></a></li>
+      </ol>
+
+      <!-- Таль -->
+      <article class="legend reveal" id="tal" aria-labelledby="tal-name">
+        <div class="legend-aside" aria-hidden="true">
+          <span class="legend-num">08</span>
+          <span class="legend-glyph">&#x265E;&#xFE0E;</span>
+        </div>
+        <div class="legend-body">
+          <p class="legend-rank">8-й чемпион мира · 1960–1961</p>
+          <h3 id="tal-name">Михаил Таль</h3>
+          <p class="legend-meta"><span>«Рижский кудесник»</span><span>1936–1992 · Рига</span></p>
+          <p>Таль играл так, будто законы шахматной логики писаны не для него. Он жертвовал фигуры там, где другие искали надёжный ход, и превращал доску в хаос, в котором ориентировался только он сам. В 1957 году 20‑летний рижанин впервые выиграл чемпионат СССР, а через три года обыграл Михаила Ботвинника — 12,5&nbsp;:&nbsp;8,5 — и в 23 года стал самым молодым чемпионом мира на тот момент.</p>
+          <p>Через год Ботвинник взял реванш: Таля всю жизнь подводило здоровье. Но и без короны он оставался одним из самых опасных игроков планеты — шесть раз побеждал в чемпионатах СССР, в 1973–1974 годах провёл 95 партий подряд без поражений, а в 1988‑м, в 51 год, выиграл чемпионат мира по блицу.</p>
+          <dl class="legend-stats">
+            <div><dt>Пиковый рейтинг</dt><dd>2705</dd></div>
+            <div><dt>Партий без поражений</dt><dd>95</dd></div>
+            <div><dt>Титулов чемпиона СССР</dt><dd>6</dd></div>
+          </dl>
+          <blockquote>«Нужно завести соперника в тёмный лес, где 2 + 2 = 5, а тропинка, ведущая к выходу, рассчитана только на одного».</blockquote>
+          <p class="legend-game"><span>Партия-символ</span> Таль — Ларсен, Блед, 1965</p>
+        </div>
+      </article>
+
+      <!-- Фишер -->
+      <article class="legend reveal" id="fischer" aria-labelledby="fischer-name">
+        <div class="legend-aside" aria-hidden="true">
+          <span class="legend-num">11</span>
+          <span class="legend-glyph">&#x265D;&#xFE0E;</span>
+        </div>
+        <div class="legend-body">
+          <p class="legend-rank">11-й чемпион мира · 1972–1975</p>
+          <h3 id="fischer-name">Роберт Фишер</h3>
+          <p class="legend-meta"><span>«Бобби»</span><span>1943–2008 · Чикаго</span></p>
+          <p>Фишер научился играть в шесть лет по инструкции из коробки с шахматами — и очень скоро не мыслил жизни без игры. В 13 лет он сыграл «Партию века» против Дональда Бирна, в 14 стал чемпионом США, в 15 — самым молодым гроссмейстером в истории на тот момент. Чемпионат США 1963/64 он выиграл со стопроцентным результатом: 11 из&nbsp;11.</p>
+          <p>Путь к короне стал легендой: в матчах претендентов 1971 года он разгромил Марка Тайманова и Бента Ларсена со счётом 6&nbsp;:&nbsp;0, а затем обыграл Тиграна Петросяна. В 1972‑м в Рейкьявике, в разгар холодной войны, Фишер победил Бориса Спасского — 12,5&nbsp;:&nbsp;8,5 — и прервал гегемонию советских шахматистов, владевших титулом с 1948 года. В 1975‑м он отказался защищать звание, но оставил шахматам контроль времени с добавлением за каждый ход и «шахматы Фишера» со случайной расстановкой фигур.</p>
+          <dl class="legend-stats">
+            <div><dt>Пиковый рейтинг</dt><dd>2785</dd></div>
+            <div><dt>Стал гроссмейстером</dt><dd>в 15 лет</dd></div>
+            <div><dt>Матчи претендентов 1971</dt><dd>6:0, 6:0</dd></div>
+          </dl>
+          <blockquote>«Шахматы — это война на доске. Цель — сокрушить сознание противника».</blockquote>
+          <p class="legend-game"><span>Партия-символ</span> Бирн — Фишер, Нью-Йорк, 1956</p>
+          <button type="button" class="watch" data-watch="fischer"><span aria-hidden="true">▶</span> Смотреть на 3D-доске</button>
+        </div>
+      </article>
+
+      <!-- Карпов -->
+      <article class="legend reveal" id="karpov" aria-labelledby="karpov-name">
+        <div class="legend-aside" aria-hidden="true">
+          <span class="legend-num">12</span>
+          <span class="legend-glyph">&#x265C;&#xFE0E;</span>
+        </div>
+        <div class="legend-body">
+          <p class="legend-rank">12-й чемпион мира · 1975–1985</p>
+          <h3 id="karpov-name">Анатолий Карпов</h3>
+          <p class="legend-meta"><span>Мастер позиционной игры</span><span>род. 1951 · Златоуст</span></p>
+          <p>Карпов вырос на Урале и в юности занимался в шахматной школе Михаила Ботвинника. В 1975 году он выиграл цикл претендентов, но Фишер не вышел на матч, и 23‑летний Карпов стал чемпионом мира без игры. Сомнения в его праве на титул он развеял за доской: следующее десятилетие он выигрывал едва ли не все крупные турниры.</p>
+          <p>Его стиль сравнивали с хваткой удава: никакого лишнего риска — медленное накопление крошечных преимуществ, пока у соперника не останется ни одного хорошего хода. Карпов дважды отстоял титул в драматичных матчах с Виктором Корчным (1978 и 1981), а в 1984–1990 годах сыграл пять матчей с Гарри Каспаровым — величайшее противостояние в истории шахмат. На его счету более 160 турнирных побед.</p>
+          <dl class="legend-stats">
+            <div><dt>Пиковый рейтинг</dt><dd>2780</dd></div>
+            <div><dt>Турнирных побед</dt><dd>160+</dd></div>
+            <div><dt>Чемпион мира ФИДЕ</dt><dd>1993–1999</dd></div>
+          </dl>
+          <p class="legend-game"><span>Партия-символ</span> Карпов — Унцикер, Ницца, 1974</p>
+        </div>
+      </article>
+
+      <!-- Каспаров -->
+      <article class="legend reveal" id="kasparov" aria-labelledby="kasparov-name">
+        <div class="legend-aside" aria-hidden="true">
+          <span class="legend-num">13</span>
+          <span class="legend-glyph">&#x265B;&#xFE0E;</span>
+        </div>
+        <div class="legend-body">
+          <p class="legend-rank">13-й чемпион мира · 1985–2000</p>
+          <h3 id="kasparov-name">Гарри Каспаров</h3>
+          <p class="legend-meta"><span>Энергия атаки</span><span>род. 1963 · Баку</span></p>
+          <p>Каспаров ворвался на вершину с энергией, которой шахматы ещё не видели. Первый матч с Карповым в 1984–1985 годах прервали после 48 партий без результата, а осенью 1985-го 22‑летний бакинец выиграл повторный матч — 13&nbsp;:&nbsp;11 — и стал самым молодым чемпионом мира на тот момент. Титул он удерживал 15 лет.</p>
+          <p>Его игра соединяла глубочайшую дебютную подготовку с яростной атакой; в 1999 году он поднял рейтинг до 2851 — рекорда, продержавшегося почти 14 лет. Матчи с суперкомпьютером IBM Deep Blue стали символом новой эпохи: в 1996‑м Каспаров победил, а в 1997‑м проиграл реванш. Завершив карьеру в 2005 году, он написал многотомную серию «Мои великие предшественники».</p>
+          <dl class="legend-stats">
+            <div><dt>Пиковый рейтинг</dt><dd>2851</dd></div>
+            <div><dt>Стал чемпионом мира</dt><dd>в 22 года</dd></div>
+            <div><dt>Во главе рейтинга ФИДЕ</dt><dd>~20 лет</dd></div>
+          </dl>
+          <p class="legend-game"><span>Партия-символ</span> Каспаров — Топалов, Вейк-ан-Зее, 1999</p>
+          <button type="button" class="watch" data-watch="kasparov"><span aria-hidden="true">▶</span> Смотреть на 3D-доске</button>
+        </div>
+      </article>
+
+      <!-- Карлсен -->
+      <article class="legend reveal" id="carlsen" aria-labelledby="carlsen-name">
+        <div class="legend-aside" aria-hidden="true">
+          <span class="legend-num">16</span>
+          <span class="legend-glyph">&#x265A;&#xFE0E;</span>
+        </div>
+        <div class="legend-body">
+          <p class="legend-rank">16-й чемпион мира · 2013–2023</p>
+          <h3 id="carlsen-name">Магнус Карлсен</h3>
+          <p class="legend-meta"><span>«Моцарт шахмат»</span><span>род. 1990 · Тёнсберг, Норвегия</span></p>
+          <p>Карлсен стал гроссмейстером в 13 лет, и уже тогда о нём заговорили как о вундеркинде, которого шахматы не видели со времён Фишера. В 2013 году в Ченнаи он обыграл Вишванатана Ананда и стал чемпионом мира, а затем четырежды защитил титул — против Ананда, Сергея Карякина, Фабиано Каруаны и Яна Непомнящего.</p>
+          <p>Карлсен побеждает не столько дебютной подготовкой, сколько неутомимой игрой в простых, на первый взгляд ничейных позициях, выжимая победу из минимального перевеса. В 2014 году он установил рекорд рейтинга — 2882, а в 2018–2020 годах провёл 125 классических партий подряд без поражений. В 2023‑м Карлсен добровольно отказался защищать корону, но остался главной фигурой мировых шахмат и многократным чемпионом мира по рапиду и блицу.</p>
+          <dl class="legend-stats">
+            <div><dt>Пиковый рейтинг — рекорд</dt><dd>2882</dd></div>
+            <div><dt>Партий без поражений</dt><dd>125</dd></div>
+            <div><dt>Стал гроссмейстером</dt><dd>в 13 лет</dd></div>
+          </dl>
+          <blockquote>«Некоторые считают: если соперник сыграл красивую партию, то проиграть не стыдно. Я так не думаю. Нужно быть беспощадным».</blockquote>
+          <p class="legend-game"><span>Партия-символ</span> Карлсен — Эрнст, Вейк-ан-Зее, 2004</p>
+          <button type="button" class="watch" data-watch="carlsen"><span aria-hidden="true">▶</span> Смотреть на 3D-доске</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p class="footer-logo"><span aria-hidden="true">&#x265E;&#xFE0E;</span> Гамбит</p>
+    <p>Одностраничный сайт о шахматах. 3D-доска — на <a href="https://threejs.org" rel="noopener">Three.js</a>. Партии воспроизводятся по настоящим записям ходов.</p>
+    <a class="to-top" href="#board">Наверх <span aria-hidden="true">↑</span></a>
+  </footer>
+</body>
+</html>
