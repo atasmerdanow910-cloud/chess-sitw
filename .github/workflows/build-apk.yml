@@ -11,6 +11,9 @@ on:
       - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -46,3 +49,12 @@ jobs:
           name: strelka-apk
           path: dist/strelka.apk
           if-no-files-found: error
+
+      - name: Publish the APK as a release (direct download link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "strelka-build-${{ github.run_number }}" dist/strelka.apk \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Strelka — build ${{ github.run_number }}" \
+            --notes "Android APK for Strelka. Download strelka.apk on your phone and install it."
