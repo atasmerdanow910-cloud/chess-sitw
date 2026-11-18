@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Strelka</title>
+<meta name="description" content="Strelka — offline arrow puzzle: 72 levels, 6 mechanics, daily puzzle and endless mode.">
+<meta name="theme-color" content="#e7edf3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c141e" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="js/game.js"></script>
+<script>
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !window.Capacitor) {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
+</script>
+</body>
+</html>

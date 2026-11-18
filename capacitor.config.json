@@ -1,0 +1,8 @@
+{
+  "appId": "app.strelka.puzzle",
+  "appName": "Strelka",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0c141e"
+  }
+}

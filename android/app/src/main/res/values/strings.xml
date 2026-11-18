@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Strelka</string>
+    <string name="title_activity_main">Strelka</string>
+    <string name="package_name">app.strelka.puzzle</string>
+    <string name="custom_url_scheme">app.strelka.puzzle</string>
+</resources>

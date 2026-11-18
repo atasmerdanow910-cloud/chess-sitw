@@ -1,0 +1,16 @@
+{
+  "name": "Strelka — arrow puzzle",
+  "short_name": "Strelka",
+  "description": "Offline arrow puzzle: 72 levels, 6 mechanics, daily puzzle and endless mode.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c141e",
+  "theme_color": "#0c141e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
