@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1016">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Интерактивный 3D-тур по роскошному американскому особняку: гостиная с камином и роялем, кухня, кинотеатр, спальни, спортзал, гараж и бассейн.">
+  <title>Villa Aurora — 3D-тур по особняку</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d1016'/%3E%3Cpath d='M12 30 32 14l20 16v20H12z' fill='none' stroke='%23d8b46a' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M27 50V38h10v12' fill='none' stroke='%23d8b46a' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-mode="loading">
+  <canvas id="c" aria-label="3D-модель особняка"></canvas>
+
+  <!-- loader -->
+  <div id="loader">
+    <div class="loader-card">
+      <div class="crest" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><path d="M10 30 32 12l22 18" /><path d="M16 26v24h32V26" /><path d="M27 50V38h10v12" /><path d="M22 32h4M38 32h4" /></svg>
+      </div>
+      <h1>Villa Aurora</h1>
+      <p class="sub">Американский особняк · 3D-тур</p>
+      <div class="bar"><span id="loaderBar"></span></div>
+      <p id="loaderText" class="hint">Загрузка…</p>
+    </div>
+  </div>
+
+  <!-- top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><path d="M10 30 32 12l22 18" /><path d="M16 26v24h32V26" /><path d="M27 50V38h10v12" /></svg>
+      </div>
+      <div class="titles">
+        <strong>Villa Aurora</strong>
+        <span>Американский особняк · 3D</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btnDay" class="icon-btn" title="День / ночь" aria-label="День или ночь">
+        <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" /></svg>
+        <svg class="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" /></svg>
+      </button>
+      <button id="btnInfo" class="icon-btn" title="О доме и управлении" aria-label="Информация">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5v.5" /></svg>
+      </button>
+      <button id="btnFull" class="icon-btn" title="Во весь экран" aria-label="Во весь экран">
+        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="roomLabel" class="pill">Villa Aurora</div>
+
+  <!-- floor switch (cutaway mode) -->
+  <div id="floors" class="seg floors" hidden>
+    <button data-floor="0" class="active">1 этаж</button>
+    <button data-floor="1">2 этаж</button>
+  </div>
+
+  <!-- bottom dock -->
+  <nav class="dock" aria-label="Режимы просмотра">
+    <div id="modes" class="seg modes">
+      <button data-mode="outside" class="active">
+        <svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7" /><path d="M5.5 9.5V20h13V9.5" /><path d="M10 20v-5h4v5" /></svg>
+        <span>Снаружи</span>
+      </button>
+      <button data-mode="cut">
+        <svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5z" /><path d="M3 12.5l9 5 9-5" /><path d="M3 17l9 5 9-5" /></svg>
+        <span>Разрез</span>
+      </button>
+      <button data-mode="walk">
+        <svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="1.8" /><path d="M10 21l2-6 3 3v3M9.5 11.5 12 8l3 2.5 2.5 1M12 8l-1 6" /></svg>
+        <span>Прогулка</span>
+      </button>
+    </div>
+    <button id="btnRooms" class="rooms-btn">
+      <svg viewBox="0 0 24 24"><path d="M5 21V4.5L14 3v18" /><path d="M14 5h5v16" /><path d="M3 21h18" /><path d="M11 12.5v.5" /></svg>
+      <span>Комнаты</span>
+    </button>
+  </nav>
+
+  <div id="scrim" class="scrim"></div>
+
+  <!-- rooms sheet -->
+  <aside id="rooms" class="sheet" aria-hidden="true" aria-label="Комнаты">
+    <div class="grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <div>
+        <h2>Комнаты</h2>
+        <p>Нажмите на комнату — и вы окажетесь внутри. В режиме «Разрез» камера покажет её сверху.</p>
+      </div>
+      <button id="closeRooms" class="icon-btn" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <div id="roomGrid" class="room-grid"></div>
+  </aside>
+
+  <!-- walk joystick -->
+  <div id="joystick" hidden><div class="knob"></div></div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- info -->
+  <div id="info" class="modal" hidden role="dialog" aria-labelledby="infoTitle">
+    <button id="closeInfo" class="icon-btn close" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
+    </button>
+    <h2 id="infoTitle">Villa Aurora</h2>
+    <p class="lead">Двухэтажный особняк в американском колониальном стиле: колонный портик, двухсветный холл с парадной лестницей и хрустальной люстрой, бассейн со спа и гараж на две машины.</p>
+    <div class="stats">
+      <div><b>830 м²</b><span>площадь</span></div>
+      <div><b>3</b><span>спальни</span></div>
+      <div><b>2</b><span>ванные</span></div>
+      <div><b>14</b><span>помещений</span></div>
+    </div>
+    <h3>Управление</h3>
+    <ul class="help">
+      <li><b>Снаружи / Разрез:</b> один палец — вращать, щипок — приблизить, два пальца — сдвинуть. На ПК: мышь и колесо.</li>
+      <li><b>Разрез</b> снимает крышу и потолок — видно весь этаж сверху. Переключайте 1 и 2 этаж.</li>
+      <li><b>Прогулка:</b> джойстик слева — идти, проведите по экрану — осмотреться. На ПК: WASD или стрелки, зажмите мышь, Shift — бегом.</li>
+      <li><b>☀/☾</b> — день и ночь (клавиша N). По лестнице в холле можно подняться на 2 этаж.</li>
+    </ul>
+  </div>
+
+  <noscript><div class="nojs">Для 3D-тура нужен JavaScript.</div></noscript>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
