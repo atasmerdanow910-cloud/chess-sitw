@@ -4,9 +4,20 @@ import math, sys
 from PIL import Image, ImageFilter
 W,H = (int(sys.argv[1]), int(sys.argv[2])) if len(sys.argv)>2 else (3840,2160)
 out = sys.argv[3] if len(sys.argv)>3 else "mac-wallpaper.png"
+palette = sys.argv[4] if len(sys.argv)>4 else "dusk"
+PALETTES = {
+  # base gradient stops, then blobs: (x, y, r, color, alpha)
+  "dusk":   ([(0.0,(10,14,32)),(0.45,(26,20,60)),(0.72,(60,28,92)),(1.0,(120,40,120))],
+             [(0.72,0.30,0.42,(0,229,255),120),(0.80,0.26,0.26,(255,255,255),150),(0.30,0.78,0.48,(255,43,214),90),(0.12,0.20,0.30,(124,77,255),80)]),
+  "ocean":  ([(0.0,(4,16,30)),(0.5,(6,40,70)),(1.0,(4,90,110))],
+             [(0.25,0.30,0.45,(0,229,255),110),(0.30,0.25,0.22,(255,255,255),130),(0.80,0.80,0.50,(0,140,255),90),(0.90,0.15,0.30,(80,255,200),60)]),
+  "sunset": ([(0.0,(30,10,40)),(0.5,(120,30,70)),(1.0,(250,120,60))],
+             [(0.50,0.62,0.40,(255,190,90),150),(0.50,0.60,0.18,(255,255,230),170),(0.15,0.25,0.35,(255,43,214),80),(0.85,0.20,0.30,(124,77,255),70)]),
+  "graphite":([(0.0,(14,15,18)),(0.6,(26,28,34)),(1.0,(40,42,52))],
+             [(0.75,0.25,0.40,(120,130,160),70),(0.20,0.85,0.45,(0,229,255),35),(0.80,0.24,0.18,(255,255,255),60)]),
+}
+stops, BLOBS = PALETTES[palette]
 
-# vertical base gradient: deep indigo -> violet -> magenta-ish (Big Sur dusk)
-stops = [(0.0,(10,14,32)),(0.45,(26,20,60)),(0.72,(60,28,92)),(1.0,(120,40,120))]
 def lerp(a,b,t): return tuple(int(a[i]+(b[i]-a[i])*t) for i in range(3))
 def grad(y):
     t=y/(H-1)
@@ -34,10 +45,8 @@ def blob(cx,cy,r,color,alpha):
                 lp[x,y]=(color[0],color[1],color[2],int(alpha*f))
     img.alpha_composite(layer.filter(ImageFilter.GaussianBlur(r*0.12)))
 img=img.convert("RGBA")
-blob(W*0.72,H*0.30,H*0.42,(0,229,255),120)    # cyan bloom
-blob(W*0.80,H*0.26,H*0.26,(255,255,255),150)  # bright sun core
-blob(W*0.30,H*0.78,H*0.48,(255,43,214),90)    # magenta glow lower-left
-blob(W*0.12,H*0.20,H*0.30,(124,77,255),80)    # violet upper-left
+for bx,by,br,bc,ba in BLOBS:
+    blob(W*bx,H*by,H*br,bc,ba)
 
 # gentle diagonal "wave" sheen bands
 band=Image.new("RGBA",(W,H),(0,0,0,0)); bp=band.load()

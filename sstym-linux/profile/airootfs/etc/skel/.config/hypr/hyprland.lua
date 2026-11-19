@@ -1,20 +1,47 @@
 -- Sstym Linux — Hyprland configuration (macOS-style desktop)
 -- Hyprland 0.57+ uses Lua. Docs: https://wiki.hypr.land/configuring/
 
--------------------------
+--------------------------
 ---- PERFORMANCE MODE ----
--------------------------
--- SSTYM_LOWFX=1 is set by sstym-session in VMs / software rendering:
---   heavy effects off so the desktop never lags.
--- Game mode (SUPER+G) creates $XDG_RUNTIME_DIR/sstym-gamemode and reloads:
---   every effect off, no gaps/rounding, maximum FPS.
-local lowfx = os.getenv("SSTYM_LOWFX") == "1"
-local gamemode = false
-do
-    local f = io.open((os.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/sstym-gamemode", "r")
-    if f then gamemode = true; f:close() end
+--------------------------
+-- Effects quality: ~/.config/sstym/effects = auto | beautiful | balanced | maxfps
+-- (set from Sstym Settings → Performance). "auto" picks by hardware:
+--   VM / software rendering (SSTYM_LOWFX=1)   → maxfps
+--   weak laptop (< 6 GB RAM or <= 4 CPU threads) → balanced
+--   everything else                            → beautiful
+-- Game mode (SUPER+G) overrides everything with zero effects.
+local function read_file(path)
+    local f = io.open(path, "r")
+    if not f then return nil end
+    local data = f:read("*a")
+    f:close()
+    return data
 end
-local fx = not (lowfx or gamemode)      -- fancy effects on?
+
+local level = ((read_file((os.getenv("HOME") or "") .. "/.config/sstym/effects") or "auto"):gsub("%s+", ""))
+if level == "auto" or level == "" then
+    if os.getenv("SSTYM_LOWFX") == "1" then
+        level = "maxfps"
+    else
+        local mem_kb = tonumber((read_file("/proc/meminfo") or ""):match("MemTotal:%s+(%d+)")) or 0
+        local threads = 0
+        for _ in (read_file("/proc/cpuinfo") or ""):gmatch("processor%s*:") do threads = threads + 1 end
+        if mem_kb > 0 and (mem_kb < 6 * 1024 * 1024 or (threads > 0 and threads <= 4)) then
+            level = "balanced"
+        else
+            level = "beautiful"
+        end
+    end
+end
+if read_file((os.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/sstym-gamemode") then level = "game" end
+
+local presets = {
+    beautiful = { blur = true,  bsize = 6, bpass = 2, shadow = true,  srange = 30, anim = true,  dim = true,  inactive = 0.93, gin = 6, gout = 14, round = 14, border = 2 },
+    balanced  = { blur = true,  bsize = 4, bpass = 1, shadow = true,  srange = 12, anim = true,  dim = false, inactive = 1.0,  gin = 6, gout = 12, round = 12, border = 2 },
+    maxfps    = { blur = false, bsize = 4, bpass = 1, shadow = false, srange = 0,  anim = false, dim = false, inactive = 1.0,  gin = 4, gout = 8,  round = 10, border = 2 },
+    game      = { blur = false, bsize = 4, bpass = 1, shadow = false, srange = 0,  anim = false, dim = false, inactive = 1.0,  gin = 0, gout = 0,  round = 0,  border = 1 },
+}
+local E = presets[level] or presets.beautiful
 
 ------------------
 ---- MONITORS ----
@@ -57,9 +84,9 @@ hl.env("MOZ_ENABLE_WAYLAND", "1")
 -- macOS-like: generous gaps, big rounding, frosted-glass blur, soft shadows
 hl.config({
     general = {
-        gaps_in  = gamemode and 0 or 6,
-        gaps_out = gamemode and 0 or 14,
-        border_size = gamemode and 1 or 2,
+        gaps_in  = E.gin,
+        gaps_out = E.gout,
+        border_size = E.border,
         col = {
             active_border   = { colors = { "rgba(ffffff66)", "rgba(00e5ff88)" }, angle = 45 },
             inactive_border = "rgba(ffffff14)",
@@ -71,22 +98,22 @@ hl.config({
     },
 
     decoration = {
-        rounding = gamemode and 0 or 14,
+        rounding = E.round,
         active_opacity   = 1.0,
-        inactive_opacity = fx and 0.93 or 1.0,
-        dim_inactive = fx,
+        inactive_opacity = E.inactive,
+        dim_inactive = E.dim,
         dim_strength = 0.06,
         shadow = {
-            enabled = fx,
-            range = 30,
+            enabled = E.shadow,
+            range = E.srange,
             render_power = 3,
             color = "rgba(00000099)",
             color_inactive = "rgba(0000004d)",
         },
         blur = {
-            enabled = fx,
-            size = 6,
-            passes = 2,
+            enabled = E.blur,
+            size = E.bsize,
+            passes = E.bpass,
             new_optimizations = true,
             ignore_opacity = true,
             xray = false,
@@ -96,7 +123,7 @@ hl.config({
         },
     },
 
-    animations = { enabled = fx },
+    animations = { enabled = E.anim },
 
     dwindle = { preserve_split = true },
     master  = { new_status = "master" },

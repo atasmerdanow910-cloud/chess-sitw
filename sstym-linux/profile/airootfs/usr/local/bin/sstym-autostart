@@ -3,8 +3,10 @@
 hyprctl setcursor Adwaita 24 &
 
 
-# wallpaper
-swaybg -i /usr/share/sstym/wallpaper.png -m fill &
+# wallpaper (chosen in Sstym Settings → Appearance)
+WALL=$(cat "$HOME/.config/sstym/wallpaper" 2>/dev/null)
+[ -f "$WALL" ] || WALL=/usr/share/sstym/wallpaper.png
+swaybg -i "$WALL" -m fill &
 
 # polkit agent (Calamares / pkexec)
 /usr/lib/hyprpolkitagent/hyprpolkitagent 2>/dev/null &
@@ -12,26 +14,21 @@ swaybg -i /usr/share/sstym/wallpaper.png -m fill &
 # top menu bar
 waybar -c "$HOME/.config/waybar/config.jsonc" -s "$HOME/.config/waybar/style.css" &
 
-# macOS-style dock (always visible, launcher opens the Launchpad)
-nwg-dock-hyprland -i 44 -mb 10 -p bottom -a center \
-  -c nwg-drawer -ico /usr/share/sstym/logo.png -x &
+# macOS-style dock (auto-hide option in Sstym Settings)
+sstym-dock
 
 # notifications, network applet, idle/lock
 mako 2>/dev/null &
 nm-applet --indicator 2>/dev/null &
 hypridle 2>/dev/null &
 
-# first-run welcome terminal
-if [ ! -f "$HOME/.config/sstym-welcomed" ]; then
-  touch "$HOME/.config/sstym-welcomed"
-  sleep 1
-  kitty --class sstym-term -e bash -lc 'fastfetch; echo
-echo -e "\e[1;36mWelcome to Sstym Linux\e[0m — everyday desktop, gaming and security in one."
-echo "  SUPER+Space  Spotlight search      SUPER+A  Launchpad (all apps)"
-echo "  SUPER+I      Settings              SUPER+G  Game mode (max FPS)"
-echo "  SUPER+Return Terminal              SUPER+B  Browser"
-echo "  SUPER+U      Update everything     SUPER+SHIFT+I  Install to disk"
-echo "  SUPER+N      VPN / обход блокировок (Tor, Lantern, Amnezia, Throne…)"
-echo "  App Store: Settings → App Store (Flathub) · Security tools: Settings → Security tools"
-echo; exec zsh' &
+# "Install Sstym Linux" boot entry → open the installer right away
+if grep -qw 'sstym.install=1' /proc/cmdline; then
+  (sleep 3; sstym-install) &
+fi
+
+# first run: the Sstym welcome screen
+if [ ! -f "$HOME/.config/sstym/welcomed" ]; then
+  mkdir -p "$HOME/.config/sstym"; touch "$HOME/.config/sstym/welcomed"
+  (sleep 2; sstym-settings --welcome) &
 fi

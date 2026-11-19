@@ -1,0 +1,7 @@
+#!/bin/bash
+# Start (or restart) the Sstym dock.
+pkill -f '^nwg-dock-hyprland' 2>/dev/null
+[ "$1" = "stop" ] && exit 0
+args=(-i 44 -mb 10 -p bottom -a center -c nwg-drawer -ico /usr/share/sstym/logo.png)
+if [ -f "$HOME/.config/sstym/dock-autohide" ]; then args+=(-d); else args+=(-x); fi
+exec setsid -f nwg-dock-hyprland "${args[@]}" >/dev/null 2>&1

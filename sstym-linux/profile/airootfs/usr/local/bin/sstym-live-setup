@@ -11,6 +11,14 @@ passwd -d root || true
 install -d -m 750 /etc/sudoers.d
 echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/10-sstym-live
 chmod 440 /etc/sudoers.d/10-sstym-live
+# passwordless polkit for the live session only (created at boot, never part of
+# the image, so an installed system keeps normal password prompts)
+install -d -m 750 /etc/polkit-1/rules.d
+cat > /etc/polkit-1/rules.d/49-sstym-live.rules <<'RULES'
+polkit.addRule(function(action, subject) {
+    if (subject.isInGroup("wheel")) { return polkit.Result.YES; }
+});
+RULES
 # make sure skel landed for an already-created home
 cp -rn /etc/skel/. /home/$U/ 2>/dev/null || true
 chown -R "$U:$U" /home/$U

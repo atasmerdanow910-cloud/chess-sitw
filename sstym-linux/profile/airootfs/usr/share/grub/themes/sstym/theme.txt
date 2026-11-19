@@ -1,0 +1,73 @@
+# Sstym Linux — GRUB boot menu theme
+title-text: ""
+desktop-image: "background.png"
+desktop-image-scale-method: "stretch"
+desktop-color: "#0a0e18"
+terminal-font: "DejaVu Sans Regular 16"
+terminal-left: "10%"
+terminal-top: "10%"
+terminal-width: "80%"
+terminal-height: "80%"
+
++ image {
+    left = 50%-100
+    top = 7%
+    width = 200
+    height = 200
+    file = "logo.png"
+}
++ label {
+    left = 0
+    top = 7%+215
+    width = 100%
+    align = "center"
+    text = "SSTYM LINUX"
+    font = "DejaVu Sans Bold 42"
+    color = "#eef1f8"
+}
++ label {
+    left = 0
+    top = 7%+268
+    width = 100%
+    align = "center"
+    text = "hack  ·  learn  ·  build"
+    font = "DejaVu Sans Regular 20"
+    color = "#00e5ff"
+}
++ boot_menu {
+    left = 50%-330
+    top = 7%+330
+    width = 660
+    height = 370
+    item_font = "DejaVu Sans Regular 20"
+    selected_item_font = "DejaVu Sans Bold 20"
+    item_color = "#aab2c8"
+    selected_item_color = "#ffffff"
+    icon_width = 32
+    icon_height = 32
+    item_icon_space = 16
+    item_height = 42
+    item_padding = 10
+    item_spacing = 6
+    selected_item_pixmap_style = "select_*.png"
+    scrollbar = false
+}
++ label {
+    left = 0
+    top = 100%-70
+    width = 100%
+    align = "center"
+    id = "__timeout__"
+    text = "Sstym Linux starts in %d s"
+    font = "DejaVu Sans Regular 16"
+    color = "#8b93a7"
+}
++ label {
+    left = 0
+    top = 100%-42
+    width = 100%
+    align = "center"
+    text = "Up/Down: choose     Enter: start     E: edit options"
+    font = "DejaVu Sans Regular 16"
+    color = "#5d6680"
+}

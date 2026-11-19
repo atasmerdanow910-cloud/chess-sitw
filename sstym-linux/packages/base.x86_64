@@ -187,3 +187,11 @@ baobab
 firefox-i18n-ru
 hunspell-ru
 hunspell-en_us
+
+# ── Sstym boot splash, Sstym Settings app, performance ──
+plymouth
+python-gobject
+gtk4
+libadwaita
+python-psutil
+power-profiles-daemon

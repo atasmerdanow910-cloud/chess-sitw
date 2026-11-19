@@ -1,0 +1,11 @@
+# Sstym Linux branding for /etc/lsb-release.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = lsb-release
+
+[Action]
+Description = Applying Sstym Linux lsb-release branding...
+When = PostTransaction
+Exec = /bin/sh -c 'printf "DISTRIB_ID=\"Sstym\"\nDISTRIB_RELEASE=\"rolling\"\nDISTRIB_DESCRIPTION=\"Sstym Linux\"\n" > /etc/lsb-release'

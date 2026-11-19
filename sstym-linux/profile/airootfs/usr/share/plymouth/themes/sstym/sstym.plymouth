@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Sstym
+Description=Sstym Linux boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/sstym
+ScriptFile=/usr/share/plymouth/themes/sstym/sstym.script
