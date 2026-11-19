@@ -1,23 +1,25 @@
 #!/bin/bash
-# Launch the Sstym Linux Hyprland desktop, guaranteeing our config is loaded.
+# Launch the Sstym Linux Hyprland desktop with our Lua config.
 set +e
 cfg="$HOME/.config"
 mkdir -p "$cfg/hypr"
-# seed any missing config dirs/files from /etc/skel (always present in the image)
+# seed any missing config from /etc/skel (always present in the image)
 for item in hypr waybar kitty rofi fastfetch mako nwg-dock-hyprland nwg-drawer gtk-3.0 gtk-4.0 qt5ct qt6ct; do
   if [ ! -e "$cfg/$item" ] && [ -e "/etc/skel/.config/$item" ]; then
     cp -r "/etc/skel/.config/$item" "$cfg/" 2>/dev/null
   fi
 done
-[ -f "$cfg/hypr/hyprland.conf" ] || cp /etc/skel/.config/hypr/hyprland.conf "$cfg/hypr/" 2>/dev/null
-# dock pins
+for f in hyprland.lua hyprlock.conf hypridle.conf; do
+  [ -f "$cfg/hypr/$f" ] || cp "/etc/skel/.config/hypr/$f" "$cfg/hypr/" 2>/dev/null
+done
 if [ ! -f "$HOME/.cache/nwg-dock-pinned" ] && [ -f /etc/skel/.cache/nwg-dock-pinned ]; then
-  mkdir -p "$HOME/.cache"; cp /etc/skel/.cache/nwg-dock-pinned "$HOME/.cache/" 2>/dev/null
+  mkdir -p "$HOME/.cache"; cp /etc/skel/.cache/nwg-dock-pinned "$HOME/.cache/"
 fi
 export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland
+# VM / software rendering → light effects (read by hyprland.lua), no lag
+if systemd-detect-virt -q 2>/dev/null; then export SSTYM_LOWFX=1; fi
 # NVIDIA proprietary driver (installed via Sstym Settings → Graphics drivers)
 if [ -d /sys/module/nvidia_drm ]; then
   export LIBVA_DRIVER_NAME=nvidia __GLX_VENDOR_LIBRARY_NAME=nvidia NVD_BACKEND=direct
 fi
-# explicit --config so Hyprland loads OUR config (it otherwise autogenerates hyprland.lua)
-exec Hyprland --config "$cfg/hypr/hyprland.conf"
+exec Hyprland --config "$cfg/hypr/hyprland.lua"

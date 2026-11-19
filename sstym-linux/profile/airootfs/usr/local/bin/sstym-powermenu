@@ -3,7 +3,7 @@
 chosen=$(printf ' Lock\n Logout\n Suspend\n Reboot\n Shutdown' | rofi -dmenu -i -p "Power" -theme sstym)
 case "$chosen" in
   *Lock)     hyprlock ;;
-  *Logout)   hyprctl dispatch exit ;;
+  *Logout)   hyprctl dispatch 'hl.dsp.exit()' ;;
   *Suspend)  systemctl suspend ;;
   *Reboot)   systemctl reboot ;;
   *Shutdown) systemctl poweroff ;;

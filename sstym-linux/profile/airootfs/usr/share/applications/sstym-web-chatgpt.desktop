@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ChatGPT
+Comment=ChatGPT (web app)
+Exec=sh -c 'exec chromium --app=https://chatgpt.com --class=sstym-web-chatgpt --user-data-dir="$HOME"/.local/share/sstym-webapps/chatgpt'
+Icon=/usr/share/sstym/webapps/chatgpt.png
+Terminal=false
+Categories=Network;Chat;
+StartupWMClass=sstym-web-chatgpt

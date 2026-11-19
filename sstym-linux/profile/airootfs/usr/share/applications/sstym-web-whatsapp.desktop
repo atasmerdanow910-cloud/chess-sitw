@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=WhatsApp
+Comment=WhatsApp Web
+Exec=sh -c 'exec chromium --app=https://web.whatsapp.com --class=sstym-web-whatsapp --user-data-dir="$HOME"/.local/share/sstym-webapps/whatsapp'
+Icon=/usr/share/sstym/webapps/whatsapp.png
+Terminal=false
+Categories=Network;Chat;
+StartupWMClass=sstym-web-whatsapp

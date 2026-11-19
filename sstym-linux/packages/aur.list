@@ -1,0 +1,8 @@
+# ── Sstym Linux: AUR packages, built during the ISO build ──
+# Only open-source packages that may be redistributed.
+tor-browser-bin          # Tor Browser with built-in bridges (Snowflake, meek, obfs4, WebTunnel)
+lantern-bin              # Lantern: free, automatic censorship circumvention
+amneziavpn-bin           # Amnezia VPN: AmneziaWG / XRay, free "Amnezia Free" option
+throne-bin               # Throne (ex-Nekoray): VLESS / Reality / Hysteria2 / Trojan / Shadowsocks
+outline-client-appimage  # Outline client (Shadowsocks access keys)
+localsend-bin            # LocalSend: AirDrop-style file sharing

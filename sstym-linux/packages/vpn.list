@@ -1,0 +1,14 @@
+# ── Sstym Linux: VPN & anti-censorship, official repos (all editions) ──
+# (Tor Browser, Lantern, Amnezia, Throne, Outline come from aur.list)
+tor
+torsocks
+obfs4proxy
+torbrowser-launcher
+proton-vpn-gtk-app
+wireguard-tools
+openvpn
+networkmanager-openvpn
+sing-box
+xray
+shadowsocks-rust
+proxychains-ng

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Sstym VPN
+Name[ru]=Sstym VPN — обход блокировок
+Comment=Tor Browser, Lantern, Amnezia, Throne, Outline, Proton VPN
+Exec=sstym-vpn
+Icon=network-vpn
+Terminal=false
+Categories=Network;Security;

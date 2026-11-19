@@ -1,0 +1,8 @@
+# ── Sstym Linux: communication & web (all editions) ──
+telegram-desktop
+discord
+signal-desktop
+element-desktop
+thunderbird
+chromium        # also powers the web-app windows (Claude, WhatsApp, ChatGPT…)
+yt-dlp

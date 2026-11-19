@@ -3,6 +3,7 @@
 term() { kitty --class sstym-term -e bash -lc "$1; echo; read -rp 'Press Enter to close…'"; }
 
 choice=$(cat <<'EOF' | rofi -dmenu -i -p "Sstym Settings" -theme sstym
+  VPN / обход блокировок
   Wi-Fi & Network
   Bluetooth
   Sound
@@ -23,6 +24,7 @@ EOF
 )
 
 case "$choice" in
+  *VPN*)            sstym-vpn & ;;
   *"Wi-Fi"*)        nm-connection-editor & ;;
   *Bluetooth*)      blueman-manager & ;;
   *Sound*)          pavucontrol & ;;

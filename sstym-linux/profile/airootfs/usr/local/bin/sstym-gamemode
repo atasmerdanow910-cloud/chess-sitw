@@ -1,15 +1,12 @@
 #!/bin/bash
-# Toggle Sstym "Game mode": no blur/shadows/animations/gaps, tearing allowed.
+# Toggle Sstym "Game mode": hyprland.lua drops every effect while the flag
+# file exists (no blur/shadows/animations/gaps), and gamemoded boosts the CPU.
 STATE="${XDG_RUNTIME_DIR:-/tmp}/sstym-gamemode"
-on() {
-  hyprctl --batch "keyword animations:enabled false ; keyword decoration:blur:enabled false ; keyword decoration:shadow:enabled false ; keyword decoration:dim_inactive false ; keyword general:gaps_in 0 ; keyword general:gaps_out 0 ; keyword general:border_size 1 ; keyword decoration:rounding 0 ; keyword general:allow_tearing true" >/dev/null
-  touch "$STATE"; notify-send -i input-gaming "Game mode" "ON — effects off, max performance"
-}
-off() {
-  hyprctl reload >/dev/null; rm -f "$STATE"
-  notify-send -i input-gaming "Game mode" "OFF — desktop effects restored"
-}
+on()  { touch "$STATE"; hyprctl reload >/dev/null
+        notify-send -i input-gaming "Game mode: ON" "Effects off — maximum FPS. Launch games with: gamemoderun %command%"; }
+off() { rm -f "$STATE"; hyprctl reload >/dev/null
+        notify-send -i input-gaming "Game mode: OFF" "Desktop effects restored"; }
 case "${1:-toggle}" in
   on) on ;; off) off ;;
-  *) [ -f "$STATE" ] && off || on ;;
+  *) if [ -f "$STATE" ]; then off; else on; fi ;;
 esac

@@ -23,7 +23,9 @@ security work, with fresh rolling-release packages and AUR access.
 | | |
 |---|---|
 | **Desktop** | Hyprland with a macOS look: top menu bar (Waybar), dock with favourites (nwg-dock), Launchpad (nwg-drawer), Spotlight search (rofi), frosted blur, Big Sur–style wallpaper |
-| **Everyday** | Firefox, Thunar, Flathub **App Store** (GNOME Software), LibreOffice, Telegram, Discord, VLC, GIMP, OBS, KeePassXC, qBittorrent, printers, Timeshift backups |
+| **Communication** | Telegram, Discord, Signal, Element, Thunderbird, web apps for **Claude**, ChatGPT, WhatsApp, YouTube |
+| **VPN / unblock** | **Sstym VPN** menu (`Super`+`N`): Tor Browser with Snowflake/WebTunnel/meek bridges, Lantern, Amnezia VPN, Throne (VLESS/Reality/Hysteria2), Outline, Proton VPN, plus `tor`, `sing-box`, `xray`, WireGuard/OpenVPN — with a Russian how-to |
+| **Everyday** | Firefox, Chromium, Thunar, Flathub **App Store** (GNOME Software), LibreOffice, VS Code, Obsidian, Spotify, VLC, GIMP, Inkscape, Kdenlive, Audacity, OBS, KeePassXC, qBittorrent, LocalSend, printers, Timeshift backups |
 | **Gaming** | Steam (Proton), Lutris, Wine-staging + winetricks, Protontricks, GameMode, MangoHud + GOverlay, Gamescope, Prism Launcher, 32-bit Vulkan drivers, one-click NVIDIA driver installer, **Game mode** (SUPER+G) |
 | **Security** | Core toolkit (nmap, Wireshark, Metasploit, Burp Suite, ZAP, sqlmap, hashcat, John, Hydra, Ghidra, radare2, Volatility, Lynis…) plus **Sstym Tools**: install any of 2800+ BlackArch tools by category |
 | **Protection** | ufw firewall on by default (deny incoming), hardened kernel sysctls, Wi-Fi MAC randomisation, no listening services |
@@ -35,8 +37,10 @@ security work, with fresh rolling-release packages and AUR access.
 
 | Edition | Contents | Use |
 |---|---|---|
-| **test** | Desktop + everyday basics + a few tools (~2.8 GB) | Try it in a VM first |
-| **full** | Everything above: apps, gaming, security toolkit (~4 GB) | The real thing to flash to USB |
+| **test** | Desktop, communication apps, VPN tools, everyday basics, a few security tools | Try it in a VM first |
+| **full** | Everything: + office/media/dev apps, gaming, security toolkit | The real thing to flash to USB |
+
+Both editions include the VPN / anti-censorship tools and Telegram, Discord, Claude.
 
 ## Download
 
@@ -75,6 +79,7 @@ Boot from the USB stick (Secure Boot off), try the live desktop, then click
 | `Super`+`A` | Launchpad (all apps) |
 | `Super`+`I` | Sstym Settings (Wi-Fi, Bluetooth, sound, displays, drivers, firewall, App Store…) |
 | `Super`+`G` | Game mode on/off |
+| `Super`+`N` | VPN / anti-censorship menu |
 | `Super`+`U` | Update everything (pacman + AUR + Flatpak) |
 | `Super`+`Return` | Terminal |
 | `Super`+`B` / `E` | Browser / Files |
@@ -93,6 +98,7 @@ Needs an **Arch Linux** host or container with `archiso`:
 ```bash
 sudo ./sstym-linux/scripts/setup-blackarch.sh   # BlackArch repo + verified keyring
 sudo ./sstym-linux/build.sh test                # or: full
+# AUR packages are built automatically; SSTYM_AUR=0 skips them (offline builds)
 ```
 
 ## Layout
@@ -106,6 +112,9 @@ sstym-linux/
 │   ├── base.x86_64              # system, desktop, security, everyday basics
 │   ├── apps.list                # office / media / chat (full)
 │   ├── gaming.list              # Steam, Wine, Lutris, GameMode… (full)
+│   ├── comms.list               # Telegram, Discord, Signal, Chromium… (all)
+│   ├── vpn.list                 # tor, Proton VPN, sing-box, xray, WireGuard… (all)
+│   ├── aur.list                 # Tor Browser, Lantern, Amnezia, Throne, Outline (built from AUR)
 │   ├── pentest-core.list        # core security toolkit (full)
 │   └── test.tools               # small tool set (test)
 └── profile/                     # archiso profile (airootfs overlay, boot menus, Calamares)

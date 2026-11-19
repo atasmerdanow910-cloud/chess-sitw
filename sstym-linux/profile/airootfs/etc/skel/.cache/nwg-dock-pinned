@@ -1,10 +1,12 @@
 /usr/share/applications/firefox.desktop
+/usr/share/applications/tor-browser.desktop
 /usr/share/applications/thunar.desktop
 /usr/share/applications/kitty.desktop
-/usr/share/applications/org.gnome.Software.desktop
-/usr/share/applications/steam.desktop
-/usr/share/applications/libreoffice-startcenter.desktop
 /usr/share/applications/org.telegram.desktop.desktop
-/usr/share/applications/vlc.desktop
+/usr/share/applications/discord.desktop
+/usr/share/applications/sstym-web-claude.desktop
+/usr/share/applications/steam.desktop
+/usr/share/applications/org.gnome.Software.desktop
+/usr/share/applications/sstym-vpn.desktop
 /usr/share/applications/sstym-settings.desktop
 /usr/share/applications/sstym-install.desktop

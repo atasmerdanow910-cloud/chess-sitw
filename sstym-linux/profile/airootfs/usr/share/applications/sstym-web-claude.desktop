@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Claude
+Comment=Claude AI assistant (web app)
+Exec=sh -c 'exec chromium --app=https://claude.ai --class=sstym-web-claude --user-data-dir="$HOME"/.local/share/sstym-webapps/claude'
+Icon=/usr/share/sstym/webapps/claude.png
+Terminal=false
+Categories=Network;Chat;
+StartupWMClass=sstym-web-claude

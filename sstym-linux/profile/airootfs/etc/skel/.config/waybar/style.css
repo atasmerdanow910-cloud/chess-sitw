@@ -45,6 +45,7 @@ window#waybar.menubar {
 #battery,
 #custom-power,
 #custom-settings,
+#custom-vpn,
 #clock {
     color: #eef1f8;
     padding: 0 8px;
@@ -53,6 +54,7 @@ window#waybar.menubar {
 #battery.charging { color: #37e6a0; }
 #battery.critical:not(.charging) { color: #ff5b6e; }
 #custom-power { color: #ff8fe3; }
+#custom-vpn { color: #37e6a0; }
 #custom-power:hover { color: #ff2bd6; }
 
 tooltip {

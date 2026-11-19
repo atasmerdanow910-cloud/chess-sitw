@@ -1,0 +1,31 @@
+#!/bin/bash
+# Sstym VPN — all anti-censorship tools in one menu (SUPER+N).
+# Ordered by what usually survives heavy DPI blocking best.
+
+have() { command -v "$1" >/dev/null 2>&1; }
+run()  { setsid -f "$@" >/dev/null 2>&1; }
+
+choice=$(cat <<'EOF' | rofi -dmenu -i -p "Sstym VPN" -theme sstym
+🧅  Tor Browser — мосты Snowflake / WebTunnel / meek (лучше всего при блокировках)
+🏮  Lantern — бесплатно, одной кнопкой
+🛡   Amnezia VPN — AmneziaWG / XRay, бесплатный «Amnezia Free» или свой ключ
+🚀  Throne — ключи vless:// reality / hy2:// / trojan:// / ss://
+🔑  Outline — ключ доступа ss://
+🟣  Proton VPN — бесплатный тариф
+✈️   Telegram через Tor — как включить
+❓  Справка: что делать, если ничего не работает
+EOF
+)
+
+case "$choice" in
+  *"Tor Browser"*)
+      if have tor-browser; then run tor-browser
+      else run torbrowser-launcher; fi ;;
+  *Lantern*)      have lantern && run lantern || run gtk-launch lantern ;;
+  *Amnezia*)      run AmneziaVPN ;;
+  *Throne*)       run throne ;;
+  *Outline*)      run outline-client ;;
+  *Proton*)       run protonvpn-app ;;
+  *Telegram*|*Справка*)
+      run kitty --class sstym-term --title "Sstym VPN — справка" -e less -R /usr/share/sstym/vpn-help.txt ;;
+esac
