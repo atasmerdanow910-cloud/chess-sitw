@@ -50,7 +50,7 @@ Release files are limited to 2 GB, so larger ISOs come in `*.partNN` pieces:
 
 ```bash
 cat sstym-full-*.iso.part* > sstym-full.iso
-sha256sum -c sstym-full-*.iso.sha256
+sha256sum -c sstym-full.iso.sha256
 ```
 
 ### Try it on Fedora first (VM)

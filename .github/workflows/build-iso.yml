@@ -1,8 +1,9 @@
 name: Build Sstym Linux ISO
 
-# Builds the Sstym Linux ISO(s) inside a privileged Arch Linux container and
-# publishes them to a GitHub Release. Release assets are capped at 2 GB each,
-# so large ISOs are split into *.partNN files — reassemble with:
+# Builds the Sstym Linux ISOs inside a privileged Arch Linux container
+# (including the AUR packages: Tor Browser, Lantern, Amnezia, Throne, Outline…)
+# and publishes them to a GitHub Release on tag pushes.
+# Release files are capped at 2 GB, so larger ISOs are split into *.partNN:
 #     cat sstym-full-*.iso.part* > sstym-full.iso
 on:
   workflow_dispatch:
@@ -10,7 +11,7 @@ on:
       edition:
         description: "Which edition(s) to build"
         type: choice
-        default: test
+        default: both
         options: [test, full, both]
   push:
     tags: ["v*"]
@@ -21,52 +22,55 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 300
     strategy:
       fail-fast: false
       matrix:
-        edition: ${{ github.event_name == 'push' && fromJSON('["test","full"]') || (github.event.inputs.edition == 'both' && fromJSON('["test","full"]') || fromJSON(format('["{0}"]', github.event.inputs.edition))) }}
+        edition: ${{ (github.event_name == 'push' || github.event.inputs.edition == 'both') && fromJSON('["test","full"]') || fromJSON(format('["{0}"]', github.event.inputs.edition)) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Free up disk space
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-                      /opt/hostedtoolcache/CodeQL /usr/local/share/boost || true
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache \
+                      /usr/local/share/boost /usr/local/lib/node_modules /usr/share/swift \
+                      /usr/local/share/powershell /usr/local/share/chromium /opt/microsoft || true
           sudo docker image prune -af || true
-          df -h /
+          sudo swapoff -a && sudo rm -f /mnt/swapfile || true
+          df -h / /mnt
 
       - name: Build ISO in Arch container
         run: |
+          sudo mkdir -p /mnt/work && sudo chmod 777 /mnt/work
           mkdir -p "$GITHUB_WORKSPACE/out"
           docker run --rm --privileged \
-            -v "$GITHUB_WORKSPACE:/work" -w /work \
+            -v "$GITHUB_WORKSPACE:/src" -v /mnt/work:/work -w /src \
             -e SSTYM_VERSION="$(date +%Y.%m.%d)" \
             archlinux:latest bash -euxo pipefail -c '
+              pacman-key --init
+              pacman-key --populate archlinux
               pacman -Syu --noconfirm --needed \
                 archiso git grub squashfs-tools mtools libisoburn \
                 curl gnupg libarchive base-devel sudo
-              # init pacman keyring
-              pacman-key --init
-              pacman-key --populate archlinux
-              # configure BlackArch repo + keyring
               bash sstym-linux/scripts/setup-blackarch.sh
-              # build the requested edition
-              OUT=/work/out ./sstym-linux/build.sh ${{ matrix.edition }}
+              WORK=/work/${{ matrix.edition }} OUT=/src/out \
+                ./sstym-linux/build.sh ${{ matrix.edition }}
             '
 
-      - name: Split large ISOs for release (<2 GB parts) & checksum
-        id: pkg
+      - name: Split large ISOs (<2 GB parts) & checksum
         run: |
           cd out
-          ls -lh
+          sudo chown -R "$USER" .
           for iso in *.iso; do
-            sha256sum "$iso" > "$iso.sha256"
-            size=$(stat -c%s "$iso")
-            if [ "$size" -gt 1900000000 ]; then
-              split -b 1900M -d --additional-suffix=.part "$iso" "$iso."
+            ed=$(echo "$iso" | cut -d- -f2)          # test | full
+            if [ "$(stat -c%s "$iso")" -gt 1900000000 ]; then
+              # checksum written for the joined name: sstym-<edition>.iso
+              echo "$(sha256sum < "$iso" | cut -d' ' -f1)  sstym-$ed.iso" > "sstym-$ed.iso.sha256"
+              split -b 1900M -d "$iso" "$iso.part"
               rm -f "$iso"
-              echo "split $iso into parts"
+            else
+              sha256sum "$iso" > "$iso.sha256"
             fi
           done
           ls -lh
@@ -77,24 +81,46 @@ jobs:
           name: sstym-${{ matrix.edition }}
           path: out/*
           retention-days: 7
+          compression-level: 0
           if-no-files-found: error
 
-      - name: Publish to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all ISOs
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: List files
+        run: ls -lh dist
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: out/*
+          files: dist/*
           body: |
-            ## Sstym Linux — ${{ matrix.edition }} edition
+            ## Sstym Linux ${{ github.ref_name }}
 
-            Hyprland pentest distro. `hack · learn · build`
+            macOS-style Hyprland desktop · everyday apps · gaming · VPN / anti-censorship · security tools
 
-            **Flash to USB** (replace `sdX` with your USB device):
-            ```
-            sudo dd if=sstym-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
-            ```
-            Files split into `*.partNN` must be joined first:
+            | File | What it is |
+            |---|---|
+            | `sstym-test-*.iso` | **Test edition** — try it in a VM first |
+            | `sstym-full-*.iso.part00, part01…` | **Full edition** — apps, gaming, security toolkit |
+
+            **Join the split parts** (Linux / macOS):
             ```
             cat sstym-full-*.iso.part* > sstym-full.iso
+            sha256sum -c sstym-full.iso.sha256
             ```
-            Verify with the provided `*.sha256`.
+            On Windows: `copy /b sstym-full-...iso.part00 + sstym-full-...iso.part01 + sstym-full-...iso.part02 sstym-full.iso`
+
+            **Flash to USB** (replace `sdX`, it will be erased):
+            ```
+            sudo dd if=sstym-full.iso of=/dev/sdX bs=4M status=progress oflag=sync
+            ```
+            Live user: `sstym` (no password). Install: click **Install Sstym Linux**.
