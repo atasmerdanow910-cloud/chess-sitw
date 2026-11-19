@@ -43,10 +43,10 @@ glow_blob(bg, 420, 900, 520, (255, 43, 214), 55)
 glow_blob(bg, 960, 330, 260, (124, 77, 255), 60)
 bg.convert("RGB").save(os.path.join(g, "background.png"))
 
-lg = logo(200, os.path.join(g, "logo.png"))
+lg = logo(160, os.path.join(g, "logo.png"))
 
 # selection highlight (9-slice pixmap): translucent rounded pill with cyan edge
-R = 14
+R = 6
 def piece(name, w, h, draw_fn):
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw_fn(ImageDraw.Draw(im), w, h)
@@ -64,7 +64,7 @@ for k, box in crops.items():
 # menu icons (rendered from Nerd Font symbols)
 nerd = ImageFont.truetype(NERD, 44)
 icons = {"sstym": None, "safe": "", "install": "", "ram": "",
-         "memtest": "", "efi": "", "restart": "", "shutdown": ""}
+         "memtest": "\uf0e4", "efi": "", "restart": "", "shutdown": ""}
 for name, glyph in icons.items():
     if glyph is None:
         logo(48, os.path.join(g, "icons", f"{name}.png"))
@@ -98,15 +98,15 @@ terminal-width: "80%"
 terminal-height: "80%"
 
 + image {
-    left = 50%-100
-    top = 7%
-    width = 200
-    height = 200
+    left = 50%-80
+    top = 5%
+    width = 160
+    height = 160
     file = "logo.png"
 }
 + label {
     left = 0
-    top = 7%+215
+    top = 5%+170
     width = 100%
     align = "center"
     text = "SSTYM LINUX"
@@ -115,7 +115,7 @@ terminal-height: "80%"
 }
 + label {
     left = 0
-    top = 7%+268
+    top = 5%+222
     width = 100%
     align = "center"
     text = "hack  ·  learn  ·  build"
@@ -123,20 +123,20 @@ terminal-height: "80%"
     color = "#00e5ff"
 }
 + boot_menu {
-    left = 50%-330
-    top = 7%+330
-    width = 660
-    height = 370
+    left = 50%-320
+    top = 5%+275
+    width = 640
+    height = 410
     item_font = "DejaVu Sans Regular 20"
     selected_item_font = "DejaVu Sans Bold 20"
     item_color = "#aab2c8"
     selected_item_color = "#ffffff"
-    icon_width = 32
-    icon_height = 32
+    icon_width = 30
+    icon_height = 30
     item_icon_space = 16
-    item_height = 42
-    item_padding = 10
-    item_spacing = 6
+    item_height = 36
+    item_padding = 2
+    item_spacing = 13
     selected_item_pixmap_style = "select_*.png"
     scrollbar = false
 }
