@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Sstym Linux (Hyprland)
+Comment=Sstym Linux — macOS-style Hyprland desktop
+Exec=/usr/local/bin/sstym-session
+Type=Application
+DesktopNames=Hyprland

@@ -99,6 +99,8 @@ xdg-desktop-portal-gtk
 waybar
 rofi-wayland
 wofi
+nwg-dock-hyprland
+nwg-drawer
 kitty
 mako
 swaync

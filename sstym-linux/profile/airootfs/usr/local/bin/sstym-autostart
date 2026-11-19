@@ -1,27 +1,37 @@
 #!/bin/bash
-# Sstym Linux desktop autostart
+# Sstym Linux macOS-style desktop autostart
 hyprctl setcursor Adwaita 24 &
+
 # wallpaper
 if command -v hyprpaper >/dev/null; then
+  mkdir -p "$HOME/.config/hypr"
   cat > "$HOME/.config/hypr/hyprpaper.conf" <<CONF
 preload = /usr/share/sstym/wallpaper.png
 wallpaper = , /usr/share/sstym/wallpaper.png
 splash = false
+ipc = off
 CONF
   hyprpaper &
 fi
-# polkit agent (for Calamares / pkexec)
+
+# polkit agent (Calamares / pkexec)
 /usr/lib/hyprpolkitagent/hyprpolkitagent 2>/dev/null &
-# status bar
-waybar &
-# notifications
+
+# top menu bar
+waybar -c "$HOME/.config/waybar/config.jsonc" -s "$HOME/.config/waybar/style.css" &
+
+# macOS-style dock (always visible, launcher opens the Launchpad)
+nwg-dock-hyprland -i 44 -mb 10 -p bottom -a center \
+  -c nwg-drawer -ico /usr/share/sstym/logo.png -x &
+
+# notifications, network applet, idle/lock
 mako 2>/dev/null &
-# network applet
 nm-applet --indicator 2>/dev/null &
-# idle + lock
 hypridle 2>/dev/null &
+
 # first-run welcome terminal
 if [ ! -f "$HOME/.config/sstym-welcomed" ]; then
   touch "$HOME/.config/sstym-welcomed"
-  kitty -e bash -lc 'fastfetch; echo; echo "Welcome to Sstym Linux!"; echo "  SUPER+R  app launcher    SUPER+Return terminal   SUPER+B browser"; echo "  SUPER+SHIFT+I  install to disk"; echo; exec zsh' &
+  sleep 1
+  kitty -e bash -lc 'fastfetch; echo; echo "Welcome to Sstym Linux  —  macOS-style Hyprland pentest distro"; echo "  SUPER+Space Spotlight   SUPER+A Launchpad   SUPER+Return terminal"; echo "  SUPER+B browser         SUPER+SHIFT+I install to disk"; echo; exec zsh' &
 fi

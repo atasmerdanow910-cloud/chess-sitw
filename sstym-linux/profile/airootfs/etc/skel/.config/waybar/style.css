@@ -1,5 +1,6 @@
+/* Sstym Linux — macOS-style menu bar */
 * {
-    font-family: "JetBrains Mono Nerd Font", "JetBrainsMono Nerd Font", monospace;
+    font-family: "JetBrains Mono Nerd Font", "JetBrainsMono Nerd Font", "SF Pro Text", monospace;
     font-size: 13px;
     font-weight: 600;
     border: none;
@@ -7,67 +8,55 @@
     min-height: 0;
 }
 
-window#waybar {
-    background: transparent;
-}
-
-.modules-left, .modules-center, .modules-right {
-    background: rgba(12, 16, 28, 0.78);
-    border: 1px solid rgba(124, 77, 255, 0.35);
-    border-radius: 12px;
-    padding: 0 6px;
+/* translucent frosted menu bar, full width, flat (like the macOS menu bar) */
+window#waybar.menubar {
+    background: rgba(18, 20, 28, 0.55);
+    color: #eef1f8;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #custom-logo {
-    color: #00e5ff;
-    font-weight: 800;
-    padding: 0 12px;
-    margin-left: 2px;
-}
-
-#workspaces button {
-    color: #8b93a7;
-    padding: 0 8px;
-    margin: 4px 2px;
-    border-radius: 8px;
-    background: transparent;
-}
-#workspaces button.active {
-    color: #0a0e18;
-    background: linear-gradient(135deg, #00e5ff, #7c4dff);
-}
-#workspaces button:hover {
     color: #ffffff;
-    background: rgba(124, 77, 255, 0.25);
-}
-
-#window { color: #c6ccdb; padding: 0 10px; }
-
-#clock {
-    color: #e6ecff;
-    font-weight: 700;
-    padding: 0 16px;
-}
-
-#custom-install {
-    color: #0a0e18;
-    background: linear-gradient(135deg, #00ff99, #00e5ff);
-    border-radius: 8px;
-    padding: 0 12px;
-    margin: 4px 4px;
-    font-weight: 800;
-}
-
-#pulseaudio, #network, #cpu, #memory, #battery, #tray {
-    color: #c6ccdb;
-    padding: 0 10px;
-}
-#battery.charging { color: #00ff99; }
-#battery.critical:not(.charging) { color: #ff4d6d; }
-
-#custom-power {
-    color: #ff2bd6;
-    padding: 0 14px 0 10px;
     font-size: 15px;
+    padding: 0 12px 0 14px;
 }
-#custom-power:hover { color: #ff6ee0; }
+#custom-logo:hover { color: #00e5ff; }
+
+#window {
+    font-weight: 700;
+    color: #eef1f8;
+    padding: 0 6px;
+}
+
+#workspaces { background: transparent; }
+#workspaces button {
+    color: rgba(255,255,255,0.45);
+    padding: 0 4px;
+    background: transparent;
+    font-size: 10px;
+}
+#workspaces button.active { color: #ffffff; }
+#workspaces button:hover { color: #00e5ff; }
+
+#tray,
+#pulseaudio,
+#network,
+#cpu,
+#battery,
+#custom-power,
+#clock {
+    color: #eef1f8;
+    padding: 0 8px;
+}
+#clock { font-weight: 700; padding: 0 14px 0 8px; }
+#battery.charging { color: #37e6a0; }
+#battery.critical:not(.charging) { color: #ff5b6e; }
+#custom-power { color: #ff8fe3; }
+#custom-power:hover { color: #ff2bd6; }
+
+tooltip {
+    background: rgba(20, 22, 30, 0.92);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+}
+tooltip label { color: #eef1f8; }

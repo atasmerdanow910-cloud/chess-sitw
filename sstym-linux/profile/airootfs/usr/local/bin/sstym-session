@@ -1,0 +1,19 @@
+#!/bin/bash
+# Launch the Sstym Linux Hyprland desktop, guaranteeing our config is loaded.
+set +e
+cfg="$HOME/.config"
+mkdir -p "$cfg/hypr"
+# seed any missing config dirs/files from /etc/skel (always present in the image)
+for item in hypr waybar kitty rofi fastfetch mako nwg-dock-hyprland nwg-drawer gtk-3.0 gtk-4.0 qt5ct qt6ct; do
+  if [ ! -e "$cfg/$item" ] && [ -e "/etc/skel/.config/$item" ]; then
+    cp -r "/etc/skel/.config/$item" "$cfg/" 2>/dev/null
+  fi
+done
+[ -f "$cfg/hypr/hyprland.conf" ] || cp /etc/skel/.config/hypr/hyprland.conf "$cfg/hypr/" 2>/dev/null
+# dock pins
+if [ ! -f "$HOME/.cache/nwg-dock-pinned" ] && [ -f /etc/skel/.cache/nwg-dock-pinned ]; then
+  mkdir -p "$HOME/.cache"; cp /etc/skel/.cache/nwg-dock-pinned "$HOME/.cache/" 2>/dev/null
+fi
+export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland
+# explicit --config so Hyprland loads OUR config (it otherwise autogenerates hyprland.lua)
+exec Hyprland --config "$cfg/hypr/hyprland.conf"

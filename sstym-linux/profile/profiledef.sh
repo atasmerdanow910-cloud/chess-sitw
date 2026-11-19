@@ -27,6 +27,7 @@ file_permissions=(
   ["/etc/polkit-1/rules.d"]="0:0:750"
   ["/usr/local/bin/sstym-install"]="0:0:755"
   ["/usr/local/bin/sstym-live-session"]="0:0:755"
+  ["/usr/local/bin/sstym-session"]="0:0:755"
   ["/usr/local/bin/sstym-live-setup"]="0:0:755"
   ["/usr/local/bin/sstym-autostart"]="0:0:755"
   ["/usr/local/bin/sstym-powermenu"]="0:0:755"

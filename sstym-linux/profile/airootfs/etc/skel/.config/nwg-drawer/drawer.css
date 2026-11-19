@@ -1,0 +1,27 @@
+window {
+    background: rgba(12, 14, 22, 0.72);
+    color: #eef1f8;
+    font-family: "JetBrains Mono Nerd Font", monospace;
+}
+#searchbox {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 14px;
+    margin: 28px 34% 10px 34%;
+    padding: 8px 14px;
+    color: #ffffff;
+    font-size: 15px;
+}
+#pinned-box { margin-bottom: 10px; }
+button {
+    background: transparent;
+    border: none;
+    border-radius: 16px;
+    padding: 12px;
+    margin: 6px;
+    color: #eef1f8;
+    transition: all 140ms ease;
+}
+button:hover { background: rgba(255,255,255,0.14); }
+#category-button { background: rgba(255,255,255,0.08); margin: 4px; }
+#desc { color: #9aa3b8; }

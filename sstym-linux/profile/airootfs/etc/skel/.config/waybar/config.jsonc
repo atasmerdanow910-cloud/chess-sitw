@@ -1,61 +1,61 @@
 {
+    "name": "menubar",
     "layer": "top",
     "position": "top",
-    "height": 36,
-    "spacing": 6,
-    "margin-top": 6,
-    "margin-left": 10,
-    "margin-right": 10,
-    "modules-left": ["custom/logo", "hyprland/workspaces", "hyprland/window"],
-    "modules-center": ["clock"],
-    "modules-right": ["custom/install", "tray", "pulseaudio", "network", "cpu", "memory", "battery", "custom/power"],
+    "height": 28,
+    "margin-top": 0,
+    "margin-left": 0,
+    "margin-right": 0,
+    "spacing": 4,
+    "modules-left": ["custom/logo", "hyprland/window"],
+    "modules-center": ["hyprland/workspaces"],
+    "modules-right": ["tray", "pulseaudio", "network", "cpu", "battery", "custom/power", "clock"],
 
     "custom/logo": {
-        "format": "  Sstym",
-        "tooltip-format": "Sstym Linux",
-        "on-click": "rofi -show drun"
+        "format": " ",
+        "tooltip-format": "Sstym Linux — hack · learn · build",
+        "on-click": "nwg-drawer"
+    },
+    "hyprland/window": {
+        "format": "{title}",
+        "max-length": 50,
+        "separate-outputs": true,
+        "rewrite": { "": "Sstym Linux" }
     },
     "hyprland/workspaces": {
         "format": "{icon}",
         "on-click": "activate",
         "format-icons": {
-            "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
-            "6": "6", "7": "7", "8": "8", "9": "9", "10": "10"
+            "default": "○",
+            "active": "●"
         }
-    },
-    "hyprland/window": {
-        "max-length": 60,
-        "separate-outputs": true
     },
     "clock": {
         "format": "{:%a %d %b  %H:%M}",
-        "tooltip-format": "<tt><small>{calendar}</small></tt>"
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%H:%M:%S}"
     },
-    "custom/install": {
-        "format": "  Install",
-        "tooltip-format": "Install Sstym Linux to disk",
-        "on-click": "sstym-install"
-    },
-    "tray": { "spacing": 10 },
+    "tray": { "spacing": 10, "icon-size": 16 },
     "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-muted": "󰝟 muted",
+        "format": "{icon}",
+        "format-muted": "󰝟",
         "format-icons": { "default": ["", "", ""] },
+        "tooltip-format": "{volume}%",
         "on-click": "pavucontrol"
     },
     "network": {
-        "format-wifi": "  {essid}",
-        "format-ethernet": "󰈀  {ifname}",
-        "format-disconnected": "󰤭  off",
-        "tooltip-format": "{ipaddr}",
+        "format-wifi": "",
+        "format-ethernet": "󰈀",
+        "format-disconnected": "󰤭",
+        "tooltip-format": "{essid}  {ipaddr}",
         "on-click": "nm-connection-editor"
     },
-    "cpu": { "format": "  {usage}%" },
-    "memory": { "format": "  {percentage}%" },
+    "cpu": { "format": "", "tooltip-format": "CPU {usage}%", "interval": 3 },
     "battery": {
-        "format": "{icon} {capacity}%",
-        "format-charging": "  {capacity}%",
-        "format-icons": ["", "", "", "", ""]
+        "format": "{icon}",
+        "format-charging": "",
+        "format-icons": ["", "", "", "", ""],
+        "tooltip-format": "{capacity}%"
     },
     "custom/power": {
         "format": "⏻",
