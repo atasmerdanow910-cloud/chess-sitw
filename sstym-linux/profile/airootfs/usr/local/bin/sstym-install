@@ -1,0 +1,7 @@
+#!/bin/bash
+# Launch the Sstym Linux graphical installer (Calamares)
+if ! command -v calamares >/dev/null; then
+  notify-send "Sstym Installer" "Calamares is not installed in this image." 2>/dev/null
+  echo "Calamares not found"; exit 1
+fi
+exec pkexec calamares -c /etc/calamares

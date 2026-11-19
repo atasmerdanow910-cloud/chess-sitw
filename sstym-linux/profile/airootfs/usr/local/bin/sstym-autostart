@@ -1,0 +1,27 @@
+#!/bin/bash
+# Sstym Linux desktop autostart
+hyprctl setcursor Adwaita 24 &
+# wallpaper
+if command -v hyprpaper >/dev/null; then
+  cat > "$HOME/.config/hypr/hyprpaper.conf" <<CONF
+preload = /usr/share/sstym/wallpaper.png
+wallpaper = , /usr/share/sstym/wallpaper.png
+splash = false
+CONF
+  hyprpaper &
+fi
+# polkit agent (for Calamares / pkexec)
+/usr/lib/hyprpolkitagent/hyprpolkitagent 2>/dev/null &
+# status bar
+waybar &
+# notifications
+mako 2>/dev/null &
+# network applet
+nm-applet --indicator 2>/dev/null &
+# idle + lock
+hypridle 2>/dev/null &
+# first-run welcome terminal
+if [ ! -f "$HOME/.config/sstym-welcomed" ]; then
+  touch "$HOME/.config/sstym-welcomed"
+  kitty -e bash -lc 'fastfetch; echo; echo "Welcome to Sstym Linux!"; echo "  SUPER+R  app launcher    SUPER+Return terminal   SUPER+B browser"; echo "  SUPER+SHIFT+I  install to disk"; echo; exec zsh' &
+fi

@@ -1,0 +1,163 @@
+# ── Sstym Linux: base system + Hyprland desktop (common to every edition) ──
+# core
+base
+base-devel
+linux
+linux-firmware
+linux-headers
+mkinitcpio
+mkinitcpio-archiso
+intel-ucode
+amd-ucode
+# bootloader / fs tools
+grub
+syslinux
+memtest86+
+memtest86+-efi
+edk2-shell
+efibootmgr
+os-prober
+dosfstools
+mtools
+exfatprogs
+ntfs-3g
+btrfs-progs
+e2fsprogs
+gptfdisk
+parted
+# network
+networkmanager
+network-manager-applet
+nm-connection-editor
+iwd
+wpa_supplicant
+wireless_tools
+dhcpcd
+bind
+bluez
+bluez-utils
+# shell / cli
+sudo
+zsh
+zsh-completions
+zsh-autosuggestions
+zsh-syntax-highlighting
+grml-zsh-config
+nano
+vim
+neovim
+git
+wget
+curl
+openssh
+openbsd-netcat
+rsync
+less
+tree
+jq
+ripgrep
+fd
+fzf
+bat
+eza
+man-db
+man-pages
+htop
+btop
+tmux
+unzip
+zip
+p7zip
+unrar
+reflector
+pacman-contrib
+pkgfile
+usbutils
+pciutils
+lsof
+# install tooling
+archinstall
+arch-install-scripts
+# AUR helpers (from blackarch)
+yay
+paru
+# ── graphical stack ──
+sddm
+qt5-wayland
+qt6-wayland
+polkit
+xdg-user-dirs
+xdg-utils
+# Hyprland + friends
+hyprland
+hyprpaper
+hyprlock
+hypridle
+hyprpolkitagent
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+waybar
+rofi-wayland
+wofi
+kitty
+mako
+swaync
+wl-clipboard
+cliphist
+grim
+slurp
+brightnessctl
+playerctl
+pamixer
+pavucontrol
+# audio
+pipewire
+pipewire-alsa
+pipewire-pulse
+pipewire-jack
+wireplumber
+# apps
+thunar
+thunar-volman
+thunar-archive-plugin
+gvfs
+gvfs-mtp
+file-roller
+firefox
+mpv
+imv
+nwg-look
+qt5ct
+qt6ct
+kvantum
+# fonts + icons + theming
+ttf-jetbrains-mono
+ttf-jetbrains-mono-nerd
+ttf-nerd-fonts-symbols
+ttf-font-awesome
+noto-fonts
+noto-fonts-emoji
+noto-fonts-cjk
+papirus-icon-theme
+adwaita-icon-theme
+breeze
+breeze-icons
+# system info
+fastfetch
+# GPU / graphics drivers
+mesa
+vulkan-icd-loader
+vulkan-radeon
+vulkan-intel
+vulkan-mesa-layers
+libva-mesa-driver
+intel-media-driver
+xf86-video-vesa
+xorg-xwayland
+# VM guest tools (so it also runs great in VirtualBox/QEMU/VMware)
+qemu-guest-agent
+spice-vdagent
+open-vm-tools
+virtualbox-guest-utils
+# installer
+calamares

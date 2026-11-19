@@ -1,0 +1,14 @@
+# Sstym Linux default zsh
+autoload -Uz compinit promptinit colors && compinit -u && promptinit && colors
+HISTFILE=~/.zsh_history; HISTSIZE=10000; SAVEHIST=10000
+setopt autocd extended_glob hist_ignore_dups share_history
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias ll='ls -lah'
+alias update='sudo pacman -Syu'
+alias install='sudo pacman -S'
+alias aur='yay -S'
+# neon two-line prompt
+PROMPT='%F{45}┌─[%F{141}%n%F{45}@%F{201}sstym%F{45}]─[%F{123}%~%F{45}]
+%F{45}└─%F{201}❯%f '
+[[ -o interactive && -z "$SSTYM_NOFETCH" && $SHLVL -le 2 ]] && command -v fastfetch >/dev/null && fastfetch

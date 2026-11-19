@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Install Sstym Linux
+Comment=Install Sstym Linux to your disk
+Exec=sstym-install
+Icon=/usr/share/sstym/logo.png
+Terminal=false
+Categories=System;

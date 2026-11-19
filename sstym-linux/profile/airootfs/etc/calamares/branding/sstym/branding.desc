@@ -1,0 +1,40 @@
+---
+componentName: sstym
+
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+
+windowExpanding: normal
+windowSize: 1000px,560px
+windowPlacement: center
+
+sidebar: widget
+navigation: widget
+
+strings:
+    productName:         Sstym Linux
+    shortProductName:    Sstym
+    version:             rolling
+    shortVersion:        rolling
+    versionedName:       Sstym Linux
+    shortVersionedName:  Sstym
+    bootloaderEntryName: Sstym
+    productUrl:          https://github.com/atasmerdanow910-cloud/chess-sitw
+    supportUrl:          https://github.com/atasmerdanow910-cloud/chess-sitw/issues
+    knownIssuesUrl:      https://github.com/atasmerdanow910-cloud/chess-sitw/issues
+    releaseNotesUrl:     https://github.com/atasmerdanow910-cloud/chess-sitw
+    donateUrl:           https://github.com/atasmerdanow910-cloud/chess-sitw
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "logo.png"
+    productWelcome:      "logo.png"
+
+slideshow:               "show.qml"
+slideshowAPI: 2
+
+style:
+    sidebarBackground:    "#0a0e18"
+    sidebarText:          "#c6ccdb"
+    sidebarTextSelect:    "#7c4dff"
+    sidebarTextCurrent:   "#00e5ff"

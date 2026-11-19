@@ -1,0 +1,65 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 36,
+    "spacing": 6,
+    "margin-top": 6,
+    "margin-left": 10,
+    "margin-right": 10,
+    "modules-left": ["custom/logo", "hyprland/workspaces", "hyprland/window"],
+    "modules-center": ["clock"],
+    "modules-right": ["custom/install", "tray", "pulseaudio", "network", "cpu", "memory", "battery", "custom/power"],
+
+    "custom/logo": {
+        "format": "  Sstym",
+        "tooltip-format": "Sstym Linux",
+        "on-click": "rofi -show drun"
+    },
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "on-click": "activate",
+        "format-icons": {
+            "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
+            "6": "6", "7": "7", "8": "8", "9": "9", "10": "10"
+        }
+    },
+    "hyprland/window": {
+        "max-length": 60,
+        "separate-outputs": true
+    },
+    "clock": {
+        "format": "{:%a %d %b  %H:%M}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>"
+    },
+    "custom/install": {
+        "format": "  Install",
+        "tooltip-format": "Install Sstym Linux to disk",
+        "on-click": "sstym-install"
+    },
+    "tray": { "spacing": 10 },
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 muted",
+        "format-icons": { "default": ["", "", ""] },
+        "on-click": "pavucontrol"
+    },
+    "network": {
+        "format-wifi": "  {essid}",
+        "format-ethernet": "󰈀  {ifname}",
+        "format-disconnected": "󰤭  off",
+        "tooltip-format": "{ipaddr}",
+        "on-click": "nm-connection-editor"
+    },
+    "cpu": { "format": "  {usage}%" },
+    "memory": { "format": "  {percentage}%" },
+    "battery": {
+        "format": "{icon} {capacity}%",
+        "format-charging": "  {capacity}%",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "custom/power": {
+        "format": "⏻",
+        "tooltip-format": "Power menu",
+        "on-click": "sstym-powermenu"
+    }
+}

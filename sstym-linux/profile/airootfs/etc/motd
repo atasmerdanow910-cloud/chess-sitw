@@ -1,0 +1,7 @@
+
+  Welcome to Sstym Linux — the Hyprland pentest distro.
+  * Launch the graphical desktop:   sstym-live-session   (auto-starts on tty1)
+  * Install to disk:                click "Install Sstym Linux" on the desktop
+  * AUR helper:                     yay  /  paru
+  * System info:                    fastfetch
+

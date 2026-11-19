@@ -1,0 +1,11 @@
+NAME="Sstym Linux"
+PRETTY_NAME="Sstym Linux"
+ID=sstym
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;124;77;255"
+HOME_URL="https://github.com/atasmerdanow910-cloud/chess-sitw"
+DOCUMENTATION_URL="https://github.com/atasmerdanow910-cloud/chess-sitw"
+SUPPORT_URL="https://github.com/atasmerdanow910-cloud/chess-sitw"
+BUG_REPORT_URL="https://github.com/atasmerdanow910-cloud/chess-sitw/issues"
+LOGO=sstym

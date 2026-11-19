@@ -1,0 +1,18 @@
+# ── Sstym Linux TEST edition: a small representative tool set ──
+# (full edition ships 500+ via packages/full.tools)
+nmap
+sqlmap
+hydra
+john
+aircrack-ng
+nikto
+gobuster
+whatweb
+wafw00f
+hashid
+crunch
+macchanger
+proxychains-ng
+tcpdump
+dnsrecon
+netexec

@@ -1,0 +1,100 @@
+name: Build Sstym Linux ISO
+
+# Builds the Sstym Linux ISO(s) inside a privileged Arch Linux container and
+# publishes them to a GitHub Release. Release assets are capped at 2 GB each,
+# so large ISOs are split into *.partNN files — reassemble with:
+#     cat sstym-full-*.iso.part* > sstym-full.iso
+on:
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: "Which edition(s) to build"
+        type: choice
+        default: test
+        options: [test, full, both]
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: ${{ github.event_name == 'push' && fromJSON('["test","full"]') || (github.event.inputs.edition == 'both' && fromJSON('["test","full"]') || fromJSON(format('["{0}"]', github.event.inputs.edition))) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL /usr/local/share/boost || true
+          sudo docker image prune -af || true
+          df -h /
+
+      - name: Build ISO in Arch container
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          docker run --rm --privileged \
+            -v "$GITHUB_WORKSPACE:/work" -w /work \
+            -e SSTYM_VERSION="$(date +%Y.%m.%d)" \
+            archlinux:latest bash -euxo pipefail -c '
+              pacman -Syu --noconfirm --needed \
+                archiso git grub squashfs-tools mtools libisoburn \
+                curl gnupg libarchive base-devel sudo
+              # init pacman keyring
+              pacman-key --init
+              pacman-key --populate archlinux
+              # configure BlackArch repo + keyring
+              bash sstym-linux/scripts/setup-blackarch.sh
+              # build the requested edition
+              OUT=/work/out ./sstym-linux/build.sh ${{ matrix.edition }}
+            '
+
+      - name: Split large ISOs for release (<2 GB parts) & checksum
+        id: pkg
+        run: |
+          cd out
+          ls -lh
+          for iso in *.iso; do
+            sha256sum "$iso" > "$iso.sha256"
+            size=$(stat -c%s "$iso")
+            if [ "$size" -gt 1900000000 ]; then
+              split -b 1900M -d --additional-suffix=.part "$iso" "$iso."
+              rm -f "$iso"
+              echo "split $iso into parts"
+            fi
+          done
+          ls -lh
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sstym-${{ matrix.edition }}
+          path: out/*
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          body: |
+            ## Sstym Linux — ${{ matrix.edition }} edition
+
+            Hyprland pentest distro. `hack · learn · build`
+
+            **Flash to USB** (replace `sdX` with your USB device):
+            ```
+            sudo dd if=sstym-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
+            ```
+            Files split into `*.partNN` must be joined first:
+            ```
+            cat sstym-full-*.iso.part* > sstym-full.iso
+            ```
+            Verify with the provided `*.sha256`.

@@ -1,0 +1,13 @@
+[Unit]
+Description=Sstym Linux live user setup
+ConditionPathExists=/run/archiso/bootmnt
+Before=sddm.service display-manager.service
+Wants=sddm.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/sstym-live-setup
+
+[Install]
+WantedBy=multi-user.target

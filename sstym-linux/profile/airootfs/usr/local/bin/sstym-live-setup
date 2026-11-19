@@ -1,0 +1,17 @@
+#!/bin/bash
+# Create the passwordless live user for the Sstym Linux ISO.
+set -e
+U=sstym
+if ! id "$U" &>/dev/null; then
+  useradd -m -G wheel,audio,video,network,storage,power,optical,lp,sys,rfkill,scanner -s /usr/bin/zsh "$U"
+fi
+passwd -d "$U" || true          # no password for live login
+passwd -d root || true
+# passwordless sudo for the live session
+install -d -m 750 /etc/sudoers.d
+echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/10-sstym-live
+chmod 440 /etc/sudoers.d/10-sstym-live
+# make sure skel landed for an already-created home
+cp -rn /etc/skel/. /home/$U/ 2>/dev/null || true
+chown -R "$U:$U" /home/$U
+exit 0

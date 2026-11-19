@@ -1,0 +1,4 @@
+#!/bin/bash
+# Start the Sstym Linux Hyprland desktop from a TTY (fallback if no display manager).
+export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland
+exec Hyprland
