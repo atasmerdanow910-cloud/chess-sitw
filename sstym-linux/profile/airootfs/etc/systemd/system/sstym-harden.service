@@ -1,0 +1,12 @@
+[Unit]
+Description=Sstym Linux first-boot security hardening (firewall)
+After=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/sstym-harden
+
+[Install]
+WantedBy=multi-user.target

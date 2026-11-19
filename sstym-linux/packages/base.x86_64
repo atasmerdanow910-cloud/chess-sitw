@@ -34,6 +34,10 @@ wpa_supplicant
 wireless_tools
 dhcpcd
 bind
+# firewall + privacy
+ufw
+# performance: compressed RAM swap
+zram-generator
 bluez
 bluez-utils
 # shell / cli

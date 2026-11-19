@@ -31,4 +31,5 @@ file_permissions=(
   ["/usr/local/bin/sstym-live-setup"]="0:0:755"
   ["/usr/local/bin/sstym-autostart"]="0:0:755"
   ["/usr/local/bin/sstym-powermenu"]="0:0:755"
+  ["/usr/local/bin/sstym-harden"]="0:0:755"
 )

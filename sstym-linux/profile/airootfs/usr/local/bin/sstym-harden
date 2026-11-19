@@ -1,0 +1,15 @@
+#!/bin/bash
+# Sstym Linux first-boot hardening: enable a default-deny firewall.
+set +e
+STAMP=/var/lib/sstym/harden.done
+[ -f "$STAMP" ] && exit 0
+if command -v ufw >/dev/null 2>&1; then
+  ufw --force reset        >/dev/null 2>&1
+  ufw default deny incoming  >/dev/null 2>&1
+  ufw default allow outgoing >/dev/null 2>&1
+  ufw logging low            >/dev/null 2>&1
+  ufw --force enable         >/dev/null 2>&1
+  systemctl enable ufw.service >/dev/null 2>&1
+fi
+mkdir -p /var/lib/sstym && touch "$STAMP"
+exit 0

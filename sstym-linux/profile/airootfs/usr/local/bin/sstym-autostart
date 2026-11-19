@@ -2,6 +2,14 @@
 # Sstym Linux macOS-style desktop autostart
 hyprctl setcursor Adwaita 24 &
 
+# ── No-lag mode ──────────────────────────────────────────────────────────
+# In a VM or on software rendering the heavy blur/shadow effects are the main
+# source of lag, so drop them there and keep the desktop snappy. On real
+# hardware the full frosted-glass look stays on.
+if systemd-detect-virt -q || [ -n "$WLR_RENDERER_ALLOW_SOFTWARE" ]; then
+  hyprctl --batch "keyword decoration:blur:enabled false ; keyword decoration:shadow:enabled false ; keyword decoration:dim_inactive false ; keyword decoration:active_opacity 1.0 ; keyword decoration:inactive_opacity 1.0 ; keyword animations:enabled false ; keyword misc:vfr true ; keyword cursor:no_hardware_cursors true" >/dev/null 2>&1
+fi
+
 # wallpaper
 if command -v hyprpaper >/dev/null; then
   mkdir -p "$HOME/.config/hypr"
