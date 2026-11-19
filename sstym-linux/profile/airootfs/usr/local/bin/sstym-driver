@@ -1,0 +1,18 @@
+#!/bin/bash
+# Detect the GPU and install the best driver for gaming.
+exec kitty --class sstym-term --title "Sstym Drivers" -e bash -lc '
+  gpu=$(lspci -nn | grep -Ei "vga|3d|display")
+  echo -e "\e[1;36m== Graphics hardware ==\e[0m\n$gpu\n"
+  if grep -qi nvidia <<<"$gpu"; then
+    echo "NVIDIA GPU found. Installing the open NVIDIA driver (RTX 20xx / GTX 16xx and newer)."
+    echo "For GTX 10xx and older use:  yay -S nvidia-580xx-dkms nvidia-580xx-utils lib32-nvidia-580xx-utils"
+    read -rp "Install nvidia-open now? [Y/n] " a
+    if [[ ${a:-Y} =~ ^[Yy]$ ]]; then
+      sudo pacman -S --needed nvidia-open nvidia-utils lib32-nvidia-utils nvidia-settings &&
+      echo -e "\n\e[1;32mDone. Reboot to use the NVIDIA driver.\e[0m"
+    fi
+  else
+    echo "AMD / Intel GPU: the open Mesa + Vulkan drivers are already installed and up to date."
+    echo "Nothing to do."
+  fi
+  read -rp "Press Enter to close…"'

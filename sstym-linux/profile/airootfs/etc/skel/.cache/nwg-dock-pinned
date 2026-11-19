@@ -1,6 +1,10 @@
 /usr/share/applications/firefox.desktop
-/usr/share/applications/kitty.desktop
 /usr/share/applications/thunar.desktop
-/usr/share/applications/mpv.desktop
-/usr/share/applications/pavucontrol.desktop
+/usr/share/applications/kitty.desktop
+/usr/share/applications/org.gnome.Software.desktop
+/usr/share/applications/steam.desktop
+/usr/share/applications/libreoffice-startcenter.desktop
+/usr/share/applications/org.telegram.desktop.desktop
+/usr/share/applications/vlc.desktop
+/usr/share/applications/sstym-settings.desktop
 /usr/share/applications/sstym-install.desktop

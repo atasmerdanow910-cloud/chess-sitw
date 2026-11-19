@@ -15,5 +15,9 @@ if [ ! -f "$HOME/.cache/nwg-dock-pinned" ] && [ -f /etc/skel/.cache/nwg-dock-pin
   mkdir -p "$HOME/.cache"; cp /etc/skel/.cache/nwg-dock-pinned "$HOME/.cache/" 2>/dev/null
 fi
 export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland
+# NVIDIA proprietary driver (installed via Sstym Settings → Graphics drivers)
+if [ -d /sys/module/nvidia_drm ]; then
+  export LIBVA_DRIVER_NAME=nvidia __GLX_VENDOR_LIBRARY_NAME=nvidia NVD_BACKEND=direct
+fi
 # explicit --config so Hyprland loads OUR config (it otherwise autogenerates hyprland.lua)
 exec Hyprland --config "$cfg/hypr/hyprland.conf"

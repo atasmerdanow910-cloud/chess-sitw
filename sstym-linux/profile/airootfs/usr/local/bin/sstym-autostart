@@ -41,5 +41,12 @@ hypridle 2>/dev/null &
 if [ ! -f "$HOME/.config/sstym-welcomed" ]; then
   touch "$HOME/.config/sstym-welcomed"
   sleep 1
-  kitty -e bash -lc 'fastfetch; echo; echo "Welcome to Sstym Linux  —  macOS-style Hyprland pentest distro"; echo "  SUPER+Space Spotlight   SUPER+A Launchpad   SUPER+Return terminal"; echo "  SUPER+B browser         SUPER+SHIFT+I install to disk"; echo; exec zsh' &
+  kitty --class sstym-term -e bash -lc 'fastfetch; echo
+echo -e "\e[1;36mWelcome to Sstym Linux\e[0m — everyday desktop, gaming and security in one."
+echo "  SUPER+Space  Spotlight search      SUPER+A  Launchpad (all apps)"
+echo "  SUPER+I      Settings              SUPER+G  Game mode (max FPS)"
+echo "  SUPER+Return Terminal              SUPER+B  Browser"
+echo "  SUPER+U      Update everything     SUPER+SHIFT+I  Install to disk"
+echo "  App Store: Settings → App Store (Flathub) · Security tools: Settings → Security tools"
+echo; exec zsh' &
 fi

@@ -4,120 +4,116 @@
 
 # Sstym Linux
 
-**A Hyprland pentest distribution** · `hack · learn · build`
+**Everyday desktop · gaming · security** — `hack · learn · build`
 
-Arch-based · BlackArch tools · Wayland desktop · graphical installer
+Arch-based · macOS-style Hyprland desktop · Steam & Proton · BlackArch tools · graphical installer
 
 </div>
 
 ---
 
-Sstym Linux is a custom Arch-based live distribution built with
-[`archiso`](https://gitlab.archlinux.org/archlinux/archiso). It boots straight
-into a themed **Hyprland** Wayland desktop, ships **500+ security tools** from
-the **BlackArch** repository, a web browser, the **yay**/**paru** AUR helpers,
-and a graphical **Calamares** installer so you can install it to disk like any
-real distro.
+Sstym Linux is a custom Arch-based distribution built with
+[`archiso`](https://gitlab.archlinux.org/archlinux/archiso). It boots into a
+macOS-style **Hyprland** desktop (menu bar, dock, Launchpad, frosted glass)
+and aims to be comfortable for everyday use, good for gaming and ready for
+security work, with fresh rolling-release packages and AUR access.
 
-It is built from scratch here: our own name, logo, wallpaper, boot splash,
-desktop theme and installer branding.
+## What's inside
+
+| | |
+|---|---|
+| **Desktop** | Hyprland with a macOS look: top menu bar (Waybar), dock with favourites (nwg-dock), Launchpad (nwg-drawer), Spotlight search (rofi), frosted blur, Big Sur–style wallpaper |
+| **Everyday** | Firefox, Thunar, Flathub **App Store** (GNOME Software), LibreOffice, Telegram, Discord, VLC, GIMP, OBS, KeePassXC, qBittorrent, printers, Timeshift backups |
+| **Gaming** | Steam (Proton), Lutris, Wine-staging + winetricks, Protontricks, GameMode, MangoHud + GOverlay, Gamescope, Prism Launcher, 32-bit Vulkan drivers, one-click NVIDIA driver installer, **Game mode** (SUPER+G) |
+| **Security** | Core toolkit (nmap, Wireshark, Metasploit, Burp Suite, ZAP, sqlmap, hashcat, John, Hydra, Ghidra, radare2, Volatility, Lynis…) plus **Sstym Tools**: install any of 2800+ BlackArch tools by category |
+| **Protection** | ufw firewall on by default (deny incoming), hardened kernel sysctls, Wi-Fi MAC randomisation, no listening services |
+| **No lag** | zram compressed swap, tuned sysctls, lighter blur, automatic low-effects mode in VMs, Game mode |
+| **Packages** | pacman, AUR via `yay`/`paru`, Flatpak/Flathub |
+| **Installer** | Calamares, branded "Install Sstym Linux" |
 
 ## Editions
 
-| Edition | Tools | ISO size (approx.) | Use |
-|---|---|---|---|
-| **test** | ~16 representative tools | ~1.5 GB | Quick boot test in a VM before committing to the big download |
-| **full** | **560 pentest tools** (+base) ≈ 700 packages | ~6 GB | The real thing to flash to a USB stick |
-
-The tool set spans recon, scanning, web, wireless, exploitation, cracking,
-forensics, reversing, sniffing, proxying and more — see
-[`packages/full.tools`](packages/full.tools).
+| Edition | Contents | Use |
+|---|---|---|
+| **test** | Desktop + everyday basics + a few tools (~2.8 GB) | Try it in a VM first |
+| **full** | Everything above: apps, gaming, security toolkit (~4 GB) | The real thing to flash to USB |
 
 ## Download
 
-Prebuilt ISOs are published on the repo's **Releases** page, built by the
-[`Build Sstym Linux ISO`](../../actions/workflows/build-iso.yml) GitHub Action.
-Because release assets are capped at 2 GB, the full ISO is split into
-`*.partNN` files — join them before use:
+ISOs are published on this repo's **Releases** page by the
+[`Build Sstym Linux ISO`](../.github/workflows/build-iso.yml) workflow.
+Release files are limited to 2 GB, so larger ISOs come in `*.partNN` pieces:
 
 ```bash
 cat sstym-full-*.iso.part* > sstym-full.iso
 sha256sum -c sstym-full-*.iso.sha256
 ```
 
-### Try it in a VM first (recommended on your Fedora laptop)
+### Try it on Fedora first (VM)
 
 ```bash
-# QEMU (no install, just boot the live desktop)
-qemu-system-x86_64 -enable-kvm -m 4096 -smp 4 \
-  -vga virtio -display gtk,gl=on \
+sudo dnf install @virtualization        # virt-manager / QEMU / GNOME Boxes
+qemu-system-x86_64 -enable-kvm -m 6144 -smp 4 -vga virtio -display gtk,gl=on \
   -cdrom sstym-test-*.iso
 ```
-or point VirtualBox/GNOME Boxes at the ISO.
+In a VM Sstym switches off heavy effects automatically so it stays smooth.
 
-### Flash to a USB stick (the real install medium)
+### Flash to USB
 
 ```bash
-# find your USB device first with: lsblk
+lsblk                                          # find your USB stick, e.g. /dev/sdb
 sudo dd if=sstym-full.iso of=/dev/sdX bs=4M status=progress oflag=sync
 ```
-Boot from USB, enjoy the live desktop, then click **Install Sstym Linux**.
+Boot from the USB stick (Secure Boot off), try the live desktop, then click
+**Install Sstym Linux**. ⚠️ `dd` erases the whole target device — double-check `sdX`.
 
-> ⚠️ `dd` overwrites the whole target device. Double-check `/dev/sdX`.
+## Shortcuts
 
-## Live desktop cheatsheet
-
-| Key | Action |
+| Keys | Action |
 |---|---|
-| `Super` + `Return` | Terminal (kitty) |
-| `Super` + `R` / `D` | App launcher (rofi) |
-| `Super` + `B` | Browser (Firefox) |
-| `Super` + `E` | Files (Thunar) |
-| `Super` + `Shift` + `I` | Install Sstym Linux |
-| `Super` + `Q` | Close window |
-| `Super` + `1..0` | Switch workspace |
-| `Super` + `L` | Lock screen |
+| `Super`+`Space` | Spotlight search |
+| `Super`+`A` | Launchpad (all apps) |
+| `Super`+`I` | Sstym Settings (Wi-Fi, Bluetooth, sound, displays, drivers, firewall, App Store…) |
+| `Super`+`G` | Game mode on/off |
+| `Super`+`U` | Update everything (pacman + AUR + Flatpak) |
+| `Super`+`Return` | Terminal |
+| `Super`+`B` / `E` | Browser / Files |
+| `Super`+`Q` | Close window |
+| `Super`+`1…0` | Workspaces |
+| `Super`+`L` | Lock screen |
+| `Super`+`Shift`+`I` | Install to disk |
+| `Alt`+`Shift` | Switch keyboard layout (EN/RU) |
 
-Live user: **`sstym`** (no password, passwordless `sudo`).
+Live user: **`sstym`**, no password, passwordless `sudo`.
 
 ## Build it yourself
 
-Requires an **Arch Linux** host (or container) with `archiso`:
+Needs an **Arch Linux** host or container with `archiso`:
 
 ```bash
-# 1. add the BlackArch repo + keyring (verified over HTTPS)
-sudo ./sstym-linux/scripts/setup-blackarch.sh
-
-# 2. build an edition  (outputs to sstym-linux/out/)
-sudo ./sstym-linux/build.sh test      # small
-sudo ./sstym-linux/build.sh full      # 500+ tools
+sudo ./sstym-linux/scripts/setup-blackarch.sh   # BlackArch repo + verified keyring
+sudo ./sstym-linux/build.sh test                # or: full
 ```
 
 ## Layout
 
 ```
 sstym-linux/
-├── build.sh                 # mkarchiso wrapper (test|full)
+├── build.sh                     # mkarchiso wrapper (test|full)
 ├── scripts/setup-blackarch.sh
-├── branding/                # logo.svg, render.py, generated art
+├── branding/                    # logo.svg, render.py, macwall.py, generated art
 ├── packages/
-│   ├── base.x86_64          # base system + Hyprland desktop
-│   ├── test.tools           # small tool set
-│   └── full.tools           # 560 pentest tools
-└── profile/                 # the archiso profile
-    ├── profiledef.sh
-    ├── pacman.conf
-    ├── packages.x86_64       # generated by build.sh
-    ├── airootfs/             # live filesystem overlay (configs, theme, installer)
-    ├── syslinux/ efiboot/ grub/
-    └── airootfs/etc/calamares/   # graphical installer config + branding
+│   ├── base.x86_64              # system, desktop, security, everyday basics
+│   ├── apps.list                # office / media / chat (full)
+│   ├── gaming.list              # Steam, Wine, Lutris, GameMode… (full)
+│   ├── pentest-core.list        # core security toolkit (full)
+│   └── test.tools               # small tool set (test)
+└── profile/                     # archiso profile (airootfs overlay, boot menus, Calamares)
 ```
 
 ## Credits
 
-Built on [Arch Linux](https://archlinux.org),
-[archiso](https://gitlab.archlinux.org/archlinux/archiso),
-[BlackArch](https://blackarch.org),
-[Hyprland](https://hypr.land) and
-[Calamares](https://calamares.io). Sstym Linux is an independent project and is
-not affiliated with any of them.
+Built on [Arch Linux](https://archlinux.org), [archiso](https://gitlab.archlinux.org/archlinux/archiso),
+[Hyprland](https://hypr.land), [BlackArch](https://blackarch.org), [Calamares](https://calamares.io)
+and the nwg-shell tools. Sstym Linux is an independent project, not affiliated with any of them.
+Use security tools only on systems you own or are authorised to test.

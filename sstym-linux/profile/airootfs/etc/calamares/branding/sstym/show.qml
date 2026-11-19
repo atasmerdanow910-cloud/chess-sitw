@@ -31,7 +31,7 @@ Presentation {
                 Text { text: "Welcome to Sstym Linux"; color: "#e6ecff"
                        font.pixelSize: 30; font.bold: true
                        anchors.horizontalCenter: parent.horizontalCenter }
-                Text { text: "A Hyprland pentest distro · hack · learn · build"
+                Text { text: "Everyday desktop · gaming · security — hack · learn · build"
                        color: "#00e5ff"; font.pixelSize: 16
                        anchors.horizontalCenter: parent.horizontalCenter }
             }
@@ -43,10 +43,10 @@ Presentation {
             anchors.fill: parent; color: "#0a0e18"
             Column {
                 anchors.centerIn: parent; spacing: 14; width: parent.width * 0.7
-                Text { text: "500+ security tools out of the box"
+                Text { text: "Work, play and hack"
                        color: "#e6ecff"; font.pixelSize: 24; font.bold: true
                        anchors.horizontalCenter: parent.horizontalCenter }
-                Text { text: "Recon · scanning · web · wireless · forensics · reversing — powered by the BlackArch repository and ready the moment you boot."
+                Text { text: "LibreOffice, Telegram, VLC and a Flathub app store for everyday work. Steam, Proton, Wine, Lutris, GameMode and MangoHud for gaming. A core security toolkit plus 2800+ BlackArch tools one click away."
                        color: "#c6ccdb"; font.pixelSize: 15; wrapMode: Text.WordWrap
                        horizontalAlignment: Text.AlignHCenter; width: parent.width }
             }

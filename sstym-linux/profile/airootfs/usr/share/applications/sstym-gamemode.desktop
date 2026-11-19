@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Game Mode
+Comment=Toggle max-performance mode for games
+Exec=sstym-gamemode toggle
+Icon=input-gaming
+Terminal=false
+Categories=Game;

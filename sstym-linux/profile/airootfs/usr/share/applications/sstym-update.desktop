@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Update Sstym
+Comment=Update system, AUR and Flatpak apps
+Exec=sstym-update
+Icon=system-software-update
+Terminal=false
+Categories=System;

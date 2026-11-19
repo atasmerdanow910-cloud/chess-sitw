@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Sstym Tools
+Comment=Install security tool categories from BlackArch
+Exec=sstym-tools
+Icon=applications-system
+Terminal=false
+Categories=System;Security;

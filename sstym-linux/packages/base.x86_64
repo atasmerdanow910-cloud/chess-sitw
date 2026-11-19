@@ -167,3 +167,22 @@ open-vm-tools
 virtualbox-guest-utils
 # installer
 calamares
+
+# ── everyday convenience (all editions) ──
+flatpak
+gnome-software
+xdg-desktop-portal-gnome
+blueman
+gnome-calculator
+gnome-text-editor
+evince
+loupe
+nwg-displays
+swappy
+timeshift
+gparted
+gnome-disk-utility
+baobab
+firefox-i18n-ru
+hunspell-ru
+hunspell-en_us

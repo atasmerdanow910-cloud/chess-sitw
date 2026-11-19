@@ -1,0 +1,41 @@
+#!/bin/bash
+# Sstym Tools — install BlackArch tool categories on demand.
+# Pick one or more categories; they are installed with pacman from the
+# BlackArch repository (already configured in Sstym Linux).
+
+cats=$(cat <<'EOF'
+blackarch-recon        Recon / OSINT
+blackarch-scanner      Scanners
+blackarch-webapp       Web application testing
+blackarch-fuzzer       Fuzzers
+blackarch-cracker      Password auditing
+blackarch-wireless     Wireless
+blackarch-sniffer      Sniffers / traffic analysis
+blackarch-networking   Networking
+blackarch-forensic     Forensics
+blackarch-reversing    Reverse engineering
+blackarch-disassembler Disassemblers
+blackarch-debugger     Debuggers
+blackarch-binary       Binary analysis
+blackarch-crypto       Cryptography
+blackarch-mobile       Mobile
+blackarch-defensive    Defensive / blue team
+blackarch-code-audit   Code auditing
+blackarch-fingerprint  Fingerprinting
+blackarch-exploitation Exploitation frameworks
+blackarch-proxy        Proxies
+blackarch              EVERYTHING (2800+ tools, very large)
+EOF
+)
+
+sel=$(printf '%s\n' "$cats" | rofi -dmenu -multi-select -i \
+      -p "Install tool categories (Shift+Enter = select several)" -theme sstym) || exit 0
+[ -z "$sel" ] && exit 0
+groups=$(printf '%s\n' "$sel" | awk '{print $1}' | tr '\n' ' ')
+
+exec kitty --class sstym-term --title "Sstym Tools" -e bash -lc "
+  echo -e '\e[1;36m== Installing: $groups ==\e[0m'
+  echo 'Only use these tools on systems you own or are authorised to test.'
+  echo
+  sudo pacman -Sy --needed $groups
+  echo; read -rp 'Press Enter to close…'"

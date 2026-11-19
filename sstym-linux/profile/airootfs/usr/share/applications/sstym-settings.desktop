@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Sstym Settings
+Comment=Wi-Fi, Bluetooth, sound, displays, updates, drivers…
+Exec=sstym-settings
+Icon=preferences-system
+Terminal=false
+Categories=Settings;System;

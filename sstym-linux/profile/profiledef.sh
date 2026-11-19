@@ -32,4 +32,10 @@ file_permissions=(
   ["/usr/local/bin/sstym-autostart"]="0:0:755"
   ["/usr/local/bin/sstym-powermenu"]="0:0:755"
   ["/usr/local/bin/sstym-harden"]="0:0:755"
+  ["/usr/local/bin/sstym-flathub"]="0:0:755"
+  ["/usr/local/bin/sstym-gamemode"]="0:0:755"
+  ["/usr/local/bin/sstym-driver"]="0:0:755"
+  ["/usr/local/bin/sstym-tools"]="0:0:755"
+  ["/usr/local/bin/sstym-update"]="0:0:755"
+  ["/usr/local/bin/sstym-settings"]="0:0:755"
 )

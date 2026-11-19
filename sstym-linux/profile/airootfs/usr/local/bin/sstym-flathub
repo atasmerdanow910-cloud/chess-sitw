@@ -1,0 +1,8 @@
+#!/bin/bash
+# Add the Flathub remote once network is available (safe to run repeatedly).
+for i in $(seq 1 40); do
+  flatpak remote-add --if-not-exists --system flathub \
+    https://dl.flathub.org/repo/flathub.flatpakrepo >/dev/null 2>&1 && exit 0
+  sleep 15
+done
+exit 0

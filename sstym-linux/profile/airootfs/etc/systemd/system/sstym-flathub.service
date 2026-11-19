@@ -1,0 +1,11 @@
+[Unit]
+Description=Sstym Linux: enable the Flathub app store
+After=NetworkManager.service
+ConditionPathExists=!/var/lib/flatpak/repo/flathub.trustedkeys.gpg
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/sstym-flathub
+
+[Install]
+WantedBy=multi-user.target

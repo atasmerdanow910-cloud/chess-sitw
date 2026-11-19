@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Sstym Linux ISO builder.
 #
-#   sudo ./build.sh test   # small live ISO (desktop + ~16 tools) — fast
-#   sudo ./build.sh full   # full live ISO (desktop + 500+ tools)
+#   sudo ./build.sh test   # small live ISO: desktop + everyday basics + a few tools
+#   sudo ./build.sh full   # full ISO: + office/media apps, gaming (Steam, Wine,
+#                          #   Lutris…), core security toolkit
 #
 # Requirements (Arch): archiso grub edk2-ovmf squashfs-tools
 # The BlackArch repository + keyring must be configured in the build host's
@@ -16,9 +17,10 @@ WORK="${WORK:-/var/tmp/sstym-build/$EDITION}"
 OUT="${OUT:-$HERE/out}"
 export SSTYM_VERSION="${SSTYM_VERSION:-$(date +%Y.%m.%d)}"
 
+P="$HERE/packages"
 case "$EDITION" in
-  test) TOOLS="$HERE/packages/test.tools" ;;
-  full) TOOLS="$HERE/packages/full.tools" ;;
+  test) LISTS=("$P/base.x86_64" "$P/test.tools") ;;
+  full) LISTS=("$P/base.x86_64" "$P/apps.list" "$P/gaming.list" "$P/pentest-core.list") ;;
   *) echo "usage: $0 {test|full}"; exit 2 ;;
 esac
 
@@ -31,11 +33,8 @@ mkdir -p "$WORK" "$OUT"
 PROFILE="$WORK/profile"
 cp -a "$PROFILE_SRC" "$PROFILE"
 
-# Assemble packages.x86_64 = base + edition tools (comments stripped)
-{
-  grep -vhE '^\s*#|^\s*$' "$HERE/packages/base.x86_64"
-  grep -vhE '^\s*#|^\s*$' "$TOOLS"
-} | sort -u > "$PROFILE/packages.x86_64"
+# Assemble packages.x86_64 from the edition's lists (comments stripped)
+grep -vhE '^\s*#|^\s*$' "${LISTS[@]}" | sort -u > "$PROFILE/packages.x86_64"
 echo "==> $(wc -l < "$PROFILE/packages.x86_64") packages in this edition"
 
 echo "==> Running mkarchiso (this downloads packages and builds the squashfs)"
