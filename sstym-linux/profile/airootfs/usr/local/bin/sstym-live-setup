@@ -11,6 +11,9 @@ passwd -d root || true
 install -d -m 750 /etc/sudoers.d
 echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/10-sstym-live
 chmod 440 /etc/sudoers.d/10-sstym-live
+# autologin into the Sstym desktop (live session only; never in the image)
+install -d /etc/sddm.conf.d
+printf '[Autologin]\nUser=%s\nSession=sstym\n' "$U" > /etc/sddm.conf.d/20-sstym-live.conf
 # passwordless polkit for the live session only (created at boot, never part of
 # the image, so an installed system keeps normal password prompts)
 install -d -m 750 /etc/polkit-1/rules.d
