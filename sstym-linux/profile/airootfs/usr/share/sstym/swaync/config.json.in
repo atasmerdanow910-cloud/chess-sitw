@@ -1,0 +1,108 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "right",
+  "positionY": "top",
+  "layer": "overlay",
+  "control-center-layer": "top",
+  "layer-shell": true,
+  "cssPriority": "user",
+  "control-center-margin-top": 8,
+  "control-center-margin-right": 8,
+  "control-center-margin-bottom": 8,
+  "control-center-width": 400,
+  "control-center-positionX": "right",
+  "control-center-positionY": "top",
+  "fit-to-screen": false,
+  "control-center-height": 760,
+  "notification-window-width": 380,
+  "notification-icon-size": 48,
+  "timeout": 6,
+  "timeout-low": 4,
+  "timeout-critical": 0,
+  "transition-time": 180,
+  "hide-on-clear": false,
+  "hide-on-action": true,
+  "relative-timestamps": true,
+  "widgets": [
+    "buttons-grid",
+    "backlight",
+    "volume",
+    "mpris",
+    "dnd",
+    "title",
+    "notifications"
+  ],
+  "widget-config": {
+    "title": {
+      "text": "Уведомления",
+      "clear-all-button": true,
+      "button-text": "Очистить"
+    },
+    "dnd": {
+      "text": "Не беспокоить"
+    },
+    "mpris": {
+      "show-album-art": "always",
+      "autohide": true
+    },
+    "volume": {
+      "label": ""
+    },
+    "backlight": {
+      "label": "",
+      "device": "@BACKLIGHT@"
+    },
+    "notifications": {
+      "vexpand": true
+    },
+    "buttons-grid": {
+      "buttons-per-row": 4,
+      "actions": [
+        {
+          "label": "",
+          "type": "toggle",
+          "active": false,
+          "command": "sh -c '[ \"$SWAYNC_TOGGLE_STATE\" = true ] && nmcli radio wifi on || nmcli radio wifi off'",
+          "update-command": "sh -c '[ \"$(nmcli radio wifi)\" = enabled ] && echo true || echo false'"
+        },
+        {
+          "label": "",
+          "type": "toggle",
+          "active": false,
+          "command": "sh -c '[ \"$SWAYNC_TOGGLE_STATE\" = true ] && bluetoothctl power on || bluetoothctl power off'",
+          "update-command": "sh -c 'bluetoothctl show | grep -q \"Powered: yes\" && echo true || echo false'"
+        },
+        {
+          "label": "",
+          "type": "toggle",
+          "active": false,
+          "command": "sh -c '[ \"$SWAYNC_TOGGLE_STATE\" = true ] && rfkill block all || rfkill unblock all'",
+          "update-command": "sh -c '! rfkill -n -o SOFT | grep -q unblocked && echo true || echo false'"
+        },
+        {
+          "label": "",
+          "type": "toggle",
+          "active": false,
+          "command": "sh -c '[ \"$SWAYNC_TOGGLE_STATE\" = true ] && sstym-gamemode on || sstym-gamemode off'",
+          "update-command": "sh -c '[ -f \"$XDG_RUNTIME_DIR/sstym-gamemode\" ] && echo true || echo false'"
+        },
+        {
+          "label": "",
+          "command": "sstym-vpn"
+        },
+        {
+          "label": "",
+          "command": "sh -c 'swaync-client -cp; sleep 0.4; grim -g \"$(slurp)\" - | swappy -f -'"
+        },
+        {
+          "label": "",
+          "command": "sh -c 'swaync-client -cp; hyprlock'"
+        },
+        {
+          "label": "",
+          "command": "sh -c 'swaync-client -cp; sstym-settings'"
+        }
+      ]
+    }
+  }
+}

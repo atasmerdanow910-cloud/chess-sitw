@@ -1,0 +1,6 @@
+/* Sstym Dark — dock */
+window { background: rgba(34, 34, 38, 0.52); border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; padding: 6px 10px; }
+#box { padding: 2px 4px; }
+button, image { background: transparent; border: none; margin: 0 4px; padding: 2px; border-radius: 14px; }
+button:hover { background: rgba(255,255,255,0.16); }
+#active { border-bottom: 3px solid #ffffff; }

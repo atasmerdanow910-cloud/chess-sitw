@@ -1,0 +1,6 @@
+/* Sstym Cozy — dock */
+window { background: rgba(64, 46, 30, 0.42); border: 1px solid rgba(255,214,150,0.25); border-radius: 22px; padding: 6px 10px; }
+#box { padding: 2px 4px; }
+button, image { background: transparent; border: none; margin: 0 4px; padding: 2px; border-radius: 14px; }
+button:hover { background: rgba(255,230,190,0.18); }
+#active { border-bottom: 3px solid #ffc978; }

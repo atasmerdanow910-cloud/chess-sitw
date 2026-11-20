@@ -30,6 +30,7 @@ file_permissions=(
   ["/usr/local/bin/sstym-powermenu"]="0:0:755"
   ["/usr/local/bin/sstym-harden"]="0:0:755"
   ["/usr/local/bin/sstym-dock"]="0:0:755"
+  ["/usr/local/bin/sstym-theme"]="0:0:755"
   ["/usr/local/bin/sstym-vpn"]="0:0:755"
   ["/usr/local/bin/sstym-flathub"]="0:0:755"
   ["/usr/local/bin/sstym-gamemode"]="0:0:755"

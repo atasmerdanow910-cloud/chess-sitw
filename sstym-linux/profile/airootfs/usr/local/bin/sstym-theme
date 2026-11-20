@@ -1,0 +1,56 @@
+#!/bin/bash
+# Sstym desktop themes.
+#   sstym-theme dark|cozy|neon   switch theme (applies live, no logout needed)
+#   sstym-theme start            at login: Control Center + theme widgets
+#   sstym-theme current          print the current theme
+T=/usr/share/sstym/themes
+C="$HOME/.config"
+current() { t=$(cat "$C/sstym/theme" 2>/dev/null); [ -d "$T/$t" ] && echo "$t" || echo dark; }
+
+control_center() {
+  # Control Center config with this laptop's backlight device (or without the slider)
+  mkdir -p "$C/swaync"
+  dev=$(ls /sys/class/backlight 2>/dev/null | head -1)
+  if [ -n "$dev" ]; then
+    sed "s/@BACKLIGHT@/$dev/" /usr/share/sstym/swaync/config.json.in > "$C/swaync/config.json"
+  else
+    jq '.widgets -= ["backlight"] | del(.["widget-config"].backlight)' /usr/share/sstym/swaync/config.json.in > "$C/swaync/config.json"
+  fi
+  [ -f "$C/swaync/style.css" ] || cp "$T/$(current)/swaync.css" "$C/swaync/style.css"
+  pgrep -x swaync >/dev/null || setsid -f swaync >/dev/null 2>&1
+}
+
+widgets() {
+  . "$T/$1/theme.env"
+  pkill -x conky 2>/dev/null
+  if [ "$WIDGETS" = conky ] && [ -f "/usr/share/sstym/conky/$1.conf" ]; then
+    setsid -f conky -c "/usr/share/sstym/conky/$1.conf" >/dev/null 2>&1
+  fi
+}
+
+apply() {
+  t=$1; d="$T/$t"; . "$d/theme.env"
+  mkdir -p "$C/sstym" "$C/waybar" "$C/nwg-dock-hyprland" "$C/swaync" "$C/kitty" "$C/rofi"
+  echo "$t" > "$C/sstym/theme"
+  cp "$d/waybar.css"  "$C/waybar/style.css"
+  cp "$d/dock.css"    "$C/nwg-dock-hyprland/style.css"
+  cp "$d/swaync.css"  "$C/swaync/style.css"
+  cp "$d/kitty.conf"  "$C/kitty/current-theme.conf"
+  cp "$d/rofi.rasi"   "$C/rofi/sstym.rasi"
+  echo "$WALLPAPER" > "$C/sstym/wallpaper"
+  pkill -x swaybg; setsid -f swaybg -i "$WALLPAPER" -m fill >/dev/null 2>&1
+  pkill -SIGUSR2 -x waybar                     # reload bar style
+  swaync-client -rs >/dev/null 2>&1            # reload Control Center style
+  pkill -SIGUSR1 -x kitty                      # reload terminal colours
+  sstym-dock restart
+  hyprctl reload >/dev/null 2>&1               # window border colours
+  widgets "$t"
+  notify-send -i preferences-desktop-theme "Sstym" "$NAME" 2>/dev/null
+}
+
+case "$1" in
+  start)   control_center; widgets "$(current)" ;;
+  current) current ;;
+  dark|cozy|neon) apply "$1" ;;
+  *) echo "usage: sstym-theme {dark|cozy|neon|start|current}"; exit 2 ;;
+esac

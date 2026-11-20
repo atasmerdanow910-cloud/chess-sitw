@@ -7,10 +7,25 @@
     "margin-left": 0,
     "margin-right": 0,
     "spacing": 4,
-    "modules-left": ["custom/logo", "hyprland/window"],
-    "modules-center": ["hyprland/workspaces"],
-    "modules-right": ["custom/vpn", "tray", "pulseaudio", "network", "cpu", "battery", "custom/settings", "custom/power", "clock"],
-
+    "modules-left": [
+        "custom/logo",
+        "hyprland/window"
+    ],
+    "modules-center": [
+        "hyprland/workspaces"
+    ],
+    "modules-right": [
+        "custom/vpn",
+        "tray",
+        "pulseaudio",
+        "network",
+        "cpu",
+        "battery",
+        "custom/settings",
+        "custom/power",
+        "custom/cc",
+        "clock"
+    ],
     "custom/logo": {
         "format": " ",
         "tooltip-format": "Sstym Linux — hack · learn · build",
@@ -20,7 +35,9 @@
         "format": "{title}",
         "max-length": 50,
         "separate-outputs": true,
-        "rewrite": { "": "Sstym Linux" }
+        "rewrite": {
+            "": "Sstym Linux"
+        }
     },
     "hyprland/workspaces": {
         "format": "{icon}",
@@ -35,11 +52,20 @@
         "tooltip-format": "<tt><small>{calendar}</small></tt>",
         "format-alt": "{:%H:%M:%S}"
     },
-    "tray": { "spacing": 10, "icon-size": 16 },
+    "tray": {
+        "spacing": 10,
+        "icon-size": 16
+    },
     "pulseaudio": {
         "format": "{icon}",
         "format-muted": "󰝟",
-        "format-icons": { "default": ["", "", ""] },
+        "format-icons": {
+            "default": [
+                "",
+                "",
+                ""
+            ]
+        },
         "tooltip-format": "{volume}%",
         "on-click": "pavucontrol"
     },
@@ -50,11 +76,21 @@
         "tooltip-format": "{essid}  {ipaddr}",
         "on-click": "nm-connection-editor"
     },
-    "cpu": { "format": "", "tooltip-format": "CPU {usage}%", "interval": 3 },
+    "cpu": {
+        "format": "",
+        "tooltip-format": "CPU {usage}%",
+        "interval": 3
+    },
     "battery": {
         "format": "{icon}",
         "format-charging": "",
-        "format-icons": ["", "", "", "", ""],
+        "format-icons": [
+            "",
+            "",
+            "",
+            "",
+            ""
+        ],
         "tooltip-format": "{capacity}%"
     },
     "custom/vpn": {
@@ -71,5 +107,25 @@
         "format": "⏻",
         "tooltip-format": "Power menu",
         "on-click": "sstym-powermenu"
+    },
+    "custom/cc": {
+        "tooltip": false,
+        "format": "{icon}",
+        "format-icons": {
+            "notification": "󰂚<span foreground='#ff5b6e'><sup></sup></span>",
+            "none": "󰂜",
+            "dnd-notification": "󰂛",
+            "dnd-none": "󰂛",
+            "inhibited-notification": "󰂚",
+            "inhibited-none": "󰂜",
+            "dnd-inhibited-notification": "󰂛",
+            "dnd-inhibited-none": "󰂛"
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
     }
 }

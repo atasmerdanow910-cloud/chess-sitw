@@ -4,7 +4,7 @@ set +e
 cfg="$HOME/.config"
 mkdir -p "$cfg/hypr"
 # seed any missing config from /etc/skel (always present in the image)
-for item in hypr waybar kitty rofi fastfetch mako nwg-dock-hyprland nwg-drawer gtk-3.0 gtk-4.0 qt5ct qt6ct; do
+for item in hypr waybar kitty rofi fastfetch swaync sstym nwg-dock-hyprland nwg-drawer gtk-3.0 gtk-4.0 qt5ct qt6ct; do
   if [ ! -e "$cfg/$item" ] && [ -e "/etc/skel/.config/$item" ]; then
     cp -r "/etc/skel/.config/$item" "$cfg/" 2>/dev/null
   fi

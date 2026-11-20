@@ -118,6 +118,8 @@ TEXT = {
     "printers": ("Принтеры", "Printers"),
     "kb": ("Раскладка клавиатуры", "Keyboard layout"),
     "kb_sub": ("English / Русский — переключение Alt+Shift", "English / Russian — switch with Alt+Shift"),
+    "dtheme": ("Тема рабочего стола", "Desktop theme"),
+    "dtheme_sub": ("Меню, док, Пункт управления, терминал и обои", "Menu bar, dock, Control Center, terminal and wallpaper"),
     "wall": ("Обои", "Wallpaper"), "own": ("Выбрать своё изображение…", "Choose your own image…"),
     "dock": ("Док", "Dock"), "dock_hide": ("Автоматически скрывать док", "Automatically hide the dock"),
     "theme": ("Тема, значки и шрифты", "Theme, icons and fonts"),
@@ -414,6 +416,17 @@ class SettingsWindow(Adw.ApplicationWindow):
 
     def page_look(self):
         page = Adw.PreferencesPage()
+        th = Adw.PreferencesGroup()
+        keys = ["dark", "cozy", "neon"]
+        combo = Adw.ComboRow(title=_("dtheme"), subtitle=_("dtheme_sub"),
+                             model=Gtk.StringList.new(["Sstym Dark", "Sstym Cozy", "Sstym Neon"]))
+        combo.add_prefix(Gtk.Image.new_from_icon_name("preferences-desktop-theme-symbolic"))
+        cur = read(f"{CFG}/theme", "dark")
+        combo.set_selected(keys.index(cur) if cur in keys else 0)
+        combo.connect("notify::selected", lambda r, _p: (spawn(["sstym-theme", keys[r.get_selected()]]),
+                                                         self.toast(_("applied"))))
+        th.add(combo)
+        page.add(th)
         g = Adw.PreferencesGroup(title=_("wall"))
         flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=3,
                            min_children_per_line=2, column_spacing=12, row_spacing=12, homogeneous=True)

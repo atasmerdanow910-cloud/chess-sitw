@@ -17,8 +17,10 @@ waybar -c "$HOME/.config/waybar/config.jsonc" -s "$HOME/.config/waybar/style.css
 # macOS-style dock (auto-hide option in Sstym Settings)
 sstym-dock
 
-# notifications, network applet, idle/lock
-mako 2>/dev/null &
+# Control Center + notifications (swaync) and theme widgets
+sstym-theme start
+
+# network applet, idle/lock
 nm-applet --indicator 2>/dev/null &
 hypridle 2>/dev/null &
 

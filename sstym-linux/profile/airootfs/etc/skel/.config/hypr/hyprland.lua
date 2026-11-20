@@ -43,6 +43,16 @@ local presets = {
 }
 local E = presets[level] or presets.beautiful
 
+-- window border colours follow the Sstym theme (Settings → Appearance)
+local theme = ((read_file((os.getenv("HOME") or "") .. "/.config/sstym/theme") or "dark"):gsub("%s+", ""))
+local borders = {}
+for line in (read_file("/usr/share/sstym/themes/" .. theme .. "/borders") or ""):gmatch("[^\n]+") do
+    borders[#borders + 1] = line
+end
+local border_inactive = borders[1] or "rgba(ffffff10)"
+local border_active = { colors = { borders[2] or "rgba(ffffff55)" }, angle = 45 }
+for i = 3, #borders do border_active.colors[#border_active.colors + 1] = borders[i] end
+
 ------------------
 ---- MONITORS ----
 ------------------
@@ -88,8 +98,8 @@ hl.config({
         gaps_out = E.gout,
         border_size = E.border,
         col = {
-            active_border   = { colors = { "rgba(ffffff66)", "rgba(00e5ff88)" }, angle = 45 },
-            inactive_border = "rgba(ffffff14)",
+            active_border   = border_active,
+            inactive_border = border_inactive,
         },
         resize_on_border = true,
         -- only windows with the `immediate` rule (games) may tear → lower input lag
@@ -191,6 +201,7 @@ hl.bind(mod .. " + I",         hl.dsp.exec_cmd("sstym-settings"))        -- Sett
 hl.bind(mod .. " + G",         hl.dsp.exec_cmd("sstym-gamemode toggle")) -- Game mode
 hl.bind(mod .. " + U",         hl.dsp.exec_cmd("sstym-update"))          -- Update all
 hl.bind(mod .. " + N",         hl.dsp.exec_cmd("sstym-vpn"))             -- VPN / unblock
+hl.bind(mod .. " + C",         hl.dsp.exec_cmd("swaync-client -t -sw"))  -- Control Center
 hl.bind(mod .. " + SHIFT + I", hl.dsp.exec_cmd("sstym-install"))
 hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd('grim -g "$(slurp)" - | swappy -f -'))
 hl.bind("Print",               hl.dsp.exec_cmd("grim - | wl-copy"))
@@ -258,3 +269,4 @@ hl.layer_rule({ name = "blur-dock",    match = { namespace = "^(nwg-dock)$" },  
 hl.layer_rule({ name = "blur-drawer",  match = { namespace = "^(nwg-drawer)$" },   blur = true })
 hl.layer_rule({ name = "blur-rofi",    match = { namespace = "^(rofi)$" },         blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "blur-notify",  match = { namespace = "^(notifications)$" }, blur = true, ignore_alpha = 0.2 })
+hl.layer_rule({ name = "blur-cc",      match = { namespace = "^(swaync-control-center|swaync-notification-window)$" }, blur = true, ignore_alpha = 0.3 })
