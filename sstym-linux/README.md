@@ -22,7 +22,9 @@ security work, with fresh rolling-release packages and AUR access.
 
 | | |
 |---|---|
-| **Desktop** | Hyprland with a macOS look: top menu bar (Waybar), dock with favourites (nwg-dock), Launchpad (nwg-drawer), Spotlight search (rofi), frosted blur, Big Sur–style wallpaper |
+| **Desktop** | Hyprland with a macOS look: top menu bar (Waybar), dock with favourites (nwg-dock), Launchpad (nwg-drawer), Spotlight search (rofi), **Control Center** (Wi-Fi, Bluetooth, airplane, brightness, volume, media, Do Not Disturb), frosted blur |
+| **Themes** | **Sstym Dark** (default, glossy black 3D wallpaper), **Sstym Cozy** (landscape + desktop clock), **Sstym Neon** — switch live in Sstym Settings or with `sstym-theme` |
+| **Own apps** | **Sstym Settings** (GTK4/libadwaita control center, Russian/English), Sstym VPN menu, Sstym Tools, Sstym boot menu and splash |
 | **Communication** | Telegram, Discord, Signal, Element, Thunderbird, web apps for **Claude**, ChatGPT, WhatsApp, YouTube |
 | **VPN / unblock** | **Sstym VPN** menu (`Super`+`N`): Tor Browser with Snowflake/WebTunnel/meek bridges, Lantern, Amnezia VPN, Throne (VLESS/Reality/Hysteria2), Outline, Proton VPN, plus `tor`, `sing-box`, `xray`, WireGuard/OpenVPN — with a Russian how-to |
 | **Everyday** | Firefox, Chromium, Thunar, Flathub **App Store** (GNOME Software), LibreOffice, VS Code, Obsidian, Spotify, VLC, GIMP, Inkscape, Kdenlive, Audacity, OBS, KeePassXC, qBittorrent, LocalSend, printers, Timeshift backups |
@@ -80,6 +82,7 @@ Boot from the USB stick (Secure Boot off), try the live desktop, then click
 | `Super`+`I` | Sstym Settings (Wi-Fi, Bluetooth, sound, displays, drivers, firewall, App Store…) |
 | `Super`+`G` | Game mode on/off |
 | `Super`+`N` | VPN / anti-censorship menu |
+| `Super`+`C` | Control Center |
 | `Super`+`U` | Update everything (pacman + AUR + Flatpak) |
 | `Super`+`Return` | Terminal |
 | `Super`+`B` / `E` | Browser / Files |
