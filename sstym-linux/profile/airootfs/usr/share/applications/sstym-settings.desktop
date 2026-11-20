@@ -5,4 +5,4 @@ Comment=VPN, Wi-Fi, appearance, performance, apps and system
 Exec=sstym-settings
 Icon=preferences-system
 Terminal=false
-Categories=Settings;System;
+Categories=Settings;

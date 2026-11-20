@@ -83,7 +83,9 @@ lsof
 # install tooling
 archinstall
 arch-install-scripts
-# AUR helpers (from blackarch)
+# BlackArch repository (keys + mirrors) and AUR helpers
+blackarch-keyring
+blackarch-mirrorlist
 yay
 paru
 # ── graphical stack ──

@@ -1,0 +1,8 @@
+#!/bin/bash
+# Open a website as its own app window (own profile, own dock icon).
+#   sstym-webapp <name> <url>
+name=$1; url=$2
+[ -n "$name" ] && [ -n "$url" ] || { echo "usage: sstym-webapp <name> <url>"; exit 2; }
+exec chromium --app="$url" --class="sstym-web-$name" \
+  --user-data-dir="$HOME/.local/share/sstym-webapps/$name" \
+  --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations

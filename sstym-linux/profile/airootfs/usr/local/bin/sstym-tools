@@ -37,5 +37,5 @@ exec kitty --class sstym-term --title "Sstym Tools" -e bash -lc "
   echo -e '\e[1;36m== Installing: $groups ==\e[0m'
   echo 'Only use these tools on systems you own or are authorised to test.'
   echo
-  sudo pacman -Sy --needed $groups
+  sudo pacman -Syu --needed $groups
   echo; read -rp 'Press Enter to close…'"

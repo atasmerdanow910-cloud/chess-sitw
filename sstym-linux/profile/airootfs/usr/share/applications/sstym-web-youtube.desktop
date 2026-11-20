@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 Name=YouTube
-Comment=YouTube
-Exec=sh -c 'exec chromium --app=https://www.youtube.com --class=sstym-web-youtube --user-data-dir="$HOME"/.local/share/sstym-webapps/youtube'
+Comment=Videos (web app)
+Exec=sstym-webapp youtube https://www.youtube.com
 Icon=/usr/share/sstym/webapps/youtube.png
 Terminal=false
 Categories=Network;Chat;

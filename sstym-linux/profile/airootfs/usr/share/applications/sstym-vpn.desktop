@@ -6,4 +6,4 @@ Comment=Tor Browser, Lantern, Amnezia, Throne, Outline, Proton VPN
 Exec=sstym-vpn
 Icon=network-vpn
 Terminal=false
-Categories=Network;Security;
+Categories=Network;

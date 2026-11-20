@@ -1,0 +1,11 @@
+# Sstym Linux: put the fast worldwide CDN mirrors first.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = pacman-mirrorlist
+
+[Action]
+Description = Adding fast CDN mirrors to the mirror list...
+When = PostTransaction
+Exec = /usr/local/bin/sstym-fix-mirrors

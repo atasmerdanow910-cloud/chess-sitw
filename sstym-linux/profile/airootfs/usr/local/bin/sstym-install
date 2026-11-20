@@ -1,7 +1,19 @@
 #!/bin/bash
-# Launch the Sstym Linux graphical installer (Calamares)
+# Launch the Sstym Linux graphical installer (Calamares).
 if ! command -v calamares >/dev/null; then
   notify-send "Sstym Installer" "Calamares is not installed in this image." 2>/dev/null
-  echo "Calamares not found"; exit 1
+  exit 1
 fi
-exec pkexec calamares -c /etc/calamares
+if pgrep -x calamares >/dev/null; then exit 0; fi   # already open
+
+CFG=/etc/calamares
+# Booted with "copy to RAM": the system image lives in RAM, not on the USB stick
+if [ -f /run/archiso/copytoram/airootfs.sfs ] && [ ! -f /run/archiso/bootmnt/sstym/x86_64/airootfs.sfs ]; then
+  sudo -n sed -i 's#/run/archiso/bootmnt/sstym/x86_64/airootfs.sfs#/run/archiso/copytoram/airootfs.sfs#' \
+    "$CFG/modules/unpackfs.conf"
+fi
+# Calamares is a GUI running as root: keep the Wayland session variables
+# (pkexec would drop them and the window could not open).
+exec sudo -n --preserve-env=WAYLAND_DISPLAY,XDG_RUNTIME_DIR,XDG_SESSION_TYPE,XDG_CURRENT_DESKTOP,LANG,LC_ALL \
+     env QT_QPA_PLATFORM=wayland QT_WAYLAND_DISABLE_WINDOWDECORATION=0 \
+     calamares -c "$CFG" -D 6 >/tmp/sstym-install.log 2>&1

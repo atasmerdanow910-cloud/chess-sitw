@@ -3,7 +3,11 @@
 set -e
 U=sstym
 if ! id "$U" &>/dev/null; then
-  useradd -m -G wheel,audio,video,network,storage,power,optical,lp,sys,rfkill,scanner -s /usr/bin/zsh "$U"
+  groups=""
+  for g in wheel audio video input network storage power optical lp sys rfkill scanner; do
+    getent group "$g" >/dev/null && groups="$groups,$g"
+  done
+  useradd -m -G "${groups#,}" -s /usr/bin/zsh "$U"
 fi
 passwd -d "$U" || true          # no password for live login
 passwd -d root || true

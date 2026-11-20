@@ -5,4 +5,4 @@ Comment=Install the best GPU driver for gaming
 Exec=sstym-driver
 Icon=video-display
 Terminal=false
-Categories=System;Settings;
+Categories=Settings;HardwareSettings;

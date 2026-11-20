@@ -1,0 +1,14 @@
+# remove from airootfs!
+# Sstym Linux build step: do the "first boot" maintenance once at build time
+# (linker cache) and mark /etc and /var as up to date, so the live USB does
+# not spend a minute on it every time it boots.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = *
+
+[Action]
+Description = Preparing a fast first boot...
+When = PostTransaction
+Exec = /bin/sh -c 'ldconfig; touch /etc/.updated /var/.updated'
