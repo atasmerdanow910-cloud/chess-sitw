@@ -1,5 +1,20 @@
 #!/bin/bash
 # Start (or restart) the Sstym dock.
+PINS="$HOME/.cache/nwg-dock-pinned"
+# First run: pin the favourites that are installed (nwg-dock wants desktop IDs,
+# i.e. the .desktop file name without the extension). Later the user's own
+# pins/unpins in the dock are kept.
+if [ ! -s "$PINS" ]; then
+  mkdir -p "$(dirname "$PINS")"
+  : > "$PINS"
+  for id in firefox tor-browser thunar kitty org.telegram.desktop discord sstym-web-claude \
+            steam org.gnome.Software sstym-vpn sstym-settings sstym-install; do
+    [ "$id" = sstym-install ] && [ ! -d /run/archiso/bootmnt ] && continue   # installer only on the live USB
+    for dir in /usr/share/applications /usr/local/share/applications "$HOME/.local/share/applications"; do
+      if [ -f "$dir/$id.desktop" ]; then echo "$id" >> "$PINS"; break; fi
+    done
+  done
+fi
 pkill -f '^nwg-dock-hyprland' 2>/dev/null
 [ "$1" = "stop" ] && exit 0
 args=(-i 44 -mb 10 -p bottom -a center -c nwg-drawer -ico /usr/share/sstym/logo.png)

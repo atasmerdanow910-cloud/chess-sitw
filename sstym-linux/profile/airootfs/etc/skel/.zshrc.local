@@ -8,7 +8,8 @@ alias ll='ls -lah'
 alias update='sudo pacman -Syu'
 alias install='sudo pacman -S'
 alias aur='yay -S'
-# neon two-line prompt
+# Sstym two-line prompt (turn off grml's prompt theme first, it would override ours)
+prompt off 2>/dev/null
 PROMPT='%F{45}┌─[%F{141}%n%F{45}@%F{201}sstym%F{45}]─[%F{123}%~%F{45}]
 %F{45}└─%F{201}❯%f '
 [[ -o interactive && -z "$SSTYM_NOFETCH" && $SHLVL -le 2 ]] && command -v fastfetch >/dev/null && fastfetch

@@ -12,9 +12,6 @@ done
 for f in hyprland.lua hyprlock.conf hypridle.conf; do
   [ -f "$cfg/hypr/$f" ] || cp "/etc/skel/.config/hypr/$f" "$cfg/hypr/" 2>/dev/null
 done
-if [ ! -f "$HOME/.cache/nwg-dock-pinned" ] && [ -f /etc/skel/.cache/nwg-dock-pinned ]; then
-  mkdir -p "$HOME/.cache"; cp /etc/skel/.cache/nwg-dock-pinned "$HOME/.cache/"
-fi
 export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland
 # VM / software rendering → light effects (read by hyprland.lua), no lag
 if systemd-detect-virt -q 2>/dev/null; then export SSTYM_LOWFX=1; fi

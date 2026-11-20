@@ -27,7 +27,7 @@
         "clock"
     ],
     "custom/logo": {
-        "format": " ",
+        "format": "⬢",
         "tooltip-format": "Sstym Linux — hack · learn · build",
         "on-click": "nwg-drawer"
     },
