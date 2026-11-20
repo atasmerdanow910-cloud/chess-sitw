@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=nvim
+Exec=true
+NoDisplay=true

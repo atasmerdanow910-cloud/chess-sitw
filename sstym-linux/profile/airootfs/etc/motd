@@ -1,7 +1,8 @@
 
-  Welcome to Sstym Linux — the Hyprland pentest distro.
-  * Launch the graphical desktop:   sstym-live-session   (auto-starts on tty1)
-  * Install to disk:                click "Install Sstym Linux" on the desktop
-  * AUR helper:                     yay  /  paru
-  * System info:                    fastfetch
+  Welcome to Sstym Linux — hack · learn · build
+  * Desktop:          starts automatically (or: systemctl restart sddm)
+  * Install to disk:  "Install Sstym Linux" in the dock / Sstym Settings
+  * Language:         sstym-setlang tk|ru|en|tr|de|fr|es|it|pt|uk|kk|uz|az|zh
+  * Security tools:   sstym-pentest  ·  2800+ more: sstym-tools
+  * AUR helper:       yay / paru      * System info: fastfetch
 

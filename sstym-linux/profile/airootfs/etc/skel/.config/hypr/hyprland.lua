@@ -274,6 +274,8 @@ hl.window_rule({ name = "float-calamares", match = { class = "^(org.kde.calamare
 hl.window_rule({ name = "float-pavu",    match = { class = "^(org.pulseaudio.pavucontrol|pavucontrol)$" }, float = true })
 hl.window_rule({ name = "float-nm",      match = { class = "^(nm-connection-editor)$" }, float = true })
 hl.window_rule({ name = "float-blueman", match = { class = "^(blueman-manager)$" }, float = true })
+hl.window_rule({ name = "float-settings", match = { class = "^(org.sstym.Settings)$" }, float = true, size = "1040 720", center = true })
+hl.window_rule({ name = "float-pentest",  match = { class = "^(org.sstym.Pentest)$" },  float = true, size = "1180 780", center = true })
 hl.window_rule({ name = "sstym-term",    match = { class = "^(sstym-term)$" }, float = true, size = "900 560", center = true })
 -- media and games: always fully opaque
 hl.window_rule({ name = "opaque-media",  match = { class = "^(firefox|vlc|mpv|com.obsproject.Studio|chromium|tor browser|Tor Browser)$" }, opacity = "1.0 override 1.0 override" })

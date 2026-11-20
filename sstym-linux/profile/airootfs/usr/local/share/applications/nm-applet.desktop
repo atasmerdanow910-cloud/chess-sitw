@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=nm-applet
+Exec=true
+NoDisplay=true

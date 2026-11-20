@@ -31,7 +31,17 @@ sleep 0.5
 args=(-i 46 -mb 8 -p bottom -a center -c nwg-drawer -ico /usr/share/sstym/apps-grid.png)
 [ -n "$out" ] && args+=(-o "$out")
 if [ -f "$HOME/.config/sstym/dock-autohide" ]; then args+=(-d -hd 300); else args+=(-x); fi
-setsid -f nwg-dock-hyprland "${args[@]}" >/dev/null 2>&1
+start() { setsid -f nwg-dock-hyprland "${args[@]}" >/dev/null 2>&1; }
+has_surface() { hyprctl layers 2>/dev/null | grep -qi 'nwg-dock'; }
+start
 
-# watchdog: if the dock died during start-up (slow first boot), start it once more
-( sleep 6; pgrep -f '^nwg-dock-hyprland' >/dev/null || setsid -f nwg-dock-hyprland "${args[@]}" >/dev/null 2>&1 ) &
+# Right after login nwg-dock sometimes runs without ever mapping its window
+# (Hyprland is still setting up the output). Check that the dock surface
+# exists and restart it until it does.
+(
+  for i in 1 2 3 4 5 6; do
+    sleep $((2 + i * 2))
+    has_surface && exit 0
+    pkill -f '^nwg-dock-hyprland'; sleep 0.5; start
+  done
+) >/dev/null 2>&1 &

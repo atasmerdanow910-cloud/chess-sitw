@@ -53,24 +53,13 @@ terminal-height: "80%"
     selected_item_pixmap_style = "select_*.png"
     scrollbar = false
 }
-+ progress_bar {
-    id = "__timeout__"
-    left = 50%-150
-    top = 5%+600
-    width = 300
-    height = 4
-    show_text = false
-    fg_color = "#00e5ff"
-    bg_color = "#2a2d3a"
-    border_color = "#2a2d3a"
-}
 + label {
     left = 0
-    top = 5%+614
+    top = 5%+600
     width = 100%
     align = "center"
     id = "__timeout__"
-    text = "Sstym Linux  ·  %d"
+    text = "Автозапуск через %d с  ·  auto start"
     font = "DejaVu Sans Regular 16"
     color = "#8b93a7"
 }

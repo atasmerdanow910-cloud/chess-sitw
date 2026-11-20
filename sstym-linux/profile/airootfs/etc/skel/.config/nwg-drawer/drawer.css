@@ -1,27 +1,40 @@
-window {
-    background: rgba(12, 14, 22, 0.72);
-    color: #eef1f8;
-    font-family: "JetBrains Mono Nerd Font", monospace;
+/* Sstym Launchpad (nwg-drawer) — translucent, frameless, macOS-like */
+* { font-family: "Inter", "Noto Sans", sans-serif; text-shadow: none; }
+window, window.background {
+    background-color: rgba(12, 20, 38, 0.50);   /* blurred by Hyprland */
+    color: #f3f8ff;
 }
-#searchbox {
-    background: rgba(255,255,255,0.10);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 14px;
-    margin: 28px 34% 10px 34%;
-    padding: 8px 14px;
+entry#searchbox, #searchbox {
+    background-color: rgba(255, 255, 255, 0.14);
+    background-image: none;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 12px;
+    box-shadow: none;
+    margin: 30px 36% 14px 36%;
+    padding: 6px 14px;
     color: #ffffff;
     font-size: 15px;
 }
 #pinned-box { margin-bottom: 10px; }
-button {
-    background: transparent;
+button, button:active, button:checked, button:focus {
+    background-color: transparent;
+    background-image: none;
     border: none;
-    border-radius: 16px;
-    padding: 12px;
+    box-shadow: none;
+    outline: none;
+    border-radius: 18px;
+    padding: 10px;
     margin: 6px;
-    color: #eef1f8;
-    transition: all 140ms ease;
+    color: #f3f8ff;
 }
-button:hover { background: rgba(255,255,255,0.14); }
-#category-button { background: rgba(255,255,255,0.08); margin: 4px; }
-#desc { color: #9aa3b8; }
+button:hover { background-color: rgba(255, 255, 255, 0.14); }
+#category-button {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin: 4px 3px;
+    font-size: 13px;
+}
+#category-button:checked, #category-button:hover { background-color: rgba(120, 180, 255, 0.35); }
+#desc { color: rgba(243, 248, 255, 0.65); }
+label { color: #f3f8ff; }
