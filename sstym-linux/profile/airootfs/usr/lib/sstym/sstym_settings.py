@@ -118,6 +118,10 @@ TEXT = {
     "printers": ("Принтеры", "Printers"),
     "kb": ("Раскладка клавиатуры", "Keyboard layout"),
     "kb_sub": ("English / Русский — переключение Alt+Shift", "English / Russian — switch with Alt+Shift"),
+    "wobble": ("Желе-окна", "Jelly windows"),
+    "wobble_sub": ("Окна мягко колышутся, когда их перетаскиваешь", "Windows wobble softly while you drag them"),
+    "glassst": ("Стиль прозрачности", "Transparency style"),
+    "glass_opts": (["Зеркальное стекло", "Матовое стекло", "Классика"], ["Mirror glass", "Frosted glass", "Classic"]),
     "night": ("Ночной режим (Night Shift)", "Night Shift"),
     "night_sub": ("Тёплые цвета экрана вечером — меньше устают глаза", "Warmer screen colours in the evening"),
     "dtheme": ("Тема рабочего стола", "Desktop theme"),
@@ -428,6 +432,18 @@ class SettingsWindow(Adw.ApplicationWindow):
         combo.connect("notify::selected", lambda r, _p: (spawn(["sstym-theme", keys[r.get_selected()]]),
                                                          self.toast(_("applied"))))
         th.add(combo)
+        wb = Adw.SwitchRow(title=_("wobble"), subtitle=_("wobble_sub"))
+        wb.add_prefix(Gtk.Image.new_from_icon_name("view-paged-symbolic"))
+        wb.set_active(read(f"{CFG}/wobble", "on") != "off")
+        wb.connect("notify::active", lambda r, _p: self.set_flag("wobble", "on" if r.get_active() else "off"))
+        th.add(wb)
+        gkeys = ["mirror", "frost", "classic"]
+        gl = Adw.ComboRow(title=_("glassst"), model=Gtk.StringList.new(_("glass_opts")))
+        gl.add_prefix(Gtk.Image.new_from_icon_name("window-new-symbolic"))
+        gcur = read(f"{CFG}/glass", "mirror")
+        gl.set_selected(gkeys.index(gcur) if gcur in gkeys else 0)
+        gl.connect("notify::selected", lambda r, _p: self.set_flag("glass", gkeys[r.get_selected()]))
+        th.add(gl)
         ns = Adw.SwitchRow(title=_("night"), subtitle=_("night_sub"))
         ns.add_prefix(Gtk.Image.new_from_icon_name("weather-clear-night-symbolic"))
         ns.set_active(os.path.exists(f"{RUNTIME}/sstym-nightshift"))
@@ -544,6 +560,12 @@ class SettingsWindow(Adw.ApplicationWindow):
                             "computer-symbolic"))
         page.add(h)
         return page
+
+    def set_flag(self, name, value):
+        write(f"{CFG}/{name}", value)
+        if have("hyprctl"):
+            subprocess.run(["hyprctl", "reload"], capture_output=True)
+        self.toast(_("applied"))
 
     def set_effects(self, level):
         write(f"{CFG}/effects", level)

@@ -1,0 +1,6 @@
+[Unit]
+Description=Sstym Linux: check for updates
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/sstym-update-check

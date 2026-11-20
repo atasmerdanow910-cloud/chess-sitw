@@ -43,6 +43,15 @@ local presets = {
 }
 local E = presets[level] or presets.beautiful
 
+-- "Jelly" windows (wobble while you drag them) and the glass style
+-- (Settings → Appearance). Heavy effects stay off in maxfps / game presets.
+local home = os.getenv("HOME") or ""
+local wobble_on = ((read_file(home .. "/.config/sstym/wobble") or "on"):gsub("%s+", "")) ~= "off"
+local glass = ((read_file(home .. "/.config/sstym/glass") or "mirror"):gsub("%s+", ""))
+local blur_variant = ({ classic = 0, frost = 1, mirror = 8 })[glass] or 8   -- 0 kawase · 1 frost · 8 acrylic
+E.wobble = wobble_on and (level == "beautiful" or level == "balanced")
+if level ~= "beautiful" then blur_variant = 0 end                         -- cheap blur on weaker hardware
+
 -- window border colours follow the Sstym theme (Settings → Appearance)
 local theme = ((read_file((os.getenv("HOME") or "") .. "/.config/sstym/theme") or "dark"):gsub("%s+", ""))
 local borders = {}
@@ -108,6 +117,7 @@ hl.config({
     },
 
     decoration = {
+        wobble = { enabled = E.wobble, intensity = 0.9, mesh = 12 },   -- "jelly" windows
         rounding = E.round,
         active_opacity   = 1.0,
         inactive_opacity = E.inactive,
@@ -122,6 +132,10 @@ hl.config({
         },
         blur = {
             enabled = E.blur,
+            variant = blur_variant,
+            -- "mirror" glass: refraction + a touch of chromatic aberration, like macOS Liquid Glass
+            acrylic = { refraction = 14, bulb = 24, clarity = 0.6, aberration = 0.08 },
+            glass = { refraction = 6, size = 48, roughness = 0.3 },
             size = E.bsize,
             passes = E.bpass,
             new_optimizations = true,

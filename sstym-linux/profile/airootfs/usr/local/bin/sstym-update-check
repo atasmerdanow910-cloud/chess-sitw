@@ -1,0 +1,6 @@
+#!/bin/bash
+# Notify when system updates (incl. security fixes) are available.
+command -v checkupdates >/dev/null || exit 0
+n=$(checkupdates 2>/dev/null | wc -l)
+[ "$n" -gt 0 ] && notify-send -i software-update-available "Sstym: доступны обновления ($n)" "Нажмите SUPER+U, чтобы обновить всё." 2>/dev/null
+exit 0

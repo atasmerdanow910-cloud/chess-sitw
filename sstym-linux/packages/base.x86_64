@@ -36,6 +36,7 @@ dhcpcd
 bind
 # firewall + privacy
 ufw
+apparmor
 # performance: compressed RAM swap
 zram-generator
 bluez
