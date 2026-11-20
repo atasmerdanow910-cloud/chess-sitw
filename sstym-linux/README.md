@@ -56,6 +56,10 @@ cat sstym-full-*.iso.part* > sstym-full.iso
 sha256sum -c sstym-full.iso.sha256
 ```
 
+On a slow or unstable connection, download the parts with a download manager
+that can resume (e.g. ADM or 1DM on Android), one part at a time: release
+links are permanent, so an interrupted part continues where it stopped.
+
 ### Try it on Fedora first (VM)
 
 ```bash
