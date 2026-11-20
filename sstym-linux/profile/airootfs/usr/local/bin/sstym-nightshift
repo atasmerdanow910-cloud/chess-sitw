@@ -1,0 +1,11 @@
+#!/bin/bash
+# Night Shift (like macOS): warmer screen colours in the evening.
+#   sstym-nightshift on|off|toggle|status
+STATE="${XDG_RUNTIME_DIR:-/tmp}/sstym-nightshift"
+on()  { pkill -x hyprsunset; setsid -f hyprsunset -t 4300 >/dev/null 2>&1; touch "$STATE"; }
+off() { pkill -x hyprsunset; rm -f "$STATE"; }
+case "${1:-toggle}" in
+  on) on ;; off) off ;;
+  status) [ -f "$STATE" ] && echo on || echo off ;;
+  *) if [ -f "$STATE" ]; then off; else on; fi ;;
+esac

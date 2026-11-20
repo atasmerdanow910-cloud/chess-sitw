@@ -13,6 +13,9 @@ for f in hyprland.lua hyprlock.conf hypridle.conf; do
   [ -f "$cfg/hypr/$f" ] || cp "/etc/skel/.config/hypr/$f" "$cfg/hypr/" 2>/dev/null
 done
 export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland
+# macOS-like look when available (WhiteSur, macOS cursor, Inter) — see sstym-appearance
+CURSOR=$(sstym-appearance 2>/dev/null | tail -1)
+export XCURSOR_THEME="${CURSOR:-Adwaita}" XCURSOR_SIZE=24 HYPRCURSOR_SIZE=24
 # VM / software rendering → light effects (read by hyprland.lua), no lag
 if systemd-detect-virt -q 2>/dev/null; then export SSTYM_LOWFX=1; fi
 # NVIDIA proprietary driver (installed via Sstym Settings → Graphics drivers)

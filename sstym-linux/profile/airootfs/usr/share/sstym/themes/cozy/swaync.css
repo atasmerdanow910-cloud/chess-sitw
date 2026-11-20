@@ -1,5 +1,5 @@
 /* Sstym Cozy — Control Center & notifications (swaync, GTK4) */
-* { font-family: "Noto Sans", "JetBrains Mono Nerd Font", sans-serif; }
+* { font-family: "Inter", "Noto Sans", "Symbols Nerd Font", sans-serif; }
 .control-center {
     background: rgba(52, 38, 26, 0.74); color: #fff4e2;
     border: 1px solid rgba(255,214,150,0.22); border-radius: 22px; padding: 12px;

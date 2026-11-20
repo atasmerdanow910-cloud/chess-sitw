@@ -56,7 +56,7 @@
       "vexpand": true
     },
     "buttons-grid": {
-      "buttons-per-row": 4,
+      "buttons-per-row": 5,
       "actions": [
         {
           "label": "",
@@ -85,6 +85,13 @@
           "active": false,
           "command": "sh -c '[ \"$SWAYNC_TOGGLE_STATE\" = true ] && sstym-gamemode on || sstym-gamemode off'",
           "update-command": "sh -c '[ -f \"$XDG_RUNTIME_DIR/sstym-gamemode\" ] && echo true || echo false'"
+        },
+        {
+          "label": "",
+          "type": "toggle",
+          "active": false,
+          "command": "sh -c '[ \"$SWAYNC_TOGGLE_STATE\" = true ] && sstym-nightshift on || sstym-nightshift off'",
+          "update-command": "sh -c '[ -f \"$XDG_RUNTIME_DIR/sstym-nightshift\" ] && echo true || echo false'"
         },
         {
           "label": "",

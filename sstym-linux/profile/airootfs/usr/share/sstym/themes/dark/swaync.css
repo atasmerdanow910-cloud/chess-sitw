@@ -1,5 +1,5 @@
 /* Sstym Dark — Control Center & notifications (swaync, GTK4) */
-* { font-family: "Noto Sans", "JetBrains Mono Nerd Font", sans-serif; }
+* { font-family: "Inter", "Noto Sans", "Symbols Nerd Font", sans-serif; }
 .control-center {
     background: rgba(30, 30, 34, 0.78); color: #f2f2f4;
     border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 12px;

@@ -196,3 +196,6 @@ gtk4
 libadwaita
 python-psutil
 power-profiles-daemon
+# ── macOS look: Inter (closest to SF Pro), Night Shift ──
+inter-font
+hyprsunset

@@ -202,6 +202,9 @@ hl.bind(mod .. " + G",         hl.dsp.exec_cmd("sstym-gamemode toggle")) -- Game
 hl.bind(mod .. " + U",         hl.dsp.exec_cmd("sstym-update"))          -- Update all
 hl.bind(mod .. " + N",         hl.dsp.exec_cmd("sstym-vpn"))             -- VPN / unblock
 hl.bind(mod .. " + C",         hl.dsp.exec_cmd("swaync-client -t -sw"))  -- Control Center
+-- Mission Control–style window switcher (all open windows, with icons)
+hl.bind(mod .. " + Tab",       hl.dsp.exec_cmd("rofi -show window -theme sstym"))
+hl.bind("ALT + Tab",           hl.dsp.exec_cmd("rofi -show window -theme sstym"))
 hl.bind(mod .. " + SHIFT + I", hl.dsp.exec_cmd("sstym-install"))
 hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd('grim -g "$(slurp)" - | swappy -f -'))
 hl.bind("Print",               hl.dsp.exec_cmd("grim - | wl-copy"))

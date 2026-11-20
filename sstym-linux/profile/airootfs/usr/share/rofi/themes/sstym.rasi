@@ -1,13 +1,19 @@
-/* Sstym Dark — Spotlight / menus */
+/* Sstym Dark — Spotlight search (rofi) */
 * {
     bg: #141416f2; bg-alt: #202024; fg: #e6e6ea; accent: #f2f2f4; accent-fg: #111114;
-    background-color: transparent; text-color: @fg;
+    background-color: transparent; text-color: @fg; font: "Inter 13";
 }
-window { width: 640px; border-radius: 18px; background-color: @bg; border: 1px; border-color: rgba(255,255,255,0.08); padding: 18px; }
-inputbar { children: [prompt, entry]; padding: 12px; background-color: @bg-alt; border-radius: 12px; margin: 0 0 12px 0; }
-prompt { text-color: @accent; margin: 0 8px 0 0; }
-listview { lines: 9; scrollbar: false; spacing: 4px; }
-element { padding: 10px; border-radius: 10px; }
+window {
+    location: north; anchor: north; y-offset: 18%;
+    width: 680px; border-radius: 18px; background-color: @bg;
+    border: 1px; border-color: rgba(255,255,255,0.08); padding: 10px;
+}
+mainbox { spacing: 8px; }
+inputbar { children: [prompt, entry]; padding: 12px 14px; background-color: transparent; border-radius: 12px; }
+prompt { text-color: @accent; margin: 0 10px 0 0; font: "Symbols Nerd Font 18"; }
+entry { font: "Inter 20"; placeholder: "Spotlight"; placeholder-color: #8a8a94; }
+listview { lines: 8; scrollbar: false; spacing: 2px; border: 1px 0 0 0; border-color: rgba(255,255,255,0.08); padding: 8px 0 0 0; }
+element { padding: 8px 12px; border-radius: 10px; }
 element selected { background-color: @accent; text-color: @accent-fg; }
-element-icon { size: 22px; margin: 0 10px 0 0; }
-element-text { text-color: inherit; }
+element-icon { size: 26px; margin: 0 12px 0 0; }
+element-text { text-color: inherit; vertical-align: 0.5; }

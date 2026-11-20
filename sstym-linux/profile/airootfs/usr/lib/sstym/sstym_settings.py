@@ -118,6 +118,8 @@ TEXT = {
     "printers": ("Принтеры", "Printers"),
     "kb": ("Раскладка клавиатуры", "Keyboard layout"),
     "kb_sub": ("English / Русский — переключение Alt+Shift", "English / Russian — switch with Alt+Shift"),
+    "night": ("Ночной режим (Night Shift)", "Night Shift"),
+    "night_sub": ("Тёплые цвета экрана вечером — меньше устают глаза", "Warmer screen colours in the evening"),
     "dtheme": ("Тема рабочего стола", "Desktop theme"),
     "dtheme_sub": ("Меню, док, Пункт управления, терминал и обои", "Menu bar, dock, Control Center, terminal and wallpaper"),
     "wall": ("Обои", "Wallpaper"), "own": ("Выбрать своё изображение…", "Choose your own image…"),
@@ -426,6 +428,11 @@ class SettingsWindow(Adw.ApplicationWindow):
         combo.connect("notify::selected", lambda r, _p: (spawn(["sstym-theme", keys[r.get_selected()]]),
                                                          self.toast(_("applied"))))
         th.add(combo)
+        ns = Adw.SwitchRow(title=_("night"), subtitle=_("night_sub"))
+        ns.add_prefix(Gtk.Image.new_from_icon_name("weather-clear-night-symbolic"))
+        ns.set_active(os.path.exists(f"{RUNTIME}/sstym-nightshift"))
+        ns.connect("notify::active", lambda r, _p: spawn(["sstym-nightshift", "on" if r.get_active() else "off"]))
+        th.add(ns)
         page.add(th)
         g = Adw.PreferencesGroup(title=_("wall"))
         flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=3,

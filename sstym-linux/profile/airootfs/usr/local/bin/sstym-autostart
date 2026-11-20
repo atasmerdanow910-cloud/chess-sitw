@@ -1,6 +1,6 @@
 #!/bin/bash
 # Sstym Linux macOS-style desktop autostart
-hyprctl setcursor Adwaita 24 &
+hyprctl setcursor "${XCURSOR_THEME:-Adwaita}" 24 &
 
 
 # wallpaper (chosen in Sstym Settings → Appearance)

@@ -1,0 +1,33 @@
+#!/bin/bash
+# Pick the most macOS-like GTK/icon/cursor themes that are installed and
+# write them to the GTK settings — unless the user changed them (nwg-look
+# rewrites the file without our marker, and then we leave it alone).
+pick() { for t in "$@"; do [ -d "/usr/share/$t" ] && { basename "$t"; return; }; done; }
+GTK=$(pick themes/WhiteSur-Dark themes/Adwaita-dark); GTK=${GTK:-Adwaita-dark}
+ICONS=$(pick icons/WhiteSur-dark icons/Papirus-Dark); ICONS=${ICONS:-Adwaita}
+CURSOR=$(pick icons/macOS icons/macOS-White icons/Adwaita); CURSOR=${CURSOR:-Adwaita}
+FONT="Inter 10"; fc-list | grep -qi "Inter" || FONT="Noto Sans 10"
+for v in gtk-3.0 gtk-4.0; do
+  f="$HOME/.config/$v/settings.ini"
+  if [ ! -f "$f" ] || grep -q "sstym-auto" "$f"; then
+    mkdir -p "$(dirname "$f")"
+    cat > "$f" <<INI
+# sstym-auto (delete this line to keep your own settings)
+[Settings]
+gtk-theme-name=$GTK
+gtk-icon-theme-name=$ICONS
+gtk-cursor-theme-name=$CURSOR
+gtk-cursor-theme-size=24
+gtk-font-name=$FONT
+gtk-application-prefer-dark-theme=1
+gtk-decoration-layout=close,minimize,maximize:
+INI
+  fi
+done
+# libadwaita/GTK4 dark style + cursor for Wayland apps
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark 2>/dev/null
+gsettings set org.gnome.desktop.interface icon-theme "$ICONS" 2>/dev/null
+gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR" 2>/dev/null
+gsettings set org.gnome.desktop.interface font-name "$FONT" 2>/dev/null
+gsettings set org.gnome.desktop.wm.preferences button-layout "close,minimize,maximize:" 2>/dev/null
+echo "$CURSOR"

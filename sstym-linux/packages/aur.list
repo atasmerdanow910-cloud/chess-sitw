@@ -6,3 +6,6 @@ amneziavpn-bin           # Amnezia VPN: AmneziaWG / XRay, free "Amnezia Free" op
 throne-bin               # Throne (ex-Nekoray): VLESS / Reality / Hysteria2 / Trojan / Shadowsocks
 outline-client-appimage  # Outline client (Shadowsocks access keys)
 localsend-bin            # LocalSend: AirDrop-style file sharing
+whitesur-icon-theme      # macOS Big Sur–style icons (GPL-3.0)
+whitesur-gtk-theme       # macOS-style GTK theme with traffic-light window buttons (MIT)
+apple_cursor             # macOS cursor (GPL-3.0)

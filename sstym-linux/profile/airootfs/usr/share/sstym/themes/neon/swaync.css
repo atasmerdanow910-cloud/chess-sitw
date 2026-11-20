@@ -1,5 +1,5 @@
 /* Sstym Neon — Control Center & notifications (swaync, GTK4) */
-* { font-family: "Noto Sans", "JetBrains Mono Nerd Font", sans-serif; }
+* { font-family: "Inter", "Noto Sans", "Symbols Nerd Font", sans-serif; }
 .control-center {
     background: rgba(14, 18, 32, 0.78); color: #eef1f8;
     border: 1px solid rgba(124,77,255,0.30); border-radius: 22px; padding: 12px;
