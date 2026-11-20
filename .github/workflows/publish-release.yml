@@ -1,0 +1,29 @@
+name: Publish Sstym release
+
+# Turns the newest "Sstym Linux build N" draft release (highest N) into a public release,
+# so every ISO part gets a permanent download link (no GitHub login needed,
+# download managers can resume). Runs for a commit whose message contains
+# "[publish-release]".
+on:
+  push:
+    branches: ["**"]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: contains(github.event.head_commit.message, '[publish-release]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish the newest Sstym draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh release list -R "$GITHUB_REPOSITORY" --limit 50 --json tagName,isDraft,createdAt \
+                -q '[.[] | select(.isDraft and (.tagName | startswith("sstym-build-")))] | sort_by(.tagName | ltrimstr("sstym-build-") | tonumber) | last | .tagName')
+          [ -n "$tag" ] || { echo "no Sstym draft release found"; exit 1; }
+          echo "Publishing $tag"
+          gh release edit "$tag" -R "$GITHUB_REPOSITORY" --draft=false --prerelease=false --latest
+          gh release view "$tag" -R "$GITHUB_REPOSITORY" --json url,assets \
+            -q '.url, (.assets[] | "\(.name)  \(.size)  \(.url)")'
