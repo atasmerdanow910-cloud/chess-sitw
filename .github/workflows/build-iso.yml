@@ -14,13 +14,17 @@ on:
         default: both
         options: [test, full, both]
   push:
+    # a tag v* builds + releases; a branch commit whose message contains
+    # "[build-iso]" builds + creates a private draft release
     tags: ["v*"]
+    branches: ["**"]
 
 permissions:
   contents: write
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, '[build-iso]')
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
@@ -85,7 +89,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, '[build-iso]')
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -102,12 +106,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
-          # tags like v2026.11.20-rc1 make a private draft (only the repo owner sees it)
-          draft: ${{ contains(github.ref_name, '-rc') }}
-          prerelease: ${{ contains(github.ref_name, '-rc') }}
-          name: Sstym Linux ${{ github.ref_name }}
+          # branch builds ("[build-iso]") and -rc tags → private draft (only the owner sees it)
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('sstym-build-{0}', github.run_number) }}
+          target_commitish: ${{ github.sha }}
+          draft: ${{ !startsWith(github.ref, 'refs/tags/') || contains(github.ref_name, '-rc') }}
+          prerelease: ${{ !startsWith(github.ref, 'refs/tags/') || contains(github.ref_name, '-rc') }}
+          name: Sstym Linux ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('build {0}', github.run_number) }}
           body: |
-            ## Sstym Linux ${{ github.ref_name }}
+            ## Sstym Linux
 
             macOS-style Hyprland desktop · everyday apps · gaming · VPN / anti-censorship · security tools
 
