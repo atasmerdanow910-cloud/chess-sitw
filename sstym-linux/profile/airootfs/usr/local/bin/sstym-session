@@ -13,6 +13,8 @@ for f in hyprland.lua hyprlock.conf hypridle.conf; do
   [ -f "$cfg/hypr/$f" ] || cp "/etc/skel/.config/hypr/$f" "$cfg/hypr/" 2>/dev/null
 done
 export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland
+# system language (set by the boot menu, the installer or Sstym Settings)
+if [ -f /etc/locale.conf ]; then set -a; . /etc/locale.conf; set +a; fi
 # macOS-like look when available (WhiteSur, macOS cursor, Inter) — see sstym-appearance
 CURSOR=$(sstym-appearance 2>/dev/null | tail -1)
 export XCURSOR_THEME="${CURSOR:-Adwaita}" XCURSOR_SIZE=24 HYPRCURSOR_SIZE=24

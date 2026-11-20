@@ -1,11 +1,11 @@
 #!/bin/bash
 # Sstym desktop themes.
-#   sstym-theme dark|cozy|neon   switch theme (applies live, no logout needed)
+#   sstym-theme glacier|dark|cozy|neon   switch theme (applies live, no logout needed)
 #   sstym-theme start            at login: Control Center + theme widgets
 #   sstym-theme current          print the current theme
 T=/usr/share/sstym/themes
 C="$HOME/.config"
-current() { t=$(cat "$C/sstym/theme" 2>/dev/null); [ -d "$T/$t" ] && echo "$t" || echo dark; }
+current() { t=$(cat "$C/sstym/theme" 2>/dev/null); [ -d "$T/$t" ] && echo "$t" || echo glacier; }
 
 control_center() {
   # Control Center config with this laptop's backlight device (or without the slider)
@@ -51,6 +51,6 @@ apply() {
 case "$1" in
   start)   control_center; widgets "$(current)" ;;
   current) current ;;
-  dark|cozy|neon) apply "$1" ;;
-  *) echo "usage: sstym-theme {dark|cozy|neon|start|current}"; exit 2 ;;
+  glacier|dark|cozy|neon) apply "$1" ;;
+  *) echo "usage: sstym-theme {glacier|dark|cozy|neon|start|current}"; exit 2 ;;
 esac

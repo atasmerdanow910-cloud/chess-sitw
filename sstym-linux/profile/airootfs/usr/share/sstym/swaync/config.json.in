@@ -77,7 +77,7 @@
           "type": "toggle",
           "active": false,
           "command": "sh -c '[ \"$SWAYNC_TOGGLE_STATE\" = true ] && rfkill block all || rfkill unblock all'",
-          "update-command": "sh -c '! rfkill -n -o SOFT | grep -q unblocked && echo true || echo false'"
+          "update-command": "sh -c 'rfkill -n -o SOFT | grep -qx blocked && ! rfkill -n -o SOFT | grep -qx unblocked && echo true || echo false'"
         },
         {
           "label": "",
@@ -94,7 +94,7 @@
           "update-command": "sh -c '[ -f \"$XDG_RUNTIME_DIR/sstym-nightshift\" ] && echo true || echo false'"
         },
         {
-          "label": "",
+          "label": "",
           "command": "sstym-vpn"
         },
         {

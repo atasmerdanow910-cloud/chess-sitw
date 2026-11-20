@@ -2,7 +2,7 @@
 title-text: ""
 desktop-image: "background.png"
 desktop-image-scale-method: "stretch"
-desktop-color: "#0a0e18"
+desktop-color: "#08090e"
 terminal-font: "DejaVu Sans Regular 16"
 terminal-left: "10%"
 terminal-top: "10%"
@@ -10,24 +10,24 @@ terminal-width: "80%"
 terminal-height: "80%"
 
 + image {
-    left = 50%-80
+    left = 50%-60
     top = 5%
-    width = 160
-    height = 160
+    width = 120
+    height = 120
     file = "logo.png"
 }
 + label {
     left = 0
-    top = 5%+170
+    top = 5%+128
     width = 100%
     align = "center"
     text = "SSTYM LINUX"
     font = "DejaVu Sans Bold 42"
-    color = "#eef1f8"
+    color = "#f2f2f4"
 }
 + label {
     left = 0
-    top = 5%+222
+    top = 5%+180
     width = 100%
     align = "center"
     text = "hack  ·  learn  ·  build"
@@ -35,39 +35,51 @@ terminal-height: "80%"
     color = "#00e5ff"
 }
 + boot_menu {
-    left = 50%-320
-    top = 5%+275
-    width = 640
-    height = 410
+    left = 50%-310
+    top = 5%+232
+    width = 620
+    height = 340
+    menu_pixmap_style = "panel_*.png"
     item_font = "DejaVu Sans Regular 20"
     selected_item_font = "DejaVu Sans Bold 20"
-    item_color = "#aab2c8"
+    item_color = "#b4bacb"
     selected_item_color = "#ffffff"
     icon_width = 30
     icon_height = 30
     item_icon_space = 16
     item_height = 36
     item_padding = 2
-    item_spacing = 13
+    item_spacing = 12
     selected_item_pixmap_style = "select_*.png"
     scrollbar = false
 }
++ progress_bar {
+    id = "__timeout__"
+    left = 50%-150
+    top = 5%+600
+    width = 300
+    height = 4
+    show_text = false
+    fg_color = "#00e5ff"
+    bg_color = "#2a2d3a"
+    border_color = "#2a2d3a"
+}
 + label {
     left = 0
-    top = 100%-70
+    top = 5%+614
     width = 100%
     align = "center"
     id = "__timeout__"
-    text = "Sstym Linux starts in %d s"
+    text = "Sstym Linux  ·  %d"
     font = "DejaVu Sans Regular 16"
     color = "#8b93a7"
 }
 + label {
     left = 0
-    top = 100%-42
+    top = 100%-38
     width = 100%
     align = "center"
-    text = "Up/Down: choose     Enter: start     E: edit options"
+    text = "↑ ↓  выбрать / choose      Enter  запуск / start      Esc  назад / back"
     font = "DejaVu Sans Regular 16"
-    color = "#5d6680"
+    color = "#6a7288"
 }

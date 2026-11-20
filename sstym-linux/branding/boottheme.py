@@ -37,13 +37,20 @@ def glow_blob(img, cx, cy, r, color, alpha):
 g = os.path.join(OUT, "grub", "themes", "sstym")
 os.makedirs(os.path.join(g, "icons"), exist_ok=True)
 
-bg = gradient(1920, 1080)
-glow_blob(bg, 1460, 260, 420, (0, 229, 255), 70)
-glow_blob(bg, 420, 900, 520, (255, 43, 214), 55)
-glow_blob(bg, 960, 330, 260, (124, 77, 255), 60)
+DARK = os.environ.get("SSTYM_DARK_WALL", "")
+if DARK and os.path.exists(DARK):
+    bg = Image.open(DARK).convert("RGBA").resize((1920, 1080), Image.LANCZOS).filter(ImageFilter.GaussianBlur(5))
+    shade = Image.new("RGBA", bg.size, (6, 7, 12, 150))
+    bg.alpha_composite(shade)
+    glow_blob(bg, 960, 250, 300, (124, 77, 255), 55)
+else:
+    bg = gradient(1920, 1080)
+    glow_blob(bg, 1460, 260, 420, (0, 229, 255), 70)
+    glow_blob(bg, 420, 900, 520, (255, 43, 214), 55)
+    glow_blob(bg, 960, 330, 260, (124, 77, 255), 60)
 bg.convert("RGB").save(os.path.join(g, "background.png"))
 
-lg = logo(160, os.path.join(g, "logo.png"))
+lg = logo(120, os.path.join(g, "logo.png"))
 
 # selection highlight (9-slice pixmap): translucent rounded pill with cyan edge
 R = 6
@@ -61,9 +68,18 @@ crops = {"nw": (0, 0, R, R), "n": (R, 0, 2 * R, R), "ne": (2 * R, 0, 3 * R, R),
 for k, box in crops.items():
     big.crop(box).save(os.path.join(g, f"select_{k}.png"))
 
+# frosted panel behind the whole menu (9-slice)
+P = 20
+pan = Image.new("RGBA", (P * 3, P * 3), (0, 0, 0, 0))
+ImageDraw.Draw(pan).rounded_rectangle((0, 0, P * 3 - 1, P * 3 - 1), radius=P, fill=(12, 14, 22, 165), outline=(255, 255, 255, 30), width=1)
+for k, box in {"nw": (0, 0, P, P), "n": (P, 0, 2 * P, P), "ne": (2 * P, 0, 3 * P, P), "w": (0, P, P, 2 * P),
+               "c": (P, P, 2 * P, 2 * P), "e": (2 * P, P, 3 * P, 2 * P), "sw": (0, 2 * P, P, 3 * P),
+               "s": (P, 2 * P, 2 * P, 3 * P), "se": (2 * P, 2 * P, 3 * P, 3 * P)}.items():
+    pan.crop(box).save(os.path.join(g, f"panel_{k}.png"))
+
 # menu icons (rendered from Nerd Font symbols)
 nerd = ImageFont.truetype(NERD, 44)
-icons = {"sstym": None, "safe": "", "install": "", "ram": "",
+icons = {"sstym": None, "lang": "\uf0ac", "advanced": "\uf1de", "safe": "", "install": "", "ram": "",
          "memtest": "\uf0e4", "efi": "", "restart": "", "shutdown": ""}
 for name, glyph in icons.items():
     if glyph is None:
@@ -90,7 +106,7 @@ open(os.path.join(g, "theme.txt"), "w").write('''# Sstym Linux — GRUB boot men
 title-text: ""
 desktop-image: "background.png"
 desktop-image-scale-method: "stretch"
-desktop-color: "#0a0e18"
+desktop-color: "#08090e"
 terminal-font: "DejaVu Sans Regular 16"
 terminal-left: "10%"
 terminal-top: "10%"
@@ -98,24 +114,24 @@ terminal-width: "80%"
 terminal-height: "80%"
 
 + image {
-    left = 50%-80
+    left = 50%-60
     top = 5%
-    width = 160
-    height = 160
+    width = 120
+    height = 120
     file = "logo.png"
 }
 + label {
     left = 0
-    top = 5%+170
+    top = 5%+128
     width = 100%
     align = "center"
     text = "SSTYM LINUX"
     font = "DejaVu Sans Bold 42"
-    color = "#eef1f8"
+    color = "#f2f2f4"
 }
 + label {
     left = 0
-    top = 5%+222
+    top = 5%+180
     width = 100%
     align = "center"
     text = "hack  ·  learn  ·  build"
@@ -123,41 +139,53 @@ terminal-height: "80%"
     color = "#00e5ff"
 }
 + boot_menu {
-    left = 50%-320
-    top = 5%+275
-    width = 640
-    height = 410
+    left = 50%-310
+    top = 5%+232
+    width = 620
+    height = 340
+    menu_pixmap_style = "panel_*.png"
     item_font = "DejaVu Sans Regular 20"
     selected_item_font = "DejaVu Sans Bold 20"
-    item_color = "#aab2c8"
+    item_color = "#b4bacb"
     selected_item_color = "#ffffff"
     icon_width = 30
     icon_height = 30
     item_icon_space = 16
     item_height = 36
     item_padding = 2
-    item_spacing = 13
+    item_spacing = 12
     selected_item_pixmap_style = "select_*.png"
     scrollbar = false
 }
++ progress_bar {
+    id = "__timeout__"
+    left = 50%-150
+    top = 5%+600
+    width = 300
+    height = 4
+    show_text = false
+    fg_color = "#00e5ff"
+    bg_color = "#2a2d3a"
+    border_color = "#2a2d3a"
+}
 + label {
     left = 0
-    top = 100%-70
+    top = 5%+614
     width = 100%
     align = "center"
     id = "__timeout__"
-    text = "Sstym Linux starts in %d s"
+    text = "Sstym Linux  ·  %d"
     font = "DejaVu Sans Regular 16"
     color = "#8b93a7"
 }
 + label {
     left = 0
-    top = 100%-42
+    top = 100%-38
     width = 100%
     align = "center"
-    text = "Up/Down: choose     Enter: start     E: edit options"
+    text = "↑ ↓  выбрать / choose      Enter  запуск / start      Esc  назад / back"
     font = "DejaVu Sans Regular 16"
-    color = "#5d6680"
+    color = "#6a7288"
 }
 ''')
 

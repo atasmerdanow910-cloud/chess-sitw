@@ -65,7 +65,9 @@ def human(n):
 
 
 # ───────────────────────────── language ─────────────────────────────
-LANG = read(f"{CFG}/lang") or ("ru" if os.environ.get("LANG", "").startswith("ru") else "ru")
+LANG = read(f"{CFG}/lang") or os.environ.get("LANG", "ru")[:2]
+if LANG not in ("ru", "en", "tk", "tr"):
+    LANG = "en"
 TEXT = {
     "title": ("Настройки Sstym", "Sstym Settings"),
     "home": ("Sstym Linux", "Sstym Linux"),
@@ -129,7 +131,9 @@ TEXT = {
     "wall": ("Обои", "Wallpaper"), "own": ("Выбрать своё изображение…", "Choose your own image…"),
     "dock": ("Док", "Dock"), "dock_hide": ("Автоматически скрывать док", "Automatically hide the dock"),
     "theme": ("Тема, значки и шрифты", "Theme, icons and fonts"),
-    "lang": ("Язык приложений Sstym", "Language of Sstym apps"),
+    "lang": ("Язык системы", "System language"),
+    "lang_sub": ("Меню, приложения и раскладки клавиатуры", "Menus, apps and keyboard layouts"),
+    "relogin": ("Готово — выйдите из сеанса и войдите снова", "Done — log out and back in to apply"),
     "effects": ("Качество эффектов", "Effects quality"),
     "effects_sub": ("Авто подбирает под ваш ноутбук", "Auto adapts to your laptop"),
     "fx": (["Авто", "Красиво", "Сбалансированно", "Максимум FPS"], ["Auto", "Beautiful", "Balanced", "Max FPS"]),
@@ -148,6 +152,8 @@ TEXT = {
     "drivers": ("Драйверы видеокарты", "Graphics drivers"),
     "drivers_sub": ("NVIDIA / AMD / Intel — лучший драйвер для игр", "NVIDIA / AMD / Intel — best driver for games"),
     "sec": ("Инструменты безопасности", "Security tools"),
+    "pentest_sub": ("Nmap, Metasploit, Wireshark, Burp… с иконками, запуск в один клик",
+                    "Nmap, Metasploit, Wireshark, Burp… with icons, one-click launch"),
     "sec_sub": ("2800+ инструментов BlackArch по категориям", "2800+ BlackArch tools by category"),
     "backup": ("Резервные копии", "Backups"), "backup_sub": ("Timeshift — откат системы", "Timeshift — roll the system back"),
     "disks": ("Диски", "Disks"),
@@ -160,9 +166,111 @@ TEXT = {
 }
 
 
+# Türkmençe / Türkçe (missing keys fall back to English)
+EXTRA = {
+    "tk": {
+        "title": "Sstym sazlamalary", "vpn": "VPN we gizlinlik", "net": "Tor we enjamlar", "look": "Daşky görnüş",
+        "perf": "Öndürijilik", "apps": "Programmalar we oýunlar", "sys": "Ulgam",
+        "welcome": "Sstym Linux-a hoş geldiňiz!",
+        "tagline": "hack · learn · build — gündelik iş, oýunlar we howpsuzlyk",
+        "computer": "Bu kompýuter", "system": "Ulgam", "kernel": "Ýadro", "cpu": "Prosessor",
+        "gpu": "Wideokarta", "ram": "Ýat", "disk": "Disk", "mode": "Režim",
+        "live": "Fleşkadan işleýän ulgam", "installed": "Diske gurnaldy", "quick": "Çalt hereketler",
+        "install": "Sstym Linux-y gurnamak", "install_sub": "Ulgamy kompýuteriň diskine gurnamak",
+        "update": "Hemmesini täzelemek", "update_sub": "Ulgam, AUR we Flatpak bir düwme bilen",
+        "store": "Programma dükany", "store_sub": "Flathub-dan müňlerçe programma",
+        "keys": "Gysga düwmeler", "vpn_group": "Blokirowkalary aýlanyp geçmek",
+        "vpn_desc": "Bir usul blokirlenen bolsa, indikisini synanyşyň.",
+        "tor_sub": "Snowflake / WebTunnel / meek köprüleri — blokirowka garşy iň gowusy",
+        "lantern_sub": "Mugt, bir düwme bilen", "outline_sub": "ss:// açary", "proton_sub": "Mugt tarif",
+        "help": "Blokirowkalary nädip aýlanyp geçmeli — gollanma",
+        "help_sub": "Tor arkaly Telegram, köprüler, öz serweriňiz",
+        "privacy": "Gorag", "firewall": "Brandmauer", "firewall_sub": "Gelýän birikmeleri bökdeýär",
+        "mac": "Tötänleýin Wi-Fi MAC salgysy", "mac_sub": "Açyk — torlar enjamy yzarlap bilmeýär",
+        "wifi": "Wi-Fi we torlar", "sound": "Ses", "displays": "Monitorlar", "printers": "Printerler",
+        "kb": "Klawiatura düzülişi", "kb_sub": "Alt+Shift bilen dil çalyşmak",
+        "wobble": "Žele penjireler", "wobble_sub": "Penjireler süýrelende ýumşak titreýär",
+        "glassst": "Aýna stili", "glass_opts": ["Aýna", "Gümür aýna", "Klassik"],
+        "night": "Gijeki režim (Night Shift)", "night_sub": "Agşamlar ýyly reňkler — gözler az ýadaýar",
+        "dtheme": "Iş stoly temasy", "dtheme_sub": "Menýu, dok, dolandyryş merkezi, terminal we fon",
+        "wall": "Fon suraty", "own": "Öz suratyňyzy saýlaň…", "dock": "Dok",
+        "dock_hide": "Dok awtomatik gizlensin", "theme": "Tema, nyşanlar we şriftler",
+        "lang": "Ulgamyň dili", "lang_sub": "Menýular, programmalar we klawiatura",
+        "relogin": "Taýýar — seansdan çykyp, gaýtadan giriň",
+        "effects": "Effektleriň hili", "effects_sub": "Awto — noutbugyňyza görä saýlaýar",
+        "fx": ["Awto", "Owadan", "Deňagramly", "Iň ýokary FPS"],
+        "power": "Energiýa režimi", "power_sub": "Batareýany tygşytlamak ýa-da iň ýokary tizlik",
+        "pw": ["Tygşytly", "Deňagramly", "Öndürijilik"],
+        "game": "Oýun režimi", "game_sub": "Effektler öçük, iň ýokary FPS (SUPER+G)",
+        "hw": "Siziň noutbugyňyz", "games": "Oýunlar", "tools": "Gurallar",
+        "steam_sub": "Müňlerçe oýun, Windows oýunlary üçin Proton",
+        "drivers": "Wideokarta drýwerleri", "drivers_sub": "NVIDIA / AMD / Intel — oýunlar üçin iň gowy drýwer",
+        "pentest_sub": "Nmap, Metasploit, Wireshark, Burp… nyşanlar bilen, bir basyşda açmak",
+        "sec": "Howpsuzlyk gurallary", "sec_sub": "Kategoriýalar boýunça 2800+ BlackArch guraly",
+        "backup": "Ätiýaçlyk nusgalary", "backup_sub": "Timeshift — ulgamy yzyna gaýtarmak",
+        "disks": "Diskler", "power_group": "Energiýa", "restart": "Täzeden açmak", "shutdown": "Öçürmek",
+        "logout": "Seansdan çykmak", "missing": "gurnalmadyk", "applied": "Taýýar",
+    },
+    "tr": {
+        "title": "Sstym Ayarları", "vpn": "VPN ve gizlilik", "net": "Ağ ve cihazlar", "look": "Görünüm",
+        "perf": "Performans", "apps": "Uygulamalar ve oyunlar", "sys": "Sistem",
+        "welcome": "Sstym Linux'a hoş geldiniz!",
+        "tagline": "hack · learn · build — günlük iş, oyun ve güvenlik",
+        "computer": "Bu bilgisayar", "system": "Sistem", "kernel": "Çekirdek", "cpu": "İşlemci",
+        "gpu": "Ekran kartı", "ram": "Bellek", "disk": "Disk", "mode": "Mod",
+        "live": "USB'den canlı sistem", "installed": "Diske kurulu", "quick": "Hızlı işlemler",
+        "install": "Sstym Linux'u kur", "install_sub": "Sistemi bu bilgisayarın diskine kur",
+        "update": "Her şeyi güncelle", "update_sub": "Sistem, AUR ve Flatpak tek tuşla",
+        "store": "Uygulama mağazası", "store_sub": "Flathub'dan binlerce uygulama",
+        "keys": "Klavye kısayolları", "vpn_group": "Engelleri aş",
+        "vpn_desc": "Bir yöntem engellenirse sıradakini deneyin.",
+        "tor_sub": "Snowflake / WebTunnel / meek köprüleri — engellemelere karşı en iyisi",
+        "lantern_sub": "Ücretsiz, tek tık", "outline_sub": "ss:// erişim anahtarı", "proton_sub": "Ücretsiz plan",
+        "help": "Engeller nasıl aşılır — rehber", "help_sub": "Tor üzerinden Telegram, köprüler, kendi sunucunuz",
+        "privacy": "Koruma", "firewall": "Güvenlik duvarı", "firewall_sub": "Gelen bağlantıları engeller",
+        "mac": "Rastgele Wi-Fi MAC adresi", "mac_sub": "Açık — ağlar bu cihazı izleyemez",
+        "wifi": "Wi-Fi ve ağlar", "sound": "Ses", "displays": "Ekranlar", "printers": "Yazıcılar",
+        "kb": "Klavye düzeni", "kb_sub": "Dil değiştirmek için Alt+Shift",
+        "wobble": "Jöle pencereler", "wobble_sub": "Pencereler sürüklenirken yumuşakça sallanır",
+        "glassst": "Saydamlık stili", "glass_opts": ["Ayna cam", "Buzlu cam", "Klasik"],
+        "night": "Gece modu (Night Shift)", "night_sub": "Akşamları sıcak renkler — gözler daha az yorulur",
+        "dtheme": "Masaüstü teması", "dtheme_sub": "Menü çubuğu, dock, Denetim Merkezi, terminal ve duvar kağıdı",
+        "wall": "Duvar kağıdı", "own": "Kendi resminizi seçin…", "dock": "Dock",
+        "dock_hide": "Dock'u otomatik gizle", "theme": "Tema, simgeler ve yazı tipleri",
+        "lang": "Sistem dili", "lang_sub": "Menüler, uygulamalar ve klavye düzenleri",
+        "relogin": "Tamam — uygulamak için oturumu kapatıp yeniden açın",
+        "effects": "Efekt kalitesi", "effects_sub": "Otomatik — dizüstünüze göre ayarlar",
+        "fx": ["Otomatik", "Güzel", "Dengeli", "Maksimum FPS"],
+        "power": "Güç modu", "power_sub": "Pil tasarrufu veya tam hız",
+        "pw": ["Güç tasarrufu", "Dengeli", "Performans"],
+        "game": "Oyun modu", "game_sub": "Tüm efektler kapalı, maksimum FPS (SUPER+G)",
+        "hw": "Dizüstünüz", "games": "Oyunlar", "tools": "Araçlar",
+        "steam_sub": "Binlerce oyun, Windows oyunları için Proton",
+        "drivers": "Ekran kartı sürücüleri", "drivers_sub": "NVIDIA / AMD / Intel — oyunlar için en iyi sürücü",
+        "pentest_sub": "Nmap, Metasploit, Wireshark, Burp… simgelerle, tek tıkla başlat",
+        "sec": "Güvenlik araçları", "sec_sub": "Kategorilere göre 2800+ BlackArch aracı",
+        "backup": "Yedekler", "backup_sub": "Timeshift — sistemi geri al",
+        "disks": "Diskler", "power_group": "Güç", "restart": "Yeniden başlat", "shutdown": "Kapat",
+        "logout": "Oturumu kapat", "missing": "kurulu değil", "applied": "Tamam",
+    },
+}
+
+
 def _(key):
     v = TEXT[key]
-    return v[0] if LANG == "ru" else v[1]
+    if LANG == "ru":
+        return v[0]
+    return EXTRA.get(LANG, {}).get(key, v[1])
+
+
+def languages():
+    """[(code, native name)] from /usr/share/sstym/languages.tsv"""
+    out = []
+    for line in read(f"{SHARE}/languages.tsv").splitlines():
+        c = line.split("\t")
+        if len(c) >= 4 and not line.startswith("#"):
+            out.append((c[0], c[3]))
+    return out or [("ru", "Русский"), ("en", "English")]
 
 
 SHORTCUTS = [
@@ -171,6 +279,7 @@ SHORTCUTS = [
     ("SUPER + I", "Настройки Sstym", "Sstym Settings"),
     ("SUPER + N", "VPN / обход блокировок", "VPN / unblock"),
     ("SUPER + G", "Игровой режим", "Game mode"),
+    ("SUPER + X", "Sstym Pentest", "Sstym Pentest"),
     ("SUPER + U", "Обновить всё", "Update everything"),
     ("SUPER + Return", "Терминал", "Terminal"),
     ("SUPER + B / E", "Браузер / Файлы", "Browser / Files"),
@@ -327,6 +436,7 @@ class SettingsWindow(Adw.ApplicationWindow):
         quick.add(self.launch_row(_("update"), _("update_sub"), "software-update-available-symbolic", ["sstym-update"]))
         quick.add(self.launch_row(_("store"), _("store_sub"), "system-software-install-symbolic", ["gnome-software"]))
         quick.add(self.launch_row(_("vpn"), _("tor_sub"), "network-vpn-symbolic", ["sstym-vpn"]))
+        quick.add(self.launch_row("Sstym Pentest", _("pentest_sub"), "security-high-symbolic", ["sstym-pentest"]))
         page.add(quick)
 
         comp = Adw.PreferencesGroup(title=_("computer"))
@@ -423,11 +533,11 @@ class SettingsWindow(Adw.ApplicationWindow):
     def page_look(self):
         page = Adw.PreferencesPage()
         th = Adw.PreferencesGroup()
-        keys = ["dark", "cozy", "neon"]
+        keys = ["glacier", "dark", "cozy", "neon"]
         combo = Adw.ComboRow(title=_("dtheme"), subtitle=_("dtheme_sub"),
-                             model=Gtk.StringList.new(["Sstym Dark", "Sstym Cozy", "Sstym Neon"]))
+                             model=Gtk.StringList.new(["Sstym Glacier", "Sstym Dark", "Sstym Cozy", "Sstym Neon"]))
         combo.add_prefix(Gtk.Image.new_from_icon_name("preferences-desktop-theme-symbolic"))
-        cur = read(f"{CFG}/theme", "dark")
+        cur = read(f"{CFG}/theme", "glacier")
         combo.set_selected(keys.index(cur) if cur in keys else 0)
         combo.connect("notify::selected", lambda r, _p: (spawn(["sstym-theme", keys[r.get_selected()]]),
                                                          self.toast(_("applied"))))
@@ -481,9 +591,13 @@ class SettingsWindow(Adw.ApplicationWindow):
 
         t = Adw.PreferencesGroup()
         t.add(self.launch_row(_("theme"), "", "preferences-desktop-theme-symbolic", ["nwg-look"]))
-        lang = Adw.ComboRow(title=_("lang"), model=Gtk.StringList.new(["Русский", "English"]))
+        self.langs = languages()
+        lang = Adw.ComboRow(title=_("lang"), subtitle=_("lang_sub"),
+                            model=Gtk.StringList.new([n for _c, n in self.langs]))
         lang.add_prefix(Gtk.Image.new_from_icon_name("preferences-desktop-locale-symbolic"))
-        lang.set_selected(0 if LANG == "ru" else 1)
+        cur = read(f"{CFG}/lang") or os.environ.get("LANG", "ru")[:2]
+        codes = [c for c, _n in self.langs]
+        lang.set_selected(codes.index(cur) if cur in codes else 0)
         lang.connect("notify::selected", self.on_lang)
         t.add(lang)
         page.add(t)
@@ -524,8 +638,15 @@ class SettingsWindow(Adw.ApplicationWindow):
         self.toast(_("applied"))
 
     def on_lang(self, row, _p):
-        write(f"{CFG}/lang", "ru" if row.get_selected() == 0 else "en")
-        self.toast(_("restart_app"))
+        code = self.langs[row.get_selected()][0]
+        cmd = ["sudo", "-n", "sstym-setlang", code] if LIVE else ["pkexec", "sstym-setlang", code]
+        try:
+            ok = subprocess.run(cmd, capture_output=True, timeout=120).returncode == 0
+        except (OSError, subprocess.TimeoutExpired):
+            ok = False
+        if not ok:   # no root rights: at least switch the apps + keyboard of this user
+            subprocess.run(["sstym-setlang", code], capture_output=True)
+        self.toast(_("relogin"))
 
     def page_perf(self):
         page = Adw.PreferencesPage()
@@ -589,6 +710,7 @@ class SettingsWindow(Adw.ApplicationWindow):
         g.add(self.launch_row(_("drivers"), _("drivers_sub"), "video-display-symbolic", ["sstym-driver"]))
         page.add(g)
         t = Adw.PreferencesGroup(title=_("tools"))
+        t.add(self.launch_row("Sstym Pentest", _("pentest_sub"), "security-high-symbolic", ["sstym-pentest"]))
         t.add(self.launch_row(_("sec"), _("sec_sub"), "security-medium-symbolic", ["sstym-tools"]))
         page.add(t)
         return page

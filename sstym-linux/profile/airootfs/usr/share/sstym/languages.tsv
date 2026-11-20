@@ -1,0 +1,14 @@
+tk	tk_TM.UTF-8	us,tm,ru	Türkmençe	Turkmen
+ru	ru_RU.UTF-8	us,ru	Русский	Russian
+en	en_US.UTF-8	us,ru	English	English
+tr	tr_TR.UTF-8	tr,us	Türkçe	Turkish
+de	de_DE.UTF-8	de,us	Deutsch	German
+fr	fr_FR.UTF-8	fr,us	Français	French
+es	es_ES.UTF-8	es,us	Español	Spanish
+it	it_IT.UTF-8	it,us	Italiano	Italian
+pt	pt_BR.UTF-8	br,us	Português (Brasil)	Portuguese
+uk	uk_UA.UTF-8	us,ua	Українська	Ukrainian
+kk	kk_KZ.UTF-8	us,kz,ru	Қазақша	Kazakh
+uz	uz_UZ.UTF-8	us,uz	Oʻzbekcha	Uzbek
+az	az_AZ.UTF-8	az,us	Azərbaycanca	Azerbaijani
+zh	zh_CN.UTF-8	us	中文 (简体)	Chinese

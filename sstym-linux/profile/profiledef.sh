@@ -31,6 +31,7 @@ file_permissions=(
   ["/usr/local/bin/sstym-harden"]="0:0:755"
   ["/usr/local/bin/sstym-dock"]="0:0:755"
   ["/usr/local/bin/sstym-theme"]="0:0:755"
+  ["/usr/local/bin/sstym-setlang"]="0:0:755"
   ["/usr/local/bin/sstym-webapp"]="0:0:755"
   ["/usr/local/bin/sstym-fix-mirrors"]="0:0:755"
   ["/usr/local/bin/sstym-update-check"]="0:0:755"
@@ -43,4 +44,7 @@ file_permissions=(
   ["/usr/local/bin/sstym-tools"]="0:0:755"
   ["/usr/local/bin/sstym-update"]="0:0:755"
   ["/usr/local/bin/sstym-settings"]="0:0:755"
+  ["/usr/local/bin/sstym-pentest"]="0:0:755"
+  ["/usr/local/bin/sstym-pentest-run"]="0:0:755"
+  ["/usr/local/bin/sstym-places"]="0:0:755"
 )

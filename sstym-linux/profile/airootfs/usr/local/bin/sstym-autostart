@@ -15,7 +15,7 @@ swaybg -i "$WALL" -m fill &
 waybar -c "$HOME/.config/waybar/config.jsonc" -s "$HOME/.config/waybar/style.css" &
 
 # macOS-style dock (auto-hide option in Sstym Settings)
-sstym-dock
+sstym-dock &
 
 # Control Center + notifications (swaync) and theme widgets
 sstym-theme start

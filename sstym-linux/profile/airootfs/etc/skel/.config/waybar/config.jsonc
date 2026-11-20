@@ -2,41 +2,37 @@
     "name": "menubar",
     "layer": "top",
     "position": "top",
-    "height": 28,
+    "height": 30,
     "margin-top": 0,
     "margin-left": 0,
     "margin-right": 0,
     "spacing": 4,
     "modules-left": [
-        "custom/logo",
+        "image#logo",
+        "custom/apps",
+        "custom/places",
         "hyprland/window"
     ],
     "modules-center": [
-        "hyprland/workspaces"
-    ],
-    "modules-right": [
-        "custom/vpn",
-        "tray",
-        "pulseaudio",
-        "network",
-        "cpu",
-        "battery",
-        "custom/settings",
-        "custom/power",
-        "custom/cc",
         "clock"
     ],
-    "custom/logo": {
-        "format": "⬢",
-        "tooltip-format": "Sstym Linux — hack · learn · build",
-        "on-click": "nwg-drawer"
-    },
+    "modules-right": [
+        "hyprland/workspaces",
+        "custom/vpn",
+        "tray",
+        "battery",
+        "hyprland/language",
+        "bluetooth",
+        "pulseaudio",
+        "custom/cc",
+        "custom/power"
+    ],
     "hyprland/window": {
         "format": "{title}",
-        "max-length": 50,
+        "max-length": 40,
         "separate-outputs": true,
         "rewrite": {
-            "": "Sstym Linux"
+            "": ""
         }
     },
     "hyprland/workspaces": {
@@ -48,9 +44,10 @@
         }
     },
     "clock": {
-        "format": "{:%a %d %b  %H:%M}",
+        "format": "{:%b %d   %H:%M}",
         "tooltip-format": "<tt><small>{calendar}</small></tt>",
-        "format-alt": "{:%H:%M:%S}"
+        "format-alt": "{:%A, %d %B %Y   %H:%M:%S}",
+        "interval": 5
     },
     "tray": {
         "spacing": 10,
@@ -70,38 +67,32 @@
         "on-click": "pavucontrol"
     },
     "network": {
-        "format-wifi": "",
+        "format-wifi": "󰖩",
         "format-ethernet": "󰈀",
-        "format-disconnected": "󰤭",
+        "format-disconnected": "󰖪",
         "tooltip-format": "{essid}  {ipaddr}",
         "on-click": "nm-connection-editor"
     },
-    "cpu": {
-        "format": "",
-        "tooltip-format": "CPU {usage}%",
-        "interval": 3
-    },
     "battery": {
-        "format": "{icon}",
-        "format-charging": "",
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
         "format-icons": [
-            "",
-            "",
-            "",
-            "",
-            ""
+            "󰁺",
+            "󰁼",
+            "󰁾",
+            "󰂀",
+            "󰁹"
         ],
-        "tooltip-format": "{capacity}%"
+        "states": {
+            "warning": 25,
+            "critical": 10
+        },
+        "tooltip-format": "{timeTo}"
     },
     "custom/vpn": {
         "format": "󰖂",
         "tooltip-format": "Sstym VPN — обход блокировок (SUPER+N)",
         "on-click": "sstym-vpn"
-    },
-    "custom/settings": {
-        "format": "",
-        "tooltip-format": "Sstym Settings",
-        "on-click": "sstym-settings"
     },
     "custom/power": {
         "format": "⏻",
@@ -128,5 +119,34 @@
         "on-click-right": "swaync-client -d -sw",
         "escape": true,
         "restart-interval": 3
+    },
+    "image#logo": {
+        "path": "/usr/share/sstym/logo.png",
+        "size": 18,
+        "tooltip": false,
+        "on-click": "sstym-settings"
+    },
+    "custom/apps": {
+        "format": "Apps",
+        "tooltip-format": "Launchpad — all apps (SUPER+A)",
+        "on-click": "nwg-drawer"
+    },
+    "custom/places": {
+        "format": "Places",
+        "tooltip-format": "Home, Documents, Downloads, USB drives…",
+        "on-click": "sstym-places"
+    },
+    "hyprland/language": {
+        "format": "{shortDescription}",
+        "on-click": "hyprctl switchxkblayout all next",
+        "tooltip-format": "{long}"
+    },
+    "bluetooth": {
+        "format": "󰂯",
+        "format-disabled": "",
+        "format-off": "",
+        "format-connected": "󰂱",
+        "tooltip-format": "{controller_alias}",
+        "on-click": "blueman-manager"
     }
 }

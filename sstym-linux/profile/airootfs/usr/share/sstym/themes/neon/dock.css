@@ -1,5 +1,5 @@
 /* Sstym Neon — dock */
-window { background: rgba(28, 30, 42, 0.45); border: 1px solid rgba(124,77,255,0.35); border-radius: 22px; padding: 6px 10px; }
+window { background: rgba(28, 30, 42, 0.45); border: 1px solid rgba(124,77,255,0.35); border-radius: 24px; padding: 6px 10px; }
 #box { padding: 2px 4px; }
 button, image { background: transparent; border: none; margin: 0 4px; padding: 2px; border-radius: 14px; }
 button:hover { background: rgba(124,77,255,0.28); }

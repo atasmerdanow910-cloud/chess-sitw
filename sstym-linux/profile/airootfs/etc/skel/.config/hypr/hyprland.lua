@@ -52,8 +52,15 @@ local blur_variant = ({ classic = 0, frost = 1, mirror = 8 })[glass] or 8   -- 0
 E.wobble = wobble_on and (level == "beautiful" or level == "balanced")
 if level ~= "beautiful" then blur_variant = 0 end                         -- cheap blur on weaker hardware
 
+-- keyboard layouts: chosen language (Sstym Settings / boot menu), then the
+-- installer's choice (/etc/X11/xorg.conf.d/00-keyboard.conf), then us,ru
+local kb = (read_file(home .. "/.config/sstym/kb") or ""):gsub("%s+", "")
+if kb == "" then
+    kb = ((read_file("/etc/X11/xorg.conf.d/00-keyboard.conf") or ""):match('XkbLayout"%s*"([^"]+)"') or "us,ru")
+end
+
 -- window border colours follow the Sstym theme (Settings → Appearance)
-local theme = ((read_file((os.getenv("HOME") or "") .. "/.config/sstym/theme") or "dark"):gsub("%s+", ""))
+local theme = ((read_file((os.getenv("HOME") or "") .. "/.config/sstym/theme") or "glacier"):gsub("%s+", ""))
 local borders = {}
 for line in (read_file("/usr/share/sstym/themes/" .. theme .. "/borders") or ""):gmatch("[^\n]+") do
     borders[#borders + 1] = line
@@ -164,7 +171,7 @@ hl.config({
     },
 
     input = {
-        kb_layout  = "us,ru",
+        kb_layout  = kb,
         kb_options = "grp:alt_shift_toggle",
         follow_mouse = 1,
         sensitivity = 0,
@@ -220,6 +227,7 @@ hl.bind(mod .. " + C",         hl.dsp.exec_cmd("swaync-client -t -sw"))  -- Cont
 hl.bind(mod .. " + Tab",       hl.dsp.exec_cmd("rofi -show window -theme sstym"))
 hl.bind("ALT + Tab",           hl.dsp.exec_cmd("rofi -show window -theme sstym"))
 hl.bind(mod .. " + SHIFT + I", hl.dsp.exec_cmd("sstym-install"))
+hl.bind(mod .. " + X",         hl.dsp.exec_cmd("sstym-pentest"))          -- Sstym Pentest
 hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd('grim -g "$(slurp)" - | swappy -f -'))
 hl.bind("Print",               hl.dsp.exec_cmd("grim - | wl-copy"))
 

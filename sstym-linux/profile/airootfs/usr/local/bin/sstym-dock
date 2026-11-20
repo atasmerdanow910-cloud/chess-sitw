@@ -1,5 +1,5 @@
 #!/bin/bash
-# Start (or restart) the Sstym dock.
+# Start (or restart) the Sstym dock (bottom, centred, macOS style).
 PINS="$HOME/.cache/nwg-dock-pinned"
 # First run: pin the favourites that are installed (nwg-dock wants desktop IDs,
 # i.e. the .desktop file name without the extension). Later the user's own
@@ -7,8 +7,8 @@ PINS="$HOME/.cache/nwg-dock-pinned"
 if [ ! -s "$PINS" ]; then
   mkdir -p "$(dirname "$PINS")"
   : > "$PINS"
-  for id in firefox tor-browser thunar kitty org.telegram.desktop discord sstym-web-claude \
-            steam org.gnome.Software sstym-vpn sstym-settings sstym-install; do
+  for id in firefox thunar kitty org.telegram.desktop discord sstym-web-claude steam \
+            org.gnome.Software sstym-pentest sstym-vpn sstym-settings sstym-install; do
     [ "$id" = sstym-install ] && [ ! -d /run/archiso/bootmnt ] && continue   # installer only on the live USB
     for dir in /usr/share/applications /usr/local/share/applications "$HOME/.local/share/applications"; do
       if [ -f "$dir/$id.desktop" ]; then echo "$id" >> "$PINS"; break; fi
@@ -17,6 +17,21 @@ if [ ! -s "$PINS" ]; then
 fi
 pkill -f '^nwg-dock-hyprland' 2>/dev/null
 [ "$1" = "stop" ] && exit 0
-args=(-i 44 -mb 10 -p bottom -a center -c nwg-drawer -ico /usr/share/sstym/logo.png)
-if [ -f "$HOME/.config/sstym/dock-autohide" ]; then args+=(-d); else args+=(-x); fi
-exec setsid -f nwg-dock-hyprland "${args[@]}" >/dev/null 2>&1
+
+# Wait until Hyprland has a focused monitor — a dock started before that
+# attaches to no output and stays invisible.
+out=""
+for _ in $(seq 1 60); do
+  out=$(hyprctl monitors -j 2>/dev/null | jq -r '[.[] | select(.focused)][0].name // empty' 2>/dev/null)
+  [ -n "$out" ] && break
+  sleep 0.25
+done
+sleep 0.5
+
+args=(-i 46 -mb 8 -p bottom -a center -c nwg-drawer -ico /usr/share/sstym/apps-grid.png)
+[ -n "$out" ] && args+=(-o "$out")
+if [ -f "$HOME/.config/sstym/dock-autohide" ]; then args+=(-d -hd 300); else args+=(-x); fi
+setsid -f nwg-dock-hyprland "${args[@]}" >/dev/null 2>&1
+
+# watchdog: if the dock died during start-up (slow first boot), start it once more
+( sleep 6; pgrep -f '^nwg-dock-hyprland' >/dev/null || setsid -f nwg-dock-hyprland "${args[@]}" >/dev/null 2>&1 ) &

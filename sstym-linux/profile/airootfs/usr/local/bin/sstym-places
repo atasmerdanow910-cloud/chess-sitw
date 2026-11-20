@@ -1,0 +1,22 @@
+#!/bin/bash
+# "Places" menu of the Sstym menu bar: home folders, USB drives, network, trash.
+declare -a names paths icons
+add() { [ -e "$2" ] || [ "${2%%:*}" != "$2" ] || return 0; names+=("$1"); paths+=("$2"); icons+=("$3"); }
+xdg() { d=$(xdg-user-dir "$1" 2>/dev/null); [ -n "$d" ] && [ "$d" != "$HOME" ] && echo "$d"; }
+xdg-user-dirs-update >/dev/null 2>&1
+add "Home"      "$HOME"                          user-home
+add "Desktop"   "$(xdg DESKTOP)"                 user-desktop
+add "Documents" "$(xdg DOCUMENTS)"               folder-documents
+add "Downloads" "$(xdg DOWNLOAD)"                folder-download
+add "Pictures"  "$(xdg PICTURES)"                folder-pictures
+add "Music"     "$(xdg MUSIC)"                   folder-music
+add "Videos"    "$(xdg VIDEOS)"                  folder-videos
+add "Pentest"   "$HOME/pentest"                  folder-development
+for m in /run/media/"$USER"/*; do [ -d "$m" ] && add "$(basename "$m")" "$m" drive-removable-media; done
+add "Computer"  "/"                              drive-harddisk
+add "Network"   "network:///"                    network-workgroup
+add "Trash"     "trash:///"                      user-trash
+menu=""
+for i in "${!names[@]}"; do menu+="${names[$i]}\0icon\x1f${icons[$i]}\n"; done
+sel=$(printf "$menu" | rofi -dmenu -i -show-icons -p "Places" -theme sstym -format i) || exit 0
+[ -n "$sel" ] && exec thunar "${paths[$sel]}"

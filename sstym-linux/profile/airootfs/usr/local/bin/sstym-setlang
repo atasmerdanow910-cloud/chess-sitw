@@ -1,0 +1,23 @@
+#!/bin/bash
+# sstym-setlang <code>   — switch Sstym Linux to another language.
+# Sets the system locale (as root) and the user's keyboard layouts.
+# Codes: see /usr/share/sstym/languages.tsv (tk ru en tr de fr es it pt uk kk uz az zh)
+T=/usr/share/sstym/languages.tsv
+code=$1
+line=$(awk -F'\t' -v c="$code" '$1==c' "$T")
+[ -n "$line" ] || { echo "usage: sstym-setlang {$(cut -f1 "$T" | tr '\n' ' ')}"; exit 2; }
+IFS=$'\t' read -r _c loc kb _native _english <<<"$line"
+if [ "$(id -u)" = 0 ]; then
+  printf 'LANG=%s\n' "$loc" > /etc/locale.conf
+  u=${SSTYM_USER:-${SUDO_USER:-$(id -nu "${PKEXEC_UID:-0}" 2>/dev/null)}}
+else
+  u=$(id -nu)
+fi
+if [ -n "$u" ] && [ "$u" != root ]; then
+  h=$(getent passwd "$u" | cut -d: -f6)
+  mkdir -p "$h/.config/sstym"
+  echo "$code" > "$h/.config/sstym/lang"
+  echo "$kb"   > "$h/.config/sstym/kb"
+  chown -R "$u:" "$h/.config/sstym"
+fi
+echo "$loc ($kb)"

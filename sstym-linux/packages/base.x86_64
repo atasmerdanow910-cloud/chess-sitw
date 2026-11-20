@@ -189,6 +189,19 @@ gparted
 gnome-disk-utility
 baobab
 firefox-i18n-ru
+# Firefox in every Sstym language (Turkmen has no Firefox translation yet)
+firefox-i18n-en-us
+firefox-i18n-tr
+firefox-i18n-de
+firefox-i18n-fr
+firefox-i18n-es-es
+firefox-i18n-it
+firefox-i18n-pt-br
+firefox-i18n-uk
+firefox-i18n-kk
+firefox-i18n-uz
+firefox-i18n-az
+firefox-i18n-zh-cn
 hunspell-ru
 hunspell-en_us
 
