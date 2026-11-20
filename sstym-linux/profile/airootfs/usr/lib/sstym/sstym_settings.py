@@ -78,8 +78,8 @@ TEXT = {
     "apps": ("Приложения и игры", "Apps & Games"),
     "sys": ("Система", "System"),
     "welcome": ("Добро пожаловать в Sstym Linux!", "Welcome to Sstym Linux!"),
-    "tagline": ("hack · learn · build — повседневная работа, игры и безопасность",
-                "hack · learn · build — everyday work, gaming and security"),
+    "tagline": ("Дистрибутив на базе Arch Linux · Hyprland · работа, игры, безопасность",
+                "Arch Linux based distribution · Hyprland · work, gaming, security"),
     "computer": ("Этот компьютер", "This computer"),
     "system": ("Система", "System"), "kernel": ("Ядро", "Kernel"),
     "cpu": ("Процессор", "Processor"), "gpu": ("Видеокарта", "Graphics"),
@@ -172,7 +172,7 @@ EXTRA = {
         "title": "Sstym sazlamalary", "vpn": "VPN we gizlinlik", "net": "Tor we enjamlar", "look": "Daşky görnüş",
         "perf": "Öndürijilik", "apps": "Programmalar we oýunlar", "sys": "Ulgam",
         "welcome": "Sstym Linux-a hoş geldiňiz!",
-        "tagline": "hack · learn · build — gündelik iş, oýunlar we howpsuzlyk",
+        "tagline": "Arch Linux esasly distribýutiw · Hyprland · iş, oýunlar, howpsuzlyk",
         "computer": "Bu kompýuter", "system": "Ulgam", "kernel": "Ýadro", "cpu": "Prosessor",
         "gpu": "Wideokarta", "ram": "Ýat", "disk": "Disk", "mode": "Režim",
         "live": "Fleşkadan işleýän ulgam", "installed": "Diske gurnaldy", "quick": "Çalt hereketler",
@@ -215,7 +215,7 @@ EXTRA = {
         "title": "Sstym Ayarları", "vpn": "VPN ve gizlilik", "net": "Ağ ve cihazlar", "look": "Görünüm",
         "perf": "Performans", "apps": "Uygulamalar ve oyunlar", "sys": "Sistem",
         "welcome": "Sstym Linux'a hoş geldiniz!",
-        "tagline": "hack · learn · build — günlük iş, oyun ve güvenlik",
+        "tagline": "Arch Linux tabanlı dağıtım · Hyprland · iş, oyun, güvenlik",
         "computer": "Bu bilgisayar", "system": "Sistem", "kernel": "Çekirdek", "cpu": "İşlemci",
         "gpu": "Ekran kartı", "ram": "Bellek", "disk": "Disk", "mode": "Mod",
         "live": "USB'den canlı sistem", "installed": "Diske kurulu", "quick": "Hızlı işlemler",
@@ -544,13 +544,13 @@ class SettingsWindow(Adw.ApplicationWindow):
         th.add(combo)
         wb = Adw.SwitchRow(title=_("wobble"), subtitle=_("wobble_sub"))
         wb.add_prefix(Gtk.Image.new_from_icon_name("view-paged-symbolic"))
-        wb.set_active(read(f"{CFG}/wobble", "on") != "off")
+        wb.set_active(read(f"{CFG}/wobble", "off") == "on")
         wb.connect("notify::active", lambda r, _p: self.set_flag("wobble", "on" if r.get_active() else "off"))
         th.add(wb)
         gkeys = ["mirror", "frost", "classic"]
         gl = Adw.ComboRow(title=_("glassst"), model=Gtk.StringList.new(_("glass_opts")))
         gl.add_prefix(Gtk.Image.new_from_icon_name("window-new-symbolic"))
-        gcur = read(f"{CFG}/glass", "mirror")
+        gcur = read(f"{CFG}/glass", "classic")
         gl.set_selected(gkeys.index(gcur) if gcur in gkeys else 0)
         gl.connect("notify::selected", lambda r, _p: self.set_flag("glass", gkeys[r.get_selected()]))
         th.add(gl)

@@ -78,8 +78,9 @@ window#waybar {{ background: {bar_bg}; color: {bar_fg}; border-bottom: 1px solid
 #custom-apps:hover, #custom-places:hover, #clock:hover {{ background: {tile_hover}; border-radius: 8px; }}
 #language {{ color: {bar_fg}; padding: 0 8px; font-weight: 700; }}
 #window {{ font-weight: 700; color: {bar_fg}; padding: 0 6px; }}
-#workspaces button {{ color: {bar_dim}; padding: 0 4px; background: transparent; font-size: 10px; }}
-#workspaces button.active {{ color: {accent}; }}
+#workspaces {{ margin: 0 6px; }}
+#workspaces button {{ color: {bar_dim}; padding: 0 7px; margin: 4px 1px; background: transparent; font-size: 12px; border-radius: 6px; }}
+#workspaces button.active {{ color: {bar_fg}; background: {tile_hover}; }}
 #workspaces button:hover {{ color: {accent2}; }}
 #tray, #pulseaudio, #network, #cpu, #battery, #bluetooth, #custom-vpn, #custom-cc, #custom-settings, #custom-power, #clock
     {{ color: {bar_fg}; padding: 0 8px; }}

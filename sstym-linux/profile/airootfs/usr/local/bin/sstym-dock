@@ -8,7 +8,7 @@ if [ ! -s "$PINS" ]; then
   mkdir -p "$(dirname "$PINS")"
   : > "$PINS"
   for id in firefox thunar kitty org.telegram.desktop discord sstym-web-claude steam \
-            org.gnome.Software sstym-pentest sstym-vpn sstym-settings sstym-install; do
+            org.gnome.Software org.sstym.Pentest sstym-vpn org.sstym.Settings sstym-install; do
     [ "$id" = sstym-install ] && [ ! -d /run/archiso/bootmnt ] && continue   # installer only on the live USB
     for dir in /usr/share/applications /usr/local/share/applications "$HOME/.local/share/applications"; do
       if [ -f "$dir/$id.desktop" ]; then echo "$id" >> "$PINS"; break; fi

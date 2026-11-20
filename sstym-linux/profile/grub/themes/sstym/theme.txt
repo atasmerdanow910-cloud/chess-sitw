@@ -30,7 +30,7 @@ terminal-height: "80%"
     top = 5%+180
     width = 100%
     align = "center"
-    text = "hack  ·  learn  ·  build"
+    text = "Arch Linux  ·  Hyprland"
     font = "DejaVu Sans Regular 20"
     color = "#00e5ff"
 }

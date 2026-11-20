@@ -12,4 +12,3 @@ alias aur='yay -S'
 prompt off 2>/dev/null
 PROMPT='%F{45}┌─[%F{141}%n%F{45}@%F{201}sstym%F{45}]─[%F{123}%~%F{45}]
 %F{45}└─%F{201}❯%f '
-[[ -o interactive && -z "$SSTYM_NOFETCH" && $SHLVL -le 2 ]] && command -v fastfetch >/dev/null && fastfetch

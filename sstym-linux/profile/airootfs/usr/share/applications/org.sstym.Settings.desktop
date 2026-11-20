@@ -6,3 +6,7 @@ Exec=sstym-settings
 Icon=preferences-system
 Terminal=false
 Categories=Settings;
+StartupWMClass=org.sstym.Settings
+Name[ru]=Настройки Sstym
+Name[tk]=Sstym sazlamalary
+Name[tr]=Sstym Ayarları

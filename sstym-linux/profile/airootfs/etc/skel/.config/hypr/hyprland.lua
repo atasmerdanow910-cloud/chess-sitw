@@ -46,8 +46,8 @@ local E = presets[level] or presets.beautiful
 -- "Jelly" windows (wobble while you drag them) and the glass style
 -- (Settings → Appearance). Heavy effects stay off in maxfps / game presets.
 local home = os.getenv("HOME") or ""
-local wobble_on = ((read_file(home .. "/.config/sstym/wobble") or "on"):gsub("%s+", "")) ~= "off"
-local glass = ((read_file(home .. "/.config/sstym/glass") or "mirror"):gsub("%s+", ""))
+local wobble_on = ((read_file(home .. "/.config/sstym/wobble") or "off"):gsub("%s+", "")) ~= "off"
+local glass = ((read_file(home .. "/.config/sstym/glass") or "classic"):gsub("%s+", ""))
 local blur_variant = ({ classic = 0, frost = 1, mirror = 8 })[glass] or 8   -- 0 kawase · 1 frost · 8 acrylic
 E.wobble = wobble_on and (level == "beautiful" or level == "balanced")
 if level ~= "beautiful" then blur_variant = 0 end                         -- cheap blur on weaker hardware
@@ -274,8 +274,8 @@ hl.window_rule({ name = "float-calamares", match = { class = "^(org.kde.calamare
 hl.window_rule({ name = "float-pavu",    match = { class = "^(org.pulseaudio.pavucontrol|pavucontrol)$" }, float = true })
 hl.window_rule({ name = "float-nm",      match = { class = "^(nm-connection-editor)$" }, float = true })
 hl.window_rule({ name = "float-blueman", match = { class = "^(blueman-manager)$" }, float = true })
-hl.window_rule({ name = "float-settings", match = { class = "^(org.sstym.Settings)$" }, float = true, size = "1040 720", center = true })
-hl.window_rule({ name = "float-pentest",  match = { class = "^(org.sstym.Pentest)$" },  float = true, size = "1180 780", center = true })
+hl.window_rule({ name = "float-settings", match = { class = "^(org.sstym.Settings)$" }, float = true, size = "1000 640", center = true })
+hl.window_rule({ name = "float-pentest",  match = { class = "^(org.sstym.Pentest)$" },  float = true, size = "1100 660", center = true })
 hl.window_rule({ name = "sstym-term",    match = { class = "^(sstym-term)$" }, float = true, size = "900 560", center = true })
 -- media and games: always fully opaque
 hl.window_rule({ name = "opaque-media",  match = { class = "^(firefox|vlc|mpv|com.obsproject.Studio|chromium|tor browser|Tor Browser)$" }, opacity = "1.0 override 1.0 override" })
