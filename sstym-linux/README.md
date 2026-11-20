@@ -31,7 +31,7 @@ security work, with fresh rolling-release packages and AUR access.
 | **Everyday** | Firefox, Chromium, Thunar, Flathub **App Store** (GNOME Software), LibreOffice, VS Code, Obsidian, Spotify, VLC, GIMP, Inkscape, Kdenlive, Audacity, OBS, KeePassXC, qBittorrent, LocalSend, printers, Timeshift backups |
 | **Gaming** | Steam (Proton), Lutris, Wine-staging + winetricks, Protontricks, GameMode, MangoHud + GOverlay, Gamescope, Prism Launcher, 32-bit Vulkan drivers, one-click NVIDIA driver installer, **Game mode** (SUPER+G) |
 | **Security** | Core toolkit (nmap, Wireshark, Metasploit, Burp Suite, ZAP, sqlmap, hashcat, John, Hydra, Ghidra, radare2, Volatility, Lynis…) plus **Sstym Tools**: install any of 2800+ BlackArch tools by category |
-| **Protection** | ufw firewall on by default (deny incoming), hardened kernel sysctls, Wi-Fi MAC randomisation, no listening services |
+| **Protection** | ufw firewall on by default (deny incoming), **AppArmor** mandatory access control (Arch's counterpart of Fedora's SELinux), kernel hardening (sysctls + `slab_nomerge`, page shuffling, kernel-stack randomisation), encrypted DNS (DNS-over-TLS), Wi-Fi MAC randomisation, no core dumps, HTTPS-only Firefox, optional full-disk encryption (LUKS) in the installer, **Security** page in Sstym Settings with status and Lynis / rkhunter / ClamAV checks |
 | **No lag** | zram compressed swap, tuned sysctls, lighter blur, automatic low-effects mode in VMs, Game mode |
 | **Packages** | pacman, AUR via `yay`/`paru`, Flatpak/Flathub |
 | **Installer** | Calamares, branded "Install Sstym Linux" |

@@ -111,10 +111,39 @@ TEXT = {
     "help": ("Как обойти блокировки — инструкция", "How to get around blocking — guide"),
     "help_sub": ("Telegram через Tor, мосты, свой сервер", "Telegram via Tor, bridges, your own server"),
     "privacy": ("Защита", "Protection"),
+    "security": ("Безопасность", "Security"),
+    "sec_status": ("Состояние защиты", "Protection status"),
+    "sec_summary": ("Включено {0} из {1}", "{0} of {1} enabled"),
+    "on": ("Включено", "On"), "off": ("Выключено", "Off"),
+    "apparmor": ("AppArmor (контроль программ)", "AppArmor (application control)"),
+    "apparmor_sub": ("Ограничивает, что могут делать программы — как SELinux в Fedora",
+                     "Limits what programs may do — like SELinux on Fedora"),
+    "profiles": ("{0} профилей", "{0} profiles"),
+    "kernel": ("Защита ядра", "Kernel hardening"),
+    "kernel_sub": ("Скрытые адреса ядра, защита памяти и процессов", "Hidden kernel pointers, memory and process protection"),
+    "dns": ("Зашифрованный DNS", "Encrypted DNS"),
+    "dns_sub": ("DNS-over-TLS (Quad9, Cloudflare) — провайдер не видит адреса сайтов",
+                "DNS-over-TLS (Quad9, Cloudflare) — your ISP can't see the sites you look up"),
+    "crypt": ("Шифрование диска", "Disk encryption"),
+    "crypt_live": ("Включается при установке: галочка «Шифровать систему»",
+                   "Turn it on while installing: tick “Encrypt system”"),
+    "crypt_off": ("Диск не зашифрован", "The disk is not encrypted"),
+    "sboot": ("Secure Boot", "Secure Boot"),
+    "sboot_sub": ("Для запуска Sstym Linux Secure Boot должен быть выключен",
+                  "Sstym Linux boots with Secure Boot turned off"),
+    "last_upd": ("Последнее обновление", "Last update"),
+    "never": ("ещё не обновлялась", "not updated yet"),
+    "checks": ("Проверка системы", "System checks"),
+    "lynis": ("Аудит безопасности (Lynis)", "Security audit (Lynis)"),
+    "lynis_sub": ("Проверяет настройки и даёт советы", "Checks the configuration and gives advice"),
+    "rkhunter": ("Поиск руткитов (rkhunter)", "Rootkit scan (rkhunter)"),
+    "clamav": ("Проверка на вирусы (ClamAV)", "Virus scan (ClamAV)"),
+    "clamav_sub": ("Домашняя папка; при первом запуске нужен интернет для баз",
+                   "Home folder; the first run needs internet for the virus database"),
     "firewall": ("Брандмауэр", "Firewall"),
     "firewall_sub": ("Блокирует входящие подключения", "Blocks incoming connections"),
     "mac": ("Случайный MAC-адрес Wi-Fi", "Random Wi-Fi MAC address"),
-    "mac_sub": ("Включено — сети не могут отслеживать устройство", "On — networks can't track this device"),
+    "mac_sub": ("Сети Wi-Fi не могут отслеживать это устройство", "Wi-Fi networks can't track this device"),
     "wifi": ("Wi-Fi и сети", "Wi-Fi & networks"), "bt": ("Bluetooth", "Bluetooth"),
     "sound": ("Звук", "Sound"), "displays": ("Мониторы", "Displays"),
     "printers": ("Принтеры", "Printers"),
@@ -185,8 +214,20 @@ EXTRA = {
         "lantern_sub": "Mugt, bir düwme bilen", "outline_sub": "ss:// açary", "proton_sub": "Mugt tarif",
         "help": "Blokirowkalary nädip aýlanyp geçmeli — gollanma",
         "help_sub": "Tor arkaly Telegram, köprüler, öz serweriňiz",
-        "privacy": "Gorag", "firewall": "Brandmauer", "firewall_sub": "Gelýän birikmeleri bökdeýär",
-        "mac": "Tötänleýin Wi-Fi MAC salgysy", "mac_sub": "Açyk — torlar enjamy yzarlap bilmeýär",
+        "privacy": "Gorag", "security": "Howpsuzlyk", "sec_status": "Goragyň ýagdaýy",
+        "sec_summary": "{1}-den {0} açyk", "on": "Açyk", "off": "Ýapyk",
+        "apparmor": "AppArmor (programmalara gözegçilik)",
+        "apparmor_sub": "Programmalaryň edip biljek zatlaryny çäklendirýär — Fedora-daky SELinux ýaly",
+        "profiles": "{0} profil", "kernel": "Ýadronyň goragy",
+        "kernel_sub": "Ýadro salgylary gizlin, ýat we prosesler goralýar",
+        "dns": "Şifrlenen DNS", "dns_sub": "DNS-over-TLS — prowaýder açýan saýtlaryňyzy görmeýär",
+        "crypt": "Diski şifrlemek", "crypt_live": "Gurnanyňyzda «Ulgamy şifrlemek» belligini goýuň",
+        "crypt_off": "Disk şifrlenmedik", "sboot_sub": "Sstym Linux Secure Boot öçük wagty açylýar",
+        "last_upd": "Soňky täzelenme", "never": "entek täzelenmedi", "checks": "Ulgamy barlamak",
+        "lynis": "Howpsuzlyk barlagy (Lynis)", "lynis_sub": "Sazlamalary barlaýar we maslahat berýär",
+        "rkhunter": "Rutkit gözlegi (rkhunter)", "clamav": "Wirus barlagy (ClamAV)",
+        "clamav_sub": "Öý bukjasy; ilkinji gezek bazalar üçin internet gerek", "firewall": "Brandmauer", "firewall_sub": "Gelýän birikmeleri bökdeýär",
+        "mac": "Tötänleýin Wi-Fi MAC salgysy", "mac_sub": "Wi-Fi torlary enjamy yzarlap bilmeýär",
         "wifi": "Wi-Fi we torlar", "sound": "Ses", "displays": "Monitorlar", "printers": "Printerler",
         "kb": "Klawiatura düzülişi", "kb_sub": "Alt+Shift bilen dil çalyşmak",
         "wobble": "Žele penjireler", "wobble_sub": "Penjireler süýrelende ýumşak titreýär",
@@ -227,8 +268,20 @@ EXTRA = {
         "tor_sub": "Snowflake / WebTunnel / meek köprüleri — engellemelere karşı en iyisi",
         "lantern_sub": "Ücretsiz, tek tık", "outline_sub": "ss:// erişim anahtarı", "proton_sub": "Ücretsiz plan",
         "help": "Engeller nasıl aşılır — rehber", "help_sub": "Tor üzerinden Telegram, köprüler, kendi sunucunuz",
-        "privacy": "Koruma", "firewall": "Güvenlik duvarı", "firewall_sub": "Gelen bağlantıları engeller",
-        "mac": "Rastgele Wi-Fi MAC adresi", "mac_sub": "Açık — ağlar bu cihazı izleyemez",
+        "privacy": "Koruma", "security": "Güvenlik", "sec_status": "Koruma durumu",
+        "sec_summary": "{1} korumadan {0} açık", "on": "Açık", "off": "Kapalı",
+        "apparmor": "AppArmor (uygulama denetimi)",
+        "apparmor_sub": "Programların yapabileceklerini sınırlar — Fedora'daki SELinux gibi",
+        "profiles": "{0} profil", "kernel": "Çekirdek sıkılaştırma",
+        "kernel_sub": "Gizli çekirdek adresleri, bellek ve süreç koruması",
+        "dns": "Şifreli DNS", "dns_sub": "DNS-over-TLS — internet sağlayıcınız baktığınız siteleri göremez",
+        "crypt": "Disk şifreleme", "crypt_live": "Kurulumda «Sistemi şifrele» kutusunu işaretleyin",
+        "crypt_off": "Disk şifreli değil", "sboot_sub": "Sstym Linux, Secure Boot kapalıyken açılır",
+        "last_upd": "Son güncelleme", "never": "henüz güncellenmedi", "checks": "Sistem denetimi",
+        "lynis": "Güvenlik denetimi (Lynis)", "lynis_sub": "Yapılandırmayı denetler ve öneriler verir",
+        "rkhunter": "Rootkit taraması (rkhunter)", "clamav": "Virüs taraması (ClamAV)",
+        "clamav_sub": "Ev klasörü; ilk çalıştırmada veritabanı için internet gerekir", "firewall": "Güvenlik duvarı", "firewall_sub": "Gelen bağlantıları engeller",
+        "mac": "Rastgele Wi-Fi MAC adresi", "mac_sub": "Wi-Fi ağları bu cihazı izleyemez",
         "wifi": "Wi-Fi ve ağlar", "sound": "Ses", "displays": "Ekranlar", "printers": "Yazıcılar",
         "kb": "Klavye düzeni", "kb_sub": "Dil değiştirmek için Alt+Shift",
         "wobble": "Jöle pencereler", "wobble_sub": "Pencereler sürüklenirken yumuşakça sallanır",
@@ -271,6 +324,40 @@ def languages():
         if len(c) >= 4 and not line.startswith("#"):
             out.append((c[0], c[3]))
     return out or [("ru", "Русский"), ("en", "English")]
+
+
+def term_cmd(title, command):
+    """Run a command in a Sstym terminal window and keep it open at the end."""
+    return ["kitty", "--class", "sstym-term", "--title", title, "-e", "bash", "-lc",
+            f"{command}; echo; read -rp 'Enter…'"]
+
+
+def security_status():
+    st = {}
+    st["fw"] = "ENABLED=yes" in read("/etc/ufw/ufw.conf")
+    st["aa"] = read("/sys/module/apparmor/parameters/enabled").strip() == "Y"
+    prof = read("/sys/kernel/security/apparmor/profiles")
+    st["aa_profiles"] = len(prof.splitlines()) if prof else 0
+    st["kernel"] = (read("/proc/sys/kernel/kptr_restrict").strip() == "2"
+                    and read("/proc/sys/kernel/yama/ptrace_scope").strip() not in ("", "0"))
+    st["dns"] = "DNSOverTLS" in read("/etc/systemd/resolved.conf.d/sstym-dns.conf")
+    st["mac"] = os.path.exists("/etc/NetworkManager/conf.d/00-sstym-macrandom.conf")
+    st["crypt"] = " crypt" in output(["lsblk", "-rno", "NAME,TYPE"]) or "\ncrypt" in output(["lsblk", "-rno", "TYPE"])
+    sb = None
+    try:
+        for f in os.listdir("/sys/firmware/efi/efivars"):
+            if f.startswith("SecureBoot-"):
+                with open(f"/sys/firmware/efi/efivars/{f}", "rb") as fh:
+                    sb = fh.read()[-1] == 1
+    except OSError:
+        pass
+    st["sboot"] = sb
+    last = ""
+    for line in read("/var/log/pacman.log").splitlines():
+        if "starting full system upgrade" in line:
+            last = line[1:17].replace("T", " ")
+    st["updated"] = last
+    return st
 
 
 SHORTCUTS = [
@@ -336,6 +423,7 @@ class SettingsWindow(Adw.ApplicationWindow):
         self.pages = {
             "home": (_("home"), "computer-symbolic", self.page_home),
             "vpn": (_("vpn"), "network-vpn-symbolic", self.page_vpn),
+            "sec": (_("security"), "security-high-symbolic", self.page_sec),
             "net": (_("net"), "network-wireless-symbolic", self.page_net),
             "look": (_("look"), "preferences-desktop-appearance-symbolic", self.page_look),
             "perf": (_("perf"), "power-profile-performance-symbolic", self.page_perf),
@@ -477,16 +565,55 @@ class SettingsWindow(Adw.ApplicationWindow):
         g.add(helprow)
         page.add(g)
 
-        p = Adw.PreferencesGroup(title=_("privacy"))
+        return page
+
+    # ───────── security ─────────
+    def status_row(self, title, subtitle, icon, ok, value=None):
+        row = Adw.ActionRow(title=title, subtitle=subtitle or "")
+        row.add_prefix(Gtk.Image.new_from_icon_name(icon))
+        lab = Gtk.Label(label=value or (_("on") if ok else _("off")))
+        lab.add_css_class("success" if ok else "warning")
+        lab.add_css_class("heading")
+        row.add_suffix(lab)
+        return row
+
+    def page_sec(self):
+        page = Adw.PreferencesPage()
+        st = security_status()
+        n_on = sum(1 for k in ("fw", "aa", "kernel", "dns", "mac") if st[k])
+        g = Adw.PreferencesGroup(title=_("sec_status"), description=_("sec_summary").format(n_on, 5))
         fw = Adw.SwitchRow(title=_("firewall"), subtitle=_("firewall_sub"))
         fw.add_prefix(Gtk.Image.new_from_icon_name("security-high-symbolic"))
-        fw.set_active("ENABLED=yes" in read("/etc/ufw/ufw.conf"))
+        fw.set_active(st["fw"])
         fw.connect("notify::active", self.on_firewall)
-        p.add(fw)
-        mac = Adw.ActionRow(title=_("mac"), subtitle=_("mac_sub"))
-        mac.add_prefix(Gtk.Image.new_from_icon_name("network-wireless-symbolic"))
-        p.add(mac)
-        page.add(p)
+        g.add(fw)
+        aa_val = (_("profiles").format(st["aa_profiles"]) if st["aa_profiles"] else _("on")) if st["aa"] else _("off")
+        g.add(self.status_row(_("apparmor"), _("apparmor_sub"), "security-medium-symbolic", st["aa"], aa_val))
+        g.add(self.status_row(_("kernel"), _("kernel_sub"), "system-run-symbolic", st["kernel"]))
+        g.add(self.status_row(_("dns"), _("dns_sub"), "network-server-symbolic", st["dns"]))
+        g.add(self.status_row(_("mac"), _("mac_sub"), "network-wireless-symbolic", st["mac"]))
+        if LIVE:
+            g.add(self.status_row(_("crypt"), _("crypt_live"), "drive-harddisk-symbolic", False, "—"))
+        else:
+            g.add(self.status_row(_("crypt"), "" if st["crypt"] else _("crypt_off"),
+                                  "drive-harddisk-symbolic", st["crypt"]))
+        if st["sboot"] is not None:
+            g.add(self.status_row(_("sboot"), _("sboot_sub"), "emblem-system-symbolic", st["sboot"]))
+        g.add(self.info_row(_("last_upd"), st["updated"] or _("never"), "software-update-available-symbolic"))
+        page.add(g)
+
+        c = Adw.PreferencesGroup(title=_("checks"))
+        c.add(self.launch_row(_("lynis"), _("lynis_sub"), "dialog-information-symbolic",
+                              term_cmd("Lynis", "sudo lynis audit system --quick"), shell=False)
+              if have("lynis") else self.launch_row(_("lynis"), _("lynis_sub"), "dialog-information-symbolic", ["lynis"]))
+        c.add(self.launch_row(_("rkhunter"), "", "dialog-warning-symbolic",
+                              term_cmd("rkhunter", "sudo rkhunter --check --sk --rwo"))
+              if have("rkhunter") else self.launch_row(_("rkhunter"), "", "dialog-warning-symbolic", ["rkhunter"]))
+        c.add(self.launch_row(_("clamav"), _("clamav_sub"), "edit-find-symbolic",
+                              term_cmd("ClamAV", "sudo freshclam; clamscan -r -i --bell ~"))
+              if have("clamscan") else self.launch_row(_("clamav"), _("clamav_sub"), "edit-find-symbolic", ["clamscan"]))
+        c.add(self.launch_row(_("update"), _("update_sub"), "software-update-available-symbolic", ["sstym-update"]))
+        page.add(c)
         return page
 
     def on_firewall(self, row, _p):
@@ -751,7 +878,7 @@ class SettingsApp(Adw.Application):
         Adw.StyleManager.get_default().set_color_scheme(Adw.ColorScheme.FORCE_DARK)
         win = self.props.active_window
         if not win:
-            page = self.start_page if self.start_page in ("home", "vpn", "net", "look", "perf", "apps", "sys") else "home"
+            page = self.start_page if self.start_page in ("home", "vpn", "sec", "net", "look", "perf", "apps", "sys") else "home"
             win = SettingsWindow(self, page, self.welcome)
         win.present()
 
