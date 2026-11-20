@@ -4,7 +4,7 @@ set +e
 cfg="$HOME/.config"
 mkdir -p "$cfg/hypr"
 # seed any missing config from /etc/skel (always present in the image)
-for item in hypr waybar kitty rofi fastfetch swaync sstym nwg-dock-hyprland nwg-drawer gtk-3.0 gtk-4.0 qt5ct qt6ct; do
+for item in hypr waybar kitty rofi fastfetch swaync swappy sstym nwg-dock-hyprland nwg-drawer gtk-3.0 gtk-4.0 qt5ct qt6ct; do
   if [ ! -e "$cfg/$item" ] && [ -e "/etc/skel/.config/$item" ]; then
     cp -r "/etc/skel/.config/$item" "$cfg/" 2>/dev/null
   fi
@@ -15,6 +15,10 @@ done
 export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland XDG_SESSION_DESKTOP=Hyprland
 # system language (set by the boot menu, the installer or Sstym Settings)
 if [ -f /etc/locale.conf ]; then set -a; . /etc/locale.conf; set +a; fi
+# home folders Desktop, Documents, Downloads, Music, Pictures, Videos… — English
+# names on disk (easy to type in a terminal) in every language, created at login
+LC_ALL=C.UTF-8 xdg-user-dirs-update >/dev/null 2>&1 || mkdir -p "$HOME"/{Desktop,Documents,Downloads,Music,Pictures,Videos}
+mkdir -p "$HOME/Pictures/Screenshots" 2>/dev/null
 # macOS-like look when available (WhiteSur, macOS cursor, Inter) — see sstym-appearance
 CURSOR=$(sstym-appearance 2>/dev/null | tail -1)
 export XCURSOR_THEME="${CURSOR:-Adwaita}" XCURSOR_SIZE=24 HYPRCURSOR_SIZE=24
