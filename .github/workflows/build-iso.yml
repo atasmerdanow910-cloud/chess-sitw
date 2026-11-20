@@ -102,6 +102,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          # tags like v2026.11.20-rc1 make a private draft (only the repo owner sees it)
+          draft: ${{ contains(github.ref_name, '-rc') }}
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
+          name: Sstym Linux ${{ github.ref_name }}
           body: |
             ## Sstym Linux ${{ github.ref_name }}
 
