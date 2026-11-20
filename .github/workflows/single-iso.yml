@@ -1,0 +1,57 @@
+name: Single-file Sstym ISO
+
+# Joins the split full-edition ISO of the latest successful "Build Sstym Linux
+# ISO" run on this branch into ONE file, sstym-full.iso, checks its SHA-256 and
+# publishes it as a single downloadable artifact (artifacts have no 2 GB limit,
+# release files do). Runs for a commit whose message contains "[single-iso]".
+on:
+  push:
+    branches: ["**"]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  single:
+    if: contains(github.event.head_commit.message, '[single-iso]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache || true
+          sudo mkdir -p /mnt/iso && sudo chown "$USER" /mnt/iso
+          df -h / /mnt
+
+      - name: Download the latest full edition (split parts)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd /mnt/iso
+          run=$(gh run list -R "$GITHUB_REPOSITORY" --workflow build-iso.yml \
+                --branch "$GITHUB_REF_NAME" --status success --limit 1 \
+                --json databaseId -q '.[0].databaseId')
+          echo "Using build run $run"
+          TMPDIR=/mnt/iso gh run download "$run" -R "$GITHUB_REPOSITORY" -n sstym-full -D parts
+          ls -lh parts
+
+      - name: Join into one sstym-full.iso and verify it
+        run: |
+          cd /mnt/iso
+          mkdir -p out
+          cat parts/sstym-full-*.iso.part* > out/sstym-full.iso
+          rm -f parts/*.part*
+          cp parts/sstym-full.iso.sha256 out/
+          cd out
+          sha256sum -c sstym-full.iso.sha256
+          ls -lh
+
+      - name: Publish sstym-full.iso as one download
+        uses: actions/upload-artifact@v4
+        with:
+          name: sstym-full-iso
+          path: /mnt/iso/out/
+          compression-level: 0
+          retention-days: 30
+          if-no-files-found: error
