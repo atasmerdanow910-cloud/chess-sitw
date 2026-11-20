@@ -127,7 +127,9 @@ jobs:
             cat sstym-full-*.iso.part* > sstym-full.iso
             sha256sum -c sstym-full.iso.sha256
             ```
-            On Windows: `copy /b sstym-full-...iso.part00 + sstym-full-...iso.part01 + sstym-full-...iso.part02 sstym-full.iso`
+            On Windows (list every part in order): `copy /b sstym-full-...iso.part00 + sstym-full-...iso.part01 + sstym-full-...iso.part02 + sstym-full-...iso.part03 sstym-full.iso`
+
+            The files are under **Assets** at the bottom of this page.
 
             **Flash to USB** (replace `sdX`, it will be erased):
             ```
