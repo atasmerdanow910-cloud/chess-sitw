@@ -1,0 +1,49 @@
+name: Smaller ISO pieces
+
+# Re-uploads the 1.9 GB full-edition parts 00–02 of the published release as
+# 475 MiB pieces (part00.a … part02.d) for slow, unstable connections. The
+# pieces subdivide the existing parts exactly, so part03 stays valid and
+#   cat sstym-full-*.iso.part* > sstym-full.iso
+# still joins everything in the right order. Runs for a commit whose message
+# contains "[small-parts]".
+on:
+  push:
+    branches: ["**"]
+
+permissions:
+  contents: write
+
+jobs:
+  pieces:
+    if: contains(github.event.head_commit.message, '[small-parts]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      TAG: sstym-build-9
+    steps:
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache || true
+          sudo mkdir -p /mnt/p && sudo chown "$USER" /mnt/p
+          df -h /mnt
+
+      - name: Split parts 00–02 into 475 MiB pieces and upload them
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd /mnt/p
+          for n in 00 01 02; do
+            f=$(gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json assets \
+                -q ".assets[].name | select(startswith(\"sstym-full-\") and endswith(\".iso.part$n\"))")
+            [ -n "$f" ] || { echo "part$n not found"; exit 1; }
+            gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p "$f"
+            sha_part=$(sha256sum "$f" | cut -d' ' -f1)
+            split -b 475M -a 1 "$f" "$f."
+            # the pieces must join back into exactly the same part
+            [ "$(cat "$f".? | sha256sum | cut -d' ' -f1)" = "$sha_part" ] || { echo "piece check failed"; exit 1; }
+            rm -f "$f"
+            ls -l "$f".?
+            gh release upload "$TAG" -R "$GITHUB_REPOSITORY" --clobber "$f".?
+            rm -f "$f".?
+          done
+          gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json assets -q '.assets[] | "\(.name)  \(.size)"'
