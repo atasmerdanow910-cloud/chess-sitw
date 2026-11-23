@@ -1,0 +1,191 @@
+{% from "_macros.html" import ic, logo, head, background %}<!doctype html>
+<html lang="ru">
+<head>
+{{ head("Админ-панель · " ~ site.site_title) }}
+<meta name="robots" content="noindex, nofollow">
+</head>
+<body class="admin" data-csrf="{{ csrf }}">
+{% include "_sprite.html" %}
+{{ background(8) }}
+
+<header class="topbar">
+  <div class="topbar-in glass">
+    <a class="brand" href="/admin">
+      <span class="brand-mark">{{ logo() }}</span>
+      <span class="brand-name">Админ-панель</span>
+    </a>
+    <div style="display:flex;gap:8px">
+      <a class="icon-btn" href="/" target="_blank" rel="noopener" aria-label="Открыть сайт" title="Открыть сайт">{{ ic("external") }}</a>
+      <form method="post" action="/admin/logout">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="icon-btn" type="submit" aria-label="Выйти" title="Выйти">{{ ic("logout") }}</button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="admin-head">
+    <div><h1>Управление сайтом</h1><p>{{ site.site_title }} — файлы, APK, фото и настройки</p></div>
+  </div>
+
+  <div class="admin-stats">
+    <div class="glass"><b id="s-files">0</b><span>файлов .py</span></div>
+    <div class="glass"><b id="s-fdl">0</b><span>скачано .py</span></div>
+    <div class="glass"><b id="s-apk">0</b><span>скачано APK</span></div>
+  </div>
+
+  <nav class="atabs glass" id="atabs" aria-label="Разделы админки">
+    <span class="tab-ind"></span>
+    <button type="button" data-tab="files" class="active">Файлы</button>
+    <button type="button" data-tab="apk">APK</button>
+    <button type="button" data-tab="photos">Фото</button>
+    <button type="button" data-tab="settings">Настройки</button>
+  </nav>
+
+  <!-- ===================================================== ФАЙЛЫ -->
+  <section data-panel="files">
+    <div class="card glass">
+      <h2>{{ ic("plus") }}Добавить .py файл</h2>
+      <p class="sub">Выберите один или несколько файлов — или вставьте код вручную.</p>
+      <div class="seg" id="add-mode" data-active="0">
+        <span class="seg-ind"></span>
+        <button type="button" class="active" data-i="0">Загрузить файл</button>
+        <button type="button" data-i="1">Вставить код</button>
+      </div>
+      <form id="add-form" novalidate>
+        <div data-mode="0">
+          <label class="drop" id="drop">
+            {{ ic("upload") }}<b>Нажмите, чтобы выбрать .py</b><small>можно несколько сразу · до 1 МБ каждый</small>
+            <input type="file" id="add-files" multiple>
+          </label>
+          <div class="picked" id="picked"></div>
+        </div>
+        <div data-mode="1" hidden>
+          <div class="field"><label for="add-filename">Имя файла</label>
+            <input class="input" id="add-filename" placeholder="script.py" autocapitalize="off" spellcheck="false"></div>
+          <div class="field"><label for="add-code">Код</label>
+            <textarea class="textarea code" id="add-code" spellcheck="false" autocapitalize="off" placeholder='print("Привет!")'></textarea></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="add-title">Название</label>
+            <input class="input" id="add-title" placeholder="Например: Проверка VPN"><small>Пусто — возьмётся из имени файла</small></div>
+          <div class="field"><label for="add-req">Библиотеки (pip)</label>
+            <input class="input" id="add-req" placeholder="requests colorama" autocapitalize="off" spellcheck="false"><small>Через пробел, если скрипту нужны</small></div>
+        </div>
+        <div class="field"><label for="add-desc">Описание</label>
+          <textarea class="textarea" id="add-desc" placeholder="Что делает скрипт и как им пользоваться"></textarea></div>
+        <button class="btn btn-primary btn-block" type="submit">{{ ic("upload") }}Опубликовать</button>
+        <div class="msg" id="add-msg" hidden></div>
+      </form>
+    </div>
+
+    <div class="card glass">
+      <h2>{{ ic("code") }}Опубликованные файлы</h2>
+      <p class="sub" id="files-count"></p>
+      <div class="alist" id="afiles"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= APK -->
+  <section data-panel="apk" hidden>
+    <div class="card glass">
+      <h2>{{ ic("package") }}Pydroid 3 APK</h2>
+      <p class="sub">Этот файл скачивают посетители по жёлтой кнопке «Скачать Pydroid 3».</p>
+      <div id="apk-box"></div>
+      <form id="apk-form" novalidate>
+        <label class="drop">
+          {{ ic("upload") }}<b id="apk-pick">Выбрать APK файл</b><small>например pydroid3.apk · до 500 МБ</small>
+          <input type="file" id="apk-file" accept=".apk,application/vnd.android.package-archive">
+        </label>
+        <div class="field"><label for="apk-version">Версия (необязательно)</label>
+          <input class="input" id="apk-version" placeholder="например 7.4"></div>
+        <div id="apk-progress" hidden>
+          <div class="progress"><i></i></div>
+          <small id="apk-progress-text" style="color:var(--muted)"></small>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="apk-submit">{{ ic("upload") }}Сохранить</button>
+        <div class="msg" id="apk-msg" hidden></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================================================== ФОТО -->
+  <section data-panel="photos" hidden>
+    <div class="card glass">
+      <h2>{{ ic("image") }}Фото инструкции</h2>
+      <p class="sub">Загрузите скриншоты со своего телефона для каждого шага. Пока фото нет — на сайте показан нарисованный экран.</p>
+      <div class="alist" id="asteps"></div>
+    </div>
+  </section>
+
+  <!-- ================================================ НАСТРОЙКИ -->
+  <section data-panel="settings" hidden>
+    <div class="card glass">
+      <h2>{{ ic("sliders") }}Сайт</h2>
+      <form id="settings-form" novalidate>
+        <div class="field"><label for="set-title">Название сайта</label>
+          <input class="input" id="set-title" name="site_title" maxlength="60"></div>
+        <div class="field"><label for="set-sub">Описание под названием</label>
+          <textarea class="textarea" id="set-sub" name="site_subtitle" maxlength="300"></textarea></div>
+        <div class="field"><label for="set-play">Ссылка Google Play</label>
+          <input class="input" id="set-play" name="play_url" inputmode="url" autocapitalize="off" spellcheck="false">
+          <small>Используется, если APK не загружен</small></div>
+        <div class="field"><label for="set-contact">Ссылка для связи (Telegram и т.п.)</label>
+          <input class="input" id="set-contact" name="contact_url" inputmode="url" placeholder="https://t.me/..." autocapitalize="off" spellcheck="false">
+          <small>Необязательно — появится внизу сайта</small></div>
+        <button class="btn btn-blue btn-block" type="submit">{{ ic("check") }}Сохранить</button>
+        <div class="msg" id="settings-msg" hidden></div>
+      </form>
+    </div>
+
+    <div class="card glass">
+      <h2>{{ ic("lock") }}Сменить пароль</h2>
+      <form id="pw-form" novalidate>
+        <div class="field"><label for="pw-cur">Текущий пароль</label>
+          <input class="input" id="pw-cur" type="password" autocomplete="current-password"></div>
+        <div class="row2">
+          <div class="field"><label for="pw-new">Новый пароль</label>
+            <input class="input" id="pw-new" type="password" autocomplete="new-password" minlength="6"></div>
+          <div class="field"><label for="pw-rep">Повторите</label>
+            <input class="input" id="pw-rep" type="password" autocomplete="new-password" minlength="6"></div>
+        </div>
+        <button class="btn btn-glass btn-block" type="submit">{{ ic("lock") }}Изменить пароль</button>
+        <div class="msg" id="pw-msg" hidden></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- редактирование файла -->
+<div class="modal-wrap" id="edit" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+    <div class="modal-head">
+      <h3 id="edit-title">Редактировать файл</h3>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть">{{ ic("x") }}</button>
+    </div>
+    <form id="edit-form" novalidate>
+      <div class="row2">
+        <div class="field"><label for="ed-title">Название</label><input class="input" id="ed-title" maxlength="120"></div>
+        <div class="field"><label for="ed-filename">Имя файла</label>
+          <input class="input" id="ed-filename" autocapitalize="off" spellcheck="false"></div>
+      </div>
+      <div class="field"><label for="ed-req">Библиотеки (pip)</label>
+        <input class="input" id="ed-req" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="ed-desc">Описание</label><textarea class="textarea" id="ed-desc"></textarea></div>
+      <div class="field"><label for="ed-code">Код</label>
+        <textarea class="textarea code" id="ed-code" spellcheck="false" autocapitalize="off" style="min-height:280px"></textarea></div>
+      <button class="btn btn-primary btn-block" type="submit">{{ ic("check") }}Сохранить изменения</button>
+      <div class="msg" id="edit-msg" hidden></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">{{ ic("check") }}<span></span></div>
+
+<script id="initial-data" type="application/json">{{ data|tojson }}</script>
+<script src="/static/js/common.js?v={{ asset_v }}"></script>
+<script src="/static/js/admin.js?v={{ asset_v }}"></script>
+</body>
+</html>

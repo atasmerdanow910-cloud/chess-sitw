@@ -1,0 +1,43 @@
+{% from "_macros.html" import ic, logo, head, background %}<!doctype html>
+<html lang="ru">
+<head>
+{{ head("Вход в админку") }}
+<meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+{% include "_sprite.html" %}
+{{ background(10) }}
+
+<main class="login">
+  <form class="login-card glass" method="post" action="/admin/login" autocomplete="off">
+    <div class="orb-wrap">
+      <div class="orb-ring"></div>
+      <div class="orb">{{ logo() }}</div>
+      <span class="mini-bubble m1"></span><span class="mini-bubble m2"></span>
+    </div>
+    <h1>Админ-панель</h1>
+    <p>Введите пароль, чтобы управлять файлами, APK и фото.</p>
+
+    {% if has_password %}
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="pw">
+        <input class="input" id="pw" type="password" name="password" placeholder="Пароль" required autofocus
+               autocomplete="current-password" aria-label="Пароль">
+        <button class="icon-btn" type="button" id="pw-toggle" aria-label="Показать пароль">{{ ic("eye") }}</button>
+      </div>
+      <button class="btn btn-blue btn-block" type="submit">{{ ic("lock") }}Войти</button>
+    {% else %}
+      <div class="msg err">Пароль ещё не задан. Выполните на сервере:
+        <code>sudo bash deploy/install.sh --password</code>
+      </div>
+    {% endif %}
+
+    {% if error %}<div class="msg err" role="alert">{{ error }}</div>{% endif %}
+    <a class="back-link" href="/">← Вернуться на сайт</a>
+  </form>
+</main>
+
+<script src="/static/js/common.js?v={{ asset_v }}"></script>
+<script src="/static/js/login.js?v={{ asset_v }}"></script>
+</body>
+</html>
