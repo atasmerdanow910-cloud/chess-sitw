@@ -97,6 +97,8 @@ systemctl restart systemmarket
 
 echo "==> nginx"
 CERT="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+# Сюда другие установщики могут класть дополнительные location (например, админку VPN Python)
+mkdir -p /etc/nginx/snippets
 APPBLOCK=$(cat <<EOF
     client_max_body_size 40m;
     root $WEB;
@@ -121,6 +123,7 @@ APPBLOCK=$(cat <<EOF
     location = /index.html { add_header Cache-Control "no-cache"; }
     location = /site.webmanifest { default_type application/manifest+json; }
     location / { try_files \$uri /index.html; }
+    include /etc/nginx/snippets/systemmarket-*.conf;
 EOF
 )
 if [ -f "$CERT" ]; then
