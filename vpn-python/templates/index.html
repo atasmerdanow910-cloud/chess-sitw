@@ -1,0 +1,209 @@
+{% from "_macros.html" import ic, logo, glogo, head, background %}<!doctype html>
+<html lang="ru">
+<head>
+{{ head(site.site_title, site.site_subtitle) }}
+<script src="/static/js/i18n.js?v={{ asset_v }}"></script>
+</head>
+<body>
+{% include "_sprite.html" %}
+{{ background() }}
+
+<header class="topbar">
+  <div class="topbar-in glass">
+    <a class="brand" href="#home" aria-label="{{ site.site_title }} — в начало" data-i18n-brand="{{ site.site_title }}">
+      <span class="brand-mark">{{ logo() }}</span>
+      <span class="brand-name">{{ site.site_title }}</span>
+    </a>
+    <nav class="top-nav" aria-label="Разделы" data-i18n-aria="sections">
+      <a href="#guide" data-i18n="nav_guide">Инструкция</a>
+      <a href="#files" data-i18n="nav_files">Файлы</a>
+    </nav>
+    <div class="top-actions" id="top-actions"></div>
+    <button class="icon-btn lang-btn" id="lang-btn" type="button" aria-label="Язык" data-i18n-aria="language">{{ ic("globe") }}<span data-lang-code>RU</span></button>
+  </div>
+</header>
+
+<main>
+  <!-- ================================================= ГЛАВНАЯ -->
+  <section id="home" class="hero">
+    <div class="hero-text">
+      <span class="hero-badge glass"><span class="brand-mark">{{ logo() }}</span><span data-i18n="badge_android">Pydroid 3 для Android</span></span>
+      <h1>{{ site.site_title }}</h1>
+      <p class="lead" data-i18n-sub>{{ site.site_subtitle }}</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" id="apk-btn" href="{{ data.apk.url }}"
+           {% if not data.apk.available %}target="_blank" rel="noopener"{% endif %}>
+          {{ ic("download") }}<span data-i18n="dl_pydroid">Скачать Pydroid 3</span>
+        </a>
+        <a class="btn btn-glass" href="#guide">{{ ic("book") }}<span data-i18n="nav_guide">Инструкция</span></a>
+      </div>
+      <div class="hero-meta" id="apk-meta"></div>
+      <ul class="checks">
+        <li>{{ ic("check-circle") }}<span data-i18n="chk_free">Бесплатно</span></li>
+        <li>{{ ic("check-circle") }}<span data-i18n="chk_steps">Пошаговая инструкция</span></li>
+        <li id="chk-secure" hidden>{{ ic("check-circle") }}<span data-i18n="chk_secure">Защищённое соединение</span></li>
+      </ul>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="stage glass"><div class="phone"><div class="phone-screen" id="hero-phone"></div></div></div>
+    </div>
+  </section>
+
+  <div class="stats glass">
+    <div class="stat"><b id="st-files">{{ data.stats.files }}</b><span data-i18n="st_scripts">скриптов</span></div>
+    <div class="stat"><b id="st-dl">{{ data.stats.file_downloads + data.stats.apk_downloads }}</b><span data-i18n="st_downloads">загрузок</span></div>
+    <div class="stat"><b>{{ data.steps|length }}</b><span data-i18n="st_steps">шагов</span></div>
+  </div>
+
+  <div class="features">
+    <div class="feature glass reveal">
+      <span class="feature-ico">{{ ic("package") }}</span>
+      <h3 data-i18n="f1_title">Установщик Pydroid 3</h3>
+      <p data-i18n="f1_text">Файл APK доступен для прямой загрузки — без поиска по сторонним сайтам.</p>
+    </div>
+    <div class="feature glass reveal">
+      <span class="feature-ico">{{ ic("image") }}</span>
+      <h3 data-i18n="f2_title">Инструкция с иллюстрациями</h3>
+      <p data-i18n="f2_text">Семь шагов: от загрузки приложения до запуска первого скрипта.</p>
+    </div>
+    <div class="feature glass reveal">
+      <span class="feature-ico">{{ ic("code") }}</span>
+      <h3 data-i18n="f3_title">Библиотека скриптов</h3>
+      <p data-i18n="f3_text">Просмотр кода, копирование в один клик и загрузка готовых .py файлов.</p>
+    </div>
+  </div>
+
+  <!-- ============================================== ИНСТРУКЦИЯ -->
+  <section id="guide">
+    <div class="section-head">
+      <span class="eyebrow" data-i18n="nav_guide">Инструкция</span>
+      <h2 data-i18n="guide_title" data-n="{{ data.steps|length }}">Установка и запуск за {{ data.steps|length }} шагов</h2>
+      <p data-i18n="guide_sub">Синий маркер на экране показывает, куда нажать на каждом шаге.</p>
+    </div>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <!-- ================================================== ФАЙЛЫ -->
+  <section id="files">
+    <div class="section-head">
+      <span class="eyebrow" data-i18n="nav_files">Файлы</span>
+      <h2 data-i18n="files_title">Готовые скрипты</h2>
+      <p data-i18n="files_sub">Откройте код, скопируйте его в Pydroid 3 или скачайте файл и запустите кнопкой ▶.</p>
+    </div>
+
+    <div class="notice" id="gate-notice" hidden>
+      {{ ic("lock") }}<span data-i18n="gate">Чтобы открыть код и скачать файлы, войдите через Google.</span>
+      <button class="btn btn-google btn-sm" type="button" data-login>{{ glogo() }}<span data-i18n="login">Войти</span></button>
+    </div>
+
+    <div class="toolbar">
+      <label class="search glass" for="q">
+        {{ ic("search") }}
+        <input id="q" type="search" placeholder="Поиск по названию, файлу или описанию" data-i18n-ph="search_ph" autocomplete="off" enterkeyhint="search">
+        <button class="icon-btn" id="q-clear" type="button" aria-label="Очистить поиск" data-i18n-aria="search_clear" hidden>{{ ic("x") }}</button>
+      </label>
+    </div>
+
+    <div class="howto glass">
+      <h3>{{ ic("terminal") }}<span data-i18n="howto_title">Как запустить .py файл</span></h3>
+      <div class="seg" id="howto-seg" data-active="0" role="tablist">
+        <span class="seg-ind"></span>
+        <button class="active" type="button" role="tab" aria-selected="true" data-i="0" data-i18n="copy_code">Копировать код</button>
+        <button type="button" role="tab" aria-selected="false" data-i="1" data-i18n="dl_file">Скачать файл</button>
+      </div>
+      <ol data-panel="0">
+        <li><span data-i18n-html="howto_c1">Нажмите <b>«Копировать»</b> у нужного скрипта — код попадёт в буфер обмена.</span></li>
+        <li><span data-i18n-html="howto_c2">Откройте <b>Pydroid 3</b>, в редакторе: долгое нажатие → <b>«Вставить»</b>.</span></li>
+        <li><span data-i18n-html="howto_c3">Нажмите жёлтую кнопку <span class="kbd">▶</span> — скрипт запустится.</span></li>
+      </ol>
+      <ol data-panel="1" hidden>
+        <li><span data-i18n-html="howto_d1">Нажмите <b>«Скачать»</b> — файл сохранится в папку <b>Download</b>.</span></li>
+        <li><span data-i18n-html="howto_d2">В Pydroid 3: <span class="kbd">☰</span> → <b>Open</b> → <b>Internal storage</b> → <b>Download</b>.</span></li>
+        <li><span data-i18n-html="howto_d3">Выберите файл и нажмите <span class="kbd">▶</span>.</span></li>
+      </ol>
+    </div>
+
+    <div class="files" id="file-list"></div>
+  </section>
+
+  <footer class="footer">
+    <div>
+      <div class="brand"><span class="brand-mark">{{ logo() }}</span><span>{{ site.site_title }}</span></div>
+      <p data-i18n="foot_about">Pydroid 3, пошаговая инструкция и готовые Python-скрипты для Android.</p>
+    </div>
+    <div>
+      <h4 data-i18n="sections">Разделы</h4>
+      <ul>
+        <li><a href="#guide" data-i18n="nav_guide">Инструкция</a></li>
+        <li><a href="#files" data-i18n="nav_files">Файлы</a></li>
+        <li><a href="{{ data.apk.url }}" data-apk-link data-i18n="dl_apk">Скачать APK</a></li>
+        {% if site.contact_url %}<li><a href="{{ site.contact_url }}" target="_blank" rel="noopener" data-i18n="contact">Связаться с нами</a></li>{% endif %}
+      </ul>
+    </div>
+    <div>
+      <h4 data-i18n="security">Безопасность</h4>
+      <div class="badges" id="badges"></div>
+    </div>
+    <div class="legal">
+      <p data-i18n="legal1">Pydroid 3 — стороннее приложение, все права принадлежат его разработчикам.</p>
+      <p data-i18n="legal2">«Python» и логотип Python — товарные знаки Python Software Foundation.</p>
+    </div>
+  </footer>
+</main>
+
+<!-- нижнее меню -->
+<nav class="tabbar" id="tabbar" aria-label="Разделы" data-i18n-aria="sections" style="--n:4">
+  <span class="tab-ind"></span>
+  <a class="tab active" href="#home" data-tab="home">{{ ic("home") }}<span data-i18n="nav_home">Главная</span></a>
+  <a class="tab" href="#guide" data-tab="guide">{{ ic("book") }}<span data-i18n="nav_guide">Инструкция</span></a>
+  <a class="tab" href="#files" data-tab="files">{{ ic("code") }}<span data-i18n="nav_files">Файлы</span></a>
+  {% if data.auth.google %}
+  <a class="tab" href="#account" data-tab="account" id="tab-account">{{ ic("user") }}<span data-i18n="nav_profile">Профиль</span></a>
+  {% else %}
+  <a class="tab" href="#files" data-tab="search">{{ ic("search") }}<span data-i18n="nav_search">Поиск</span></a>
+  {% endif %}
+</nav>
+
+<!-- просмотр кода -->
+<div class="sheet-wrap" id="sheet" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <span class="file-ico">{{ logo() }}</span>
+      <div><h3 id="sheet-title"></h3><div class="sheet-sub" id="sheet-sub"></div></div>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть" data-i18n-aria="close">{{ ic("x") }}</button>
+    </div>
+    <div class="sheet-req" id="sheet-req" hidden>
+      <span data-i18n="libs">Библиотеки:</span><code id="sheet-req-code"></code>
+      <button class="icon-btn" type="button" id="sheet-req-copy" aria-label="Скопировать команду pip" data-i18n-aria="copy_pip">{{ ic("copy") }}</button>
+    </div>
+    <div class="code-box" id="code-box"><pre class="gutter" id="gutter"></pre><pre class="code"><code id="code"></code></pre></div>
+    <div class="sheet-actions">
+      <button class="btn btn-primary" type="button" id="sheet-copy">{{ ic("copy") }}<span data-i18n="copy_code">Копировать код</span></button>
+      <a class="btn btn-glass" id="sheet-dl" href="#">{{ ic("download") }}<span data-i18n="dl_py">Скачать .py</span></a>
+    </div>
+    <div class="sheet-hint" data-i18n="sheet_hint">Pydroid 3: вставьте код в редактор и нажмите ▶</div>
+  </div>
+</div>
+
+<!-- аккаунт -->
+<div class="modal-wrap" id="account" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <div class="modal sm" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <div class="modal-head">
+      <h3 id="account-title" data-i18n="account">Аккаунт</h3>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть" data-i18n-aria="close">{{ ic("x") }}</button>
+    </div>
+    <div class="account" id="account-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">{{ ic("check") }}<span></span></div>
+
+<script id="initial-data" type="application/json">{{ data|tojson }}</script>
+<script src="/static/js/common.js?v={{ asset_v }}"></script>
+<script src="/static/js/mockups.js?v={{ asset_v }}"></script>
+<script src="/static/js/site.js?v={{ asset_v }}"></script>
+</body>
+</html>

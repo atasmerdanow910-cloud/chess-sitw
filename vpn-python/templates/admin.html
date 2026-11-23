@@ -1,0 +1,306 @@
+{% from "_macros.html" import ic, logo, glogo, head, background %}<!doctype html>
+<html lang="ru">
+<head>
+{{ head("Админ-панель · " ~ site.site_title) }}
+<meta name="robots" content="noindex, nofollow">
+</head>
+<body class="admin" data-csrf="{{ csrf }}">
+{% include "_sprite.html" %}
+{{ background() }}
+
+<header class="topbar">
+  <div class="topbar-in glass">
+    <a class="brand" href="/admin">
+      <span class="brand-mark">{{ logo() }}</span>
+      <span class="brand-name">Админ-панель</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="/" target="_blank" rel="noopener" aria-label="Открыть сайт" title="Открыть сайт">{{ ic("external") }}</a>
+      <form method="post" action="/admin/logout">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="icon-btn" type="submit" aria-label="Выйти" title="Выйти">{{ ic("logout") }}</button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="admin-head">
+    <h1>Управление сайтом</h1>
+    <p>{{ site.site_title }}</p>
+  </div>
+
+  <div class="admin-stats">
+    <div class="glass"><b id="s-files">0</b><span>скриптов</span></div>
+    <div class="glass"><b id="s-fdl">0</b><span>скачано .py</span></div>
+    <div class="glass"><b id="s-apk">0</b><span>скачано APK</span></div>
+    <div class="glass"><b id="s-users">0</b><span>пользователей</span></div>
+  </div>
+
+  <nav class="atabs glass" id="atabs" aria-label="Разделы админки">
+    <button type="button" data-tab="files" class="active">Файлы</button>
+    <button type="button" data-tab="apk">APK</button>
+    <button type="button" data-tab="photos">Фото</button>
+    <button type="button" data-tab="users">Люди</button>
+    <button type="button" data-tab="security">Защита</button>
+    <button type="button" data-tab="settings">Настройки</button>
+  </nav>
+
+  <!-- ===================================================== ФАЙЛЫ -->
+  <section data-panel="files">
+    <div class="card glass">
+      <h2>{{ ic("plus") }}Добавить скрипт</h2>
+      <p class="sub">Загрузите один или несколько .py файлов или вставьте код вручную.</p>
+      <div class="seg" id="add-mode" data-active="0">
+        <span class="seg-ind"></span>
+        <button type="button" class="active" data-i="0">Загрузить файл</button>
+        <button type="button" data-i="1">Вставить код</button>
+      </div>
+      <form id="add-form" novalidate>
+        <div data-mode="0">
+          <label class="drop" id="drop">
+            {{ ic("upload") }}<b>Выберите .py файлы</b><small>можно несколько · до 1 МБ каждый</small>
+            <input type="file" id="add-files" multiple>
+          </label>
+          <div class="picked" id="picked"></div>
+        </div>
+        <div data-mode="1" hidden>
+          <div class="field"><label for="add-filename">Имя файла</label>
+            <input class="input" id="add-filename" placeholder="script.py" autocapitalize="off" spellcheck="false"></div>
+          <div class="field"><label for="add-code">Код</label>
+            <textarea class="textarea code" id="add-code" spellcheck="false" autocapitalize="off" placeholder='print("Привет!")'></textarea></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="add-title">Название</label>
+            <input class="input" id="add-title" placeholder="Например: Проверка VPN"><small>Пусто — по имени файла</small></div>
+          <div class="field"><label for="add-req">Библиотеки (pip)</label>
+            <input class="input" id="add-req" placeholder="requests colorama" autocapitalize="off" spellcheck="false"><small>Через пробел, если нужны</small></div>
+        </div>
+        <div class="field"><label for="add-desc">Описание</label>
+          <textarea class="textarea" id="add-desc" placeholder="Что делает скрипт и как им пользоваться"></textarea></div>
+        <button class="btn btn-primary btn-block" type="submit">{{ ic("upload") }}Опубликовать</button>
+        <div class="msg" id="add-msg" hidden></div>
+      </form>
+    </div>
+
+    <div class="card glass">
+      <h2>{{ ic("code") }}Опубликованные скрипты</h2>
+      <p class="sub" id="files-count"></p>
+      <div class="alist" id="afiles"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= APK -->
+  <section data-panel="apk" hidden>
+    <div class="card glass">
+      <h2>{{ ic("package") }}Pydroid 3 APK</h2>
+      <p class="sub">Файл, который посетители скачивают по кнопке «Скачать Pydroid 3».</p>
+      <div id="apk-box"></div>
+      <form id="apk-form" novalidate>
+        <label class="drop">
+          {{ ic("upload") }}<b id="apk-pick">Выбрать APK файл</b><small>до 500 МБ</small>
+          <input type="file" id="apk-file" accept=".apk,application/vnd.android.package-archive">
+        </label>
+        <div class="field"><label for="apk-version">Версия (необязательно)</label>
+          <input class="input" id="apk-version" placeholder="например 7.4"></div>
+        <div id="apk-progress" hidden>
+          <div class="progress"><i></i></div>
+          <small id="apk-progress-text" style="color:var(--muted)"></small>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="apk-submit">{{ ic("upload") }}Сохранить</button>
+        <div class="msg" id="apk-msg" hidden></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================================================== ФОТО -->
+  <section data-panel="photos" hidden>
+    <div class="card glass">
+      <h2>{{ ic("image") }}Иллюстрации инструкции</h2>
+      <p class="sub">Сделайте скриншоты на телефоне (кнопки «Питание» + «Громкость вниз») и загрузите их по порядку — до 6 на шаг. Пока своих фото нет, на сайте показаны нарисованные экраны.</p>
+      <div class="alist" id="asteps"></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== ЛЮДИ -->
+  <section data-panel="users" hidden>
+    <div class="card glass">
+      <h2>{{ glogo() }}Вход через Google <span class="tag" id="g-status"></span></h2>
+      <p class="sub">Посетители регистрируются и входят через аккаунт Google.</p>
+      <div class="msg err" id="g-https-warn" hidden>
+        Google разрешает вход только на сайтах с доменом и HTTPS. Сначала подключите домен через Cloudflare
+        (вкладка «Защита») и укажите адрес сайта в «Настройках».
+      </div>
+      <form id="google-form" novalidate>
+        <div class="field"><label for="g-id">Client ID</label>
+          <input class="input mono" id="g-id" placeholder="xxxx.apps.googleusercontent.com" autocapitalize="off" spellcheck="false"></div>
+        <div class="field"><label for="g-secret">Client Secret</label>
+          <input class="input mono" id="g-secret" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <small id="g-secret-hint"></small></div>
+        <div class="field"><label for="g-redirect">Redirect URI — вставьте его в Google Cloud</label>
+          <div class="with-btn"><input class="input mono" id="g-redirect" readonly>
+            <button class="icon-btn" type="button" id="g-redirect-copy" aria-label="Скопировать">{{ ic("copy") }}</button></div></div>
+        <label class="switch"><input type="checkbox" id="g-req-files"><span class="track"></span>
+          <span><b>Скрипты только после входа</b><small>Код, копирование и скачивание .py — только для вошедших</small></span></label>
+        <label class="switch"><input type="checkbox" id="g-req-apk"><span class="track"></span>
+          <span><b>APK только после входа</b><small>Скачать Pydroid 3 смогут только вошедшие</small></span></label>
+        <button class="btn btn-primary btn-block" type="submit" style="margin-top:8px">{{ ic("check") }}Сохранить</button>
+        <div class="msg" id="g-msg" hidden></div>
+      </form>
+      <details class="guide" style="margin-top:14px">
+        <summary>Как получить Client ID и Secret</summary>
+        <ol>
+          <li>Откройте <b>console.cloud.google.com</b> и создайте проект.</li>
+          <li><b>APIs &amp; Services → OAuth consent screen</b>: тип <b>External</b>, укажите название и email, сохраните.
+            Затем нажмите <b>Publish app</b>, чтобы входить мог любой пользователь.</li>
+          <li><b>Credentials → Create credentials → OAuth client ID</b>, тип <b>Web application</b>.</li>
+          <li>В <b>Authorized redirect URIs</b> вставьте адрес из поля «Redirect URI» выше.</li>
+          <li>Скопируйте <b>Client ID</b> и <b>Client Secret</b> сюда и сохраните.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="card glass">
+      <h2>{{ ic("users") }}Пользователи <span class="tag" id="u-count"></span></h2>
+      <p class="sub">Заблокированный пользователь сразу теряет доступ и не сможет войти снова.</p>
+      <label class="search glass" for="u-q" style="margin-bottom:12px">
+        {{ ic("search") }}<input id="u-q" type="search" placeholder="Поиск по имени или email" autocomplete="off">
+      </label>
+      <div class="alist" id="ausers"></div>
+    </div>
+  </section>
+
+  <!-- ==================================================== ЗАЩИТА -->
+  <section data-panel="security" hidden>
+    <div class="status-grid" id="sec-status"></div>
+
+    <div class="card glass">
+      <h2>{{ ic("cloud") }}Cloudflare — защита от DDoS</h2>
+      <p class="sub">Cloudflare принимает весь трафик на себя, отсеивает атаки и ботов и бесплатно даёт HTTPS.
+        Сайт видит настоящие IP посетителей через заголовки Cloudflare.</p>
+      <label class="switch"><input type="checkbox" id="cf-only"><span class="track"></span>
+        <span><b>Принимать запросы только через Cloudflare</b>
+          <small>Прямые запросы на IP сервера будут отклонены. Включайте, когда сайт открывается по домену.</small></span></label>
+      <div class="msg" id="cf-msg" hidden></div>
+      <details class="guide" style="margin-top:12px">
+        <summary>Как подключить Cloudflare</summary>
+        <ol>
+          <li>Купите домен (подойдёт любой недорогой) и добавьте его в <b>dash.cloudflare.com</b> (тариф Free).</li>
+          <li>У регистратора домена замените NS-серверы на те, что выдаст Cloudflare.</li>
+          <li><b>DNS</b>: запись <b>A</b>, имя <code>@</code>, значение — IP сервера, облако <b>оранжевое</b> (Proxied).</li>
+          <li><b>SSL/TLS</b>: режим <b>Flexible</b>, включите <b>Always Use HTTPS</b>.</li>
+          <li><b>Security → Bots</b>: включите <b>Bot Fight Mode</b>. Во время атаки — <b>Under Attack Mode</b>.</li>
+          <li>Откройте админку по домену и включите переключатель выше.</li>
+          <li>Для полной защиты закройте сервер фаерволом: <code>bash deploy/install.sh --cloudflare-firewall</code></li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="card glass">
+      <h2>{{ ic("smartphone") }}Двухфакторная защита (2FA)</h2>
+      <p class="sub">Кроме пароля при входе в админку будет нужен код из Google Authenticator.</p>
+      <div id="twofa"></div>
+      <div class="msg" id="twofa-msg" hidden></div>
+    </div>
+
+    <div class="card glass">
+      <h2>{{ ic("ban") }}Блокировка IP</h2>
+      <p class="sub" id="limits-text"></p>
+      <form id="block-form" novalidate>
+        <div class="row2 row3">
+          <div class="field"><label for="b-ip">IP или подсеть</label>
+            <input class="input mono" id="b-ip" placeholder="203.0.113.7" autocapitalize="off" spellcheck="false"></div>
+          <div class="field"><label for="b-time">Срок</label>
+            <select class="select" id="b-time">
+              <option value="60">1 час</option><option value="1440">1 день</option>
+              <option value="10080">7 дней</option><option value="0" selected>Навсегда</option>
+            </select></div>
+          <div class="field"><label for="b-reason">Причина</label>
+            <input class="input" id="b-reason" placeholder="Спам"></div>
+        </div>
+        <button class="btn btn-glass btn-block" type="submit">{{ ic("ban") }}Заблокировать</button>
+        <div class="msg" id="b-msg" hidden></div>
+      </form>
+      <div class="alist" id="blocks" style="margin-top:14px"></div>
+    </div>
+
+    <div class="card glass">
+      <h2>{{ ic("activity") }}Журнал безопасности</h2>
+      <p class="sub">Входы в админку, неудачные попытки, автоблокировки и изменения настроек защиты.</p>
+      <div class="log" id="seclog"></div>
+    </div>
+  </section>
+
+  <!-- ================================================ НАСТРОЙКИ -->
+  <section data-panel="settings" hidden>
+    <div class="card glass">
+      <h2>{{ ic("sliders") }}Сайт</h2>
+      <form id="settings-form" novalidate>
+        <div class="field"><label for="set-title">Название сайта</label>
+          <input class="input" id="set-title" maxlength="60"></div>
+        <div class="field"><label for="set-sub">Описание</label>
+          <textarea class="textarea" id="set-sub" maxlength="300"></textarea></div>
+        <div class="field"><label for="set-url">Адрес сайта</label>
+          <input class="input mono" id="set-url" inputmode="url" placeholder="https://ваш-домен.com" autocapitalize="off" spellcheck="false">
+          <small>Нужен для входа через Google. Только домен, без пути.</small></div>
+        <div class="field"><label for="set-play">Ссылка Google Play</label>
+          <input class="input mono" id="set-play" inputmode="url" autocapitalize="off" spellcheck="false">
+          <small>Используется, пока APK не загружен</small></div>
+        <div class="field"><label for="set-contact">Ссылка для связи</label>
+          <input class="input mono" id="set-contact" inputmode="url" placeholder="https://t.me/..." autocapitalize="off" spellcheck="false">
+          <small>Необязательно — появится в подвале сайта</small></div>
+        <button class="btn btn-primary btn-block" type="submit">{{ ic("check") }}Сохранить</button>
+        <div class="msg" id="settings-msg" hidden></div>
+      </form>
+    </div>
+
+    <div class="card glass">
+      <h2>{{ ic("key") }}Пароль админки</h2>
+      <form id="pw-form" novalidate>
+        <div class="field"><label for="pw-cur">Текущий пароль</label>
+          <input class="input" id="pw-cur" type="password" autocomplete="current-password"></div>
+        <div class="row2">
+          <div class="field"><label for="pw-new">Новый пароль</label>
+            <input class="input" id="pw-new" type="password" autocomplete="new-password" minlength="8"></div>
+          <div class="field"><label for="pw-rep">Повторите</label>
+            <input class="input" id="pw-rep" type="password" autocomplete="new-password" minlength="8"></div>
+        </div>
+        <button class="btn btn-glass btn-block" type="submit">{{ ic("lock") }}Изменить пароль</button>
+        <div class="msg" id="pw-msg" hidden></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- редактирование файла -->
+<div class="modal-wrap" id="edit" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+    <div class="modal-head">
+      <h3 id="edit-title">Редактирование скрипта</h3>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть">{{ ic("x") }}</button>
+    </div>
+    <form id="edit-form" novalidate>
+      <div class="row2">
+        <div class="field"><label for="ed-title">Название</label><input class="input" id="ed-title" maxlength="120"></div>
+        <div class="field"><label for="ed-filename">Имя файла</label>
+          <input class="input mono" id="ed-filename" autocapitalize="off" spellcheck="false"></div>
+      </div>
+      <div class="field"><label for="ed-req">Библиотеки (pip)</label>
+        <input class="input mono" id="ed-req" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="ed-desc">Описание</label><textarea class="textarea" id="ed-desc"></textarea></div>
+      <div class="field"><label for="ed-code">Код</label>
+        <textarea class="textarea code" id="ed-code" spellcheck="false" autocapitalize="off" style="min-height:280px"></textarea></div>
+      <button class="btn btn-primary btn-block" type="submit">{{ ic("check") }}Сохранить изменения</button>
+      <div class="msg" id="edit-msg" hidden></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">{{ ic("check") }}<span></span></div>
+
+<script id="initial-data" type="application/json">{{ data|tojson }}</script>
+<script src="/static/js/common.js?v={{ asset_v }}"></script>
+<script src="/static/js/admin.js?v={{ asset_v }}"></script>
+</body>
+</html>

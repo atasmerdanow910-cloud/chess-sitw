@@ -3,6 +3,9 @@
 Запуск в продакшене: gunicorn -w 2 -b 127.0.0.1:8000 app:app (за nginx).
 Локально для разработки: SM_DEV=1 python app.py — тогда Flask сам отдаёт
 index.html и загруженные фото.
+
+Ошибки возвращаются как {"error": "<текст по-русски>", "code": "<код>"} —
+по коду сайт показывает сообщение на выбранном языке.
 """
 import hashlib
 import hmac
@@ -24,7 +27,7 @@ DB_PATH = os.path.join(DATA, "market.db")
 ADMIN_TOKEN = os.environ.get("SM_ADMIN_TOKEN", "")
 DEV = os.environ.get("SM_DEV") == "1"
 
-CATS = {"auto", "realty", "phones", "electronics", "home", "clothes", "services", "other"}
+CATS = ("auto", "realty", "phones", "electronics", "home", "clothes", "services", "other")
 CITIES = {"Ашхабад", "Аркадаг", "Балканабат", "Дашогуз", "Мары", "Туркменабат",
           "Туркменбаши", "Теджен", "Байрамали", "Другой"}
 MAX_PHOTOS = 6
@@ -32,6 +35,7 @@ MAX_SIDE = 1600
 THUMB_SIDE = 480
 PER_IP_PER_HOUR = 15
 PAGE_MAX = 60
+MAX_PRICE = 10_000_000_000
 
 os.makedirs(UPLOADS, exist_ok=True)
 
@@ -58,20 +62,37 @@ CREATE TABLE IF NOT EXISTS listings (
     token_hash  TEXT NOT NULL,
     ip          TEXT NOT NULL DEFAULT '',
     views       INTEGER NOT NULL DEFAULT 0,
-    created     INTEGER NOT NULL
+    created     INTEGER NOT NULL,
+    sold        INTEGER NOT NULL DEFAULT 0,
+    updated     INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_created ON listings(created DESC);
 CREATE INDEX IF NOT EXISTS idx_cat ON listings(cat, created DESC);
 CREATE INDEX IF NOT EXISTS idx_ip ON listings(ip, created);
 """
 
+# Колонки, которых не было в первых версиях базы, — добавляются при запуске.
+MIGRATIONS = {
+    "sold": "ALTER TABLE listings ADD COLUMN sold INTEGER NOT NULL DEFAULT 0",
+    "updated": "ALTER TABLE listings ADD COLUMN updated INTEGER NOT NULL DEFAULT 0",
+}
+
 
 def init_db():
-    con = sqlite3.connect(DB_PATH)
-    con.execute("PRAGMA journal_mode=WAL")
-    con.executescript(SCHEMA)
-    con.commit()
-    con.close()
+    con = sqlite3.connect(DB_PATH, timeout=10)
+    try:
+        con.execute("PRAGMA journal_mode=WAL")
+        con.executescript(SCHEMA)
+        have = {r[1] for r in con.execute("PRAGMA table_info(listings)")}
+        for column, sql in MIGRATIONS.items():
+            if column not in have:
+                try:
+                    con.execute(sql)
+                except sqlite3.OperationalError:
+                    pass  # другой процесс gunicorn успел добавить колонку
+        con.commit()
+    finally:
+        con.close()
 
 
 init_db()
@@ -92,8 +113,8 @@ def close_db(_exc):
 
 
 # ---------------------------------------------------------------- helpers
-def err(msg, code=400):
-    return jsonify({"error": msg}), code
+def err(msg, status=400, code="bad_request"):
+    return jsonify({"error": msg, "code": code}), status
 
 
 def client_ip():
@@ -128,6 +149,7 @@ def public(row):
         "city": row["city"], "desc": row["descr"], "name": row["name"], "phone": row["phone"],
         "extra": json.loads(row["extra"]), "photos": photo_urls(json.loads(row["photos"])),
         "views": row["views"], "created": row["created"],
+        "sold": bool(row["sold"]), "updated": row["updated"],
     }
 
 
@@ -158,6 +180,12 @@ def delete_photo_files(names):
                 pass
 
 
+EXTRA_FIELDS = {
+    "auto": ("brand", "model", "year", "mileage", "gear", "fuel"),
+    "realty": ("deal", "rooms", "area", "floor"),
+}
+
+
 def parse_extra(cat, f):
     if cat == "auto":
         return {
@@ -173,10 +201,40 @@ def parse_extra(cat, f):
     return {}
 
 
+def check_fields(title, price, city, phone):
+    """Общая проверка полей объявления. Возвращает ответ-ошибку или None."""
+    if title is not None and len(title) < 3:
+        return err("Заголовок слишком короткий", code="title")
+    if price is None:
+        return err("Укажите цену", code="price")
+    if city is not None and city not in CITIES:
+        return err("Выберите город", code="city")
+    if phone is not None and len(re.sub(r"\D", "", phone)) < 6:
+        return err("Укажите телефон", code="phone")
+    return None
+
+
+def edit_rights(row):
+    token = request.headers.get("X-Edit-Token", "")
+    is_owner = bool(token) and hmac.compare_digest(sha(token), row["token_hash"])
+    is_admin = bool(ADMIN_TOKEN) and bool(token) and hmac.compare_digest(token, ADMIN_TOKEN)
+    return is_owner or is_admin
+
+
 # ---------------------------------------------------------------- routes
 @app.get("/api/health")
 def health():
     return {"ok": True}
+
+
+@app.get("/api/stats")
+def stats():
+    rows = db().execute("SELECT cat, COUNT(*) FROM listings WHERE sold = 0 GROUP BY cat").fetchall()
+    cats = {c: 0 for c in CATS}
+    for cat, n in rows:
+        if cat in cats:
+            cats[cat] = n
+    return {"total": sum(cats.values()), "cats": cats}
 
 
 @app.get("/api/listings")
@@ -189,18 +247,36 @@ def list_listings():
             return {"items": [], "total": 0}
         where.append("id IN (%s)" % ",".join("?" * len(ids)))
         params += ids
+    elif a.get("with_sold") != "1":
+        where.append("sold = 0")           # в общей ленте проданные не показываем
     if a.get("cat") in CATS:
         where.append("cat = ?")
         params.append(a["cat"])
     if a.get("city") in CITIES:
         where.append("city = ?")
         params.append(a["city"])
+    lo = to_int(a.get("min_price"), 0, MAX_PRICE)
+    hi = to_int(a.get("max_price"), 0, MAX_PRICE)
+    if lo:
+        where.append("price >= ?")
+        params.append(lo)
+    if hi:
+        where.append("price <= ? AND price > 0")
+        params.append(hi)
+    ex = a.get("exclude", "")
+    if re.fullmatch(r"[a-z0-9]{6,32}", ex):
+        where.append("id <> ?")
+        params.append(ex)
     q = clean(a.get("q"), 60).lower()
     if q:
         like = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         where.append("(lower(title) LIKE ? ESCAPE '\\' OR lower(descr) LIKE ? ESCAPE '\\' OR lower(extra) LIKE ? ESCAPE '\\')")
         params += [like, like, like]
-    order = {"cheap": "price ASC, created DESC", "exp": "price DESC, created DESC"}.get(a.get("sort"), "created DESC")
+    order = {
+        "cheap": "price = 0, price ASC, created DESC",
+        "exp": "price DESC, created DESC",
+        "popular": "views DESC, created DESC",
+    }.get(a.get("sort"), "created DESC")
     limit = to_int(a.get("limit", 24), 1, PAGE_MAX) or 24
     offset = to_int(a.get("offset", 0), 0, 1_000_000) or 0
     w = ("WHERE " + " AND ".join(where)) if where else ""
@@ -216,7 +292,7 @@ def get_listing(lid):
     con.commit()
     row = con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()
     if not row:
-        return err("Объявление не найдено", 404)
+        return err("Объявление не найдено", 404, "not_found")
     return public(row)
 
 
@@ -228,59 +304,92 @@ def create_listing():
     recent = con.execute("SELECT COUNT(*) FROM listings WHERE ip = ? AND created > ?",
                          (ip, int(time.time()) - 3600)).fetchone()[0]
     if recent >= PER_IP_PER_HOUR:
-        return err("Слишком много объявлений за час. Попробуйте позже.", 429)
+        return err("Слишком много объявлений за час. Попробуйте позже.", 429, "rate_limit")
 
     cat = f.get("cat")
     title = clean(f.get("title"), 80)
-    price = to_int(f.get("price"), 0, 10_000_000_000)
-    city = f.get("city")
+    price = to_int(f.get("price"), 0, MAX_PRICE)
+    city = f.get("city") or ""
     phone = clean(f.get("phone"), 20)
     if cat not in CATS:
-        return err("Выберите категорию")
-    if len(title) < 3:
-        return err("Заголовок слишком короткий")
-    if price is None:
-        return err("Укажите цену")
-    if city not in CITIES:
-        return err("Выберите город")
-    if len(re.sub(r"\D", "", phone)) < 6:
-        return err("Укажите телефон")
+        return err("Выберите категорию", code="cat")
+    bad = check_fields(title, price, city, phone)
+    if bad:
+        return bad
 
     files = [x for x in request.files.getlist("photos") if x and x.filename][:MAX_PHOTOS]
     if not files:
-        return err("Добавьте хотя бы одно фото товара")
+        return err("Добавьте хотя бы одно фото товара", code="photo_required")
     names = []
     try:
         for fs in files:
             names.append(save_photo(fs))
     except ValueError as e:
         delete_photo_files(names)
-        return err(str(e))
+        return err(str(e), code="photo_bad")
 
     lid = secrets.token_hex(6)
     token = secrets.token_urlsafe(24)
+    now = int(time.time())
     con.execute(
-        "INSERT INTO listings (id, cat, title, price, city, descr, name, phone, extra, photos, token_hash, ip, created)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO listings (id, cat, title, price, city, descr, name, phone, extra, photos, token_hash, ip,"
+        " created, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (lid, cat, title, price, city, clean(f.get("desc"), 3000), clean(f.get("name"), 30) or "Продавец",
          phone, json.dumps(parse_extra(cat, f), ensure_ascii=False), json.dumps(names), sha(token), ip,
-         int(time.time())),
+         now, now),
     )
     con.commit()
     return {"id": lid, "token": token}, 201
 
 
+@app.put("/api/listings/<lid>")
+def update_listing(lid):
+    """Редактирование своего объявления (или любого — с ключом администратора)."""
+    con = db()
+    row = con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()
+    if not row:
+        return err("Объявление не найдено", 404, "not_found")
+    if not edit_rights(row):
+        return err("Нет прав на изменение", 403, "forbidden")
+    d = request.get_json(silent=True)
+    if not isinstance(d, dict):
+        d = request.form.to_dict()
+
+    title = clean(d["title"], 80) if "title" in d else row["title"]
+    price = to_int(d["price"], 0, MAX_PRICE) if "price" in d else row["price"]
+    city = d["city"] if "city" in d else row["city"]
+    phone = clean(d["phone"], 20) if "phone" in d else row["phone"]
+    bad = check_fields(title, price, city, phone)
+    if bad:
+        return bad
+    descr = clean(d["desc"], 3000) if "desc" in d else row["descr"]
+    name = (clean(d["name"], 30) or "Продавец") if "name" in d else row["name"]
+    sold = (1 if d["sold"] in (True, 1, "1", "true", "on") else 0) if "sold" in d else row["sold"]
+
+    extra = json.loads(row["extra"])
+    incoming = parse_extra(row["cat"], d)
+    for key in EXTRA_FIELDS.get(row["cat"], ()):
+        if key in d:
+            extra[key] = incoming[key]
+
+    con.execute(
+        "UPDATE listings SET title = ?, price = ?, city = ?, descr = ?, name = ?, phone = ?, extra = ?,"
+        " sold = ?, updated = ? WHERE id = ?",
+        (title, price, city, descr, name, phone, json.dumps(extra, ensure_ascii=False), sold,
+         int(time.time()), lid),
+    )
+    con.commit()
+    return public(con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone())
+
+
 @app.delete("/api/listings/<lid>")
 def delete_listing(lid):
-    token = request.headers.get("X-Edit-Token", "")
     con = db()
-    row = con.execute("SELECT token_hash, photos FROM listings WHERE id = ?", (lid,)).fetchone()
+    row = con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()
     if not row:
-        return err("Объявление не найдено", 404)
-    is_owner = token and hmac.compare_digest(sha(token), row["token_hash"])
-    is_admin = ADMIN_TOKEN and token and hmac.compare_digest(token, ADMIN_TOKEN)
-    if not (is_owner or is_admin):
-        return err("Нет прав на удаление", 403)
+        return err("Объявление не найдено", 404, "not_found")
+    if not edit_rights(row):
+        return err("Нет прав на удаление", 403, "forbidden")
     con.execute("DELETE FROM listings WHERE id = ?", (lid,))
     con.commit()
     delete_photo_files(json.loads(row["photos"]))
@@ -296,16 +405,21 @@ def admin_check():
 
 @app.errorhandler(413)
 def too_large(_e):
-    return err("Фото слишком большие (максимум 40 МБ за раз)", 413)
+    return err("Фото слишком большие (максимум 40 МБ за раз)", 413, "too_large")
 
 
 @app.errorhandler(404)
 def not_found(_e):
     if request.path.startswith("/api/"):
-        return err("Не найдено", 404)
+        return err("Не найдено", 404, "not_found")
     if DEV:
         return send_from_directory(os.path.dirname(HERE), "index.html")
-    return err("Не найдено", 404)
+    return err("Не найдено", 404, "not_found")
+
+
+@app.errorhandler(405)
+def not_allowed(_e):
+    return err("Метод не поддерживается", 405, "bad_request")
 
 
 # ---------------------------------------------------------------- dev only

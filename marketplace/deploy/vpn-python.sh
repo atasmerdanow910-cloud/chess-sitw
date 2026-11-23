@@ -2,7 +2,7 @@
 # Маркетплейс и «VPN Python» на одном сервере (nginx + HTTPS):
 #   https://DOMAIN           → маркетплейс SystemMarket
 #   https://DOMAIN/admin     → админка VPN Python
-#   https://market.DOMAIN    → сайт VPN Python (код из ветки ccr-0774bf1d-0dfpmd)
+#   https://market.DOMAIN    → сайт VPN Python (папка vpn-python/ этой же ветки)
 #
 # Перед запуском в DNS нужна запись A: market → IP сервера.
 # Запуск от root:
@@ -16,7 +16,7 @@ set -euo pipefail
 DOMAIN="${DOMAIN:-sstymmarket.click}"
 VPN_HOST="${VPN_HOST:-market.$DOMAIN}"
 BRANCH="${BRANCH:-ccr-d10ab0ac-yrj6qu}"
-VPN_REF="${VPN_REF:-125f2a31df81f00f69693e81d8994e4b1095dded}"
+VPN_REF="${VPN_REF:-$BRANCH}"   # VPN Python лежит в той же ветке/коммите, что и маркетплейс
 REPO="atasmerdanow910-cloud/chess-sitw"
 VPN_DIR=/opt/vpn-python
 VPN_USER=vpnpy
@@ -112,8 +112,9 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 curl -fsSL "https://codeload.github.com/$REPO/tar.gz/$VPN_REF" -o "$TMP/vpn.tgz"
 tar -xzf "$TMP/vpn.tgz" -C "$TMP"
-SRC="$(find "$TMP" -mindepth 1 -maxdepth 1 -type d -name 'chess-sitw-*' | head -1)"
-[ -n "$SRC" ] && [ -f "$SRC/app.py" ] || fail "В архиве нет app.py"
+TOP="$(find "$TMP" -mindepth 1 -maxdepth 1 -type d -name 'chess-sitw-*' | head -1)"
+SRC="$TOP/vpn-python"
+[ -n "$TOP" ] && [ -f "$SRC/app.py" ] || fail "В архиве нет vpn-python/app.py — проверьте BRANCH"
 id -u "$VPN_USER" >/dev/null 2>&1 || useradd --system --home-dir "$VPN_DIR" --shell /usr/sbin/nologin "$VPN_USER"
 mkdir -p "$VPN_DIR/data"
 rm -rf "$VPN_DIR/templates" "$VPN_DIR/static"

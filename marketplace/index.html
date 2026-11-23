@@ -20,6 +20,8 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ru_RU">
+<meta property="og:locale:alternate" content="tr_TR">
+<meta property="og:locale:alternate" content="tk_TM">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"SystemMarket","alternateName":"System Market","url":"__SITE_URL__/"}
@@ -27,307 +29,474 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"SystemMarket","url":"__SITE_URL__/","logo":"__SITE_URL__/favicon-512.png"}
 </script>
+<script>
+/* Тема применяется до отрисовки, чтобы экран не мигал */
+(function(){try{var t=JSON.parse(localStorage.getItem('sm_theme')||'"auto"');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
 <style>
 :root{
-  --bg:#f2f3f5; --surface:#ffffff; --surface-2:#eceef1; --text:#111418; --muted:#687080;
-  --border:#e1e4e8; --accent:#15803d; --accent-hover:#166534; --accent-ink:#ffffff; --accent-soft:#e7f5ec;
-  --danger:#c62828; --star:#e11d48; --skeleton:#e6e8ec;
-  --shadow:0 1px 2px rgba(16,24,40,.05),0 4px 14px rgba(16,24,40,.06);
-  --radius:14px;
+  --bg:#f3f5f7; --surface:#ffffff; --surface-2:#eff2f5; --surface-3:#e5e9ee; --text:#0f1419; --muted:#667085;
+  --border:#e3e7ec; --accent:#15803d; --accent-2:#22c55e; --accent-hover:#116a33; --accent-ink:#ffffff; --accent-soft:#e7f5ec;
+  --danger:#d92d20; --star:#e11d48; --glass:rgba(255,255,255,.8); --skeleton:#e7ebef;
+  --shadow-sm:0 1px 2px rgba(16,24,40,.06);
+  --shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.07);
+  --shadow-lg:0 16px 48px rgba(16,24,40,.18);
+  --radius:18px; --radius-sm:12px;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0d0f12; --surface:#16191e; --surface-2:#1f232a; --text:#eceef1; --muted:#98a0ad;
-    --border:#272c34; --accent:#22a355; --accent-hover:#2bb862; --accent-ink:#ffffff; --accent-soft:#132a1c;
-    --danger:#ef5350; --star:#fb7185; --skeleton:#1f232a;
-    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+  :root:not([data-theme="light"]){
+    --bg:#0a0c0f; --surface:#14171c; --surface-2:#1b1f26; --surface-3:#242a33; --text:#eef1f5; --muted:#98a2b3;
+    --border:#262c35; --accent:#22a355; --accent-2:#4ade80; --accent-hover:#2bb862; --accent-ink:#ffffff; --accent-soft:#10261a;
+    --danger:#f97066; --star:#fb7185; --glass:rgba(17,20,25,.82); --skeleton:#1c2129;
+    --shadow-sm:none; --shadow:0 1px 2px rgba(0,0,0,.45),0 8px 24px rgba(0,0,0,.35); --shadow-lg:0 16px 48px rgba(0,0,0,.55);
+    color-scheme:dark;
   }
+}
+:root[data-theme="dark"]{
+  --bg:#0a0c0f; --surface:#14171c; --surface-2:#1b1f26; --surface-3:#242a33; --text:#eef1f5; --muted:#98a2b3;
+  --border:#262c35; --accent:#22a355; --accent-2:#4ade80; --accent-hover:#2bb862; --accent-ink:#ffffff; --accent-soft:#10261a;
+  --danger:#f97066; --star:#fb7185; --glass:rgba(17,20,25,.82); --skeleton:#1c2129;
+  --shadow-sm:none; --shadow:0 1px 2px rgba(0,0,0,.45),0 8px 24px rgba(0,0,0,.35); --shadow-lg:0 16px 48px rgba(0,0,0,.55);
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--text);
   font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;
-  -webkit-tap-highlight-color:transparent;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  -webkit-tap-highlight-color:transparent;padding-bottom:calc(98px + env(safe-area-inset-bottom))}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 a{color:inherit;text-decoration:none}
+[hidden]{display:none !important}
 svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.f{fill:currentColor;stroke:none}
 .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
 .sr{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
 
-/* top bar */
-.topbar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border)}
-.topbar .wrap{display:flex;gap:12px;align-items:center;height:60px}
-.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;letter-spacing:-.02em;white-space:nowrap}
-.logo .mark{width:32px;height:32px;display:block;flex:none}
+/* ---------- кнопки ---------- */
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:700;background:var(--accent);color:var(--accent-ink);
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;transition:background .15s,transform .1s}
+.btn:hover{background:var(--accent-hover)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.7;cursor:default}
+.btn.ghost{background:var(--surface-2);color:var(--text)}
+.btn.ghost:hover{background:var(--surface-3)}
+.btn.line{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+.btn.block{width:100%}
+.btn.sm{padding:8px 12px;font-size:14px;border-radius:10px}
+.btn .bar{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.22);width:0;transition:width .2s}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:0;background:var(--surface-2);display:grid;place-items:center;flex:none;color:var(--text)}
+.icon-btn:hover{background:var(--surface-3)}
+
+/* ---------- шапка ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:var(--glass);backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid var(--border)}
+.topbar-in{display:flex;gap:8px;align-items:center;height:58px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;letter-spacing:-.02em;white-space:nowrap}
+.logo .mark{width:34px;height:34px;display:block}
 .logo .txt span{color:var(--accent)}
-@media (max-width:420px){.logo .txt{display:none}}
-.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:10px;padding:0 12px;min-width:0;height:40px;border:1px solid transparent}
+.page-title{font-size:19px;font-weight:800;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp{flex:1}
+.lang-btn{height:40px;border-radius:12px;border:0;background:var(--surface-2);display:flex;align-items:center;gap:6px;padding:0 11px;font-weight:800;font-size:13px;letter-spacing:.02em}
+.lang-btn:hover{background:var(--surface-3)}
+.lang-btn .i{width:18px;height:18px;color:var(--muted)}
+.searchrow{display:flex;gap:8px;padding-bottom:10px}
+.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:14px;padding:0 12px;min-width:0;height:46px;border:1.5px solid transparent;transition:border-color .15s,background .15s}
 .search:focus-within{border-color:var(--accent);background:var(--surface)}
-.search input{flex:1;border:0;background:transparent;outline:none;min-width:0;height:100%}
+.search input{flex:1;border:0;background:transparent;outline:none;min-width:0;height:100%;font-size:16px}
+.search input::-webkit-search-cancel-button{display:none}
 .search .i{color:var(--muted)}
-.page-title{font-size:19px;font-weight:800;margin:0;flex:1}
+.q-clear{border:0;background:var(--surface-3);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.q-clear .i{width:14px;height:14px;stroke-width:2.4}
+.filter-btn{position:relative;width:46px;height:46px;border-radius:14px;border:0;background:var(--surface-2);display:grid;place-items:center}
+.filter-btn:hover{background:var(--surface-3)}
+.filter-btn.on{background:var(--accent);color:var(--accent-ink)}
+.fcount{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:var(--star);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px;border:2px solid var(--surface)}
 
-/* categories */
-.cats{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 2px;scrollbar-width:none;max-width:1120px;margin:0 auto}
+/* ---------- категории ---------- */
+.cats{display:flex;gap:10px;overflow-x:auto;padding:14px 16px 4px;scrollbar-width:none;max-width:1120px;margin:0 auto;scroll-padding:16px}
 .cats::-webkit-scrollbar{display:none}
-.chip{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);
-  border-radius:10px;padding:8px 12px;font-weight:600;font-size:14px;white-space:nowrap}
-.chip .i{width:18px;height:18px;color:var(--muted)}
-.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.chip.on .i{color:var(--accent-ink)}
-.filters{display:flex;gap:8px;padding:10px 0 0}
-.filters select{flex:1;min-width:0;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:8px 10px;height:40px}
-.count{color:var(--muted);font-size:13px;margin:10px 0}
+.cat{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:76px;border:0;background:transparent;padding:0;text-align:center}
+.cat .ci{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;color:var(--c);background:var(--surface);
+  background:color-mix(in srgb,var(--c) 13%,var(--surface));box-shadow:var(--shadow-sm);transition:transform .15s,box-shadow .15s;position:relative}
+.cat .ci .i{width:26px;height:26px}
+.cat .cn{font-size:12px;font-weight:600;line-height:1.2;color:var(--text);max-width:76px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cat .cc{position:absolute;top:-6px;right:-8px;min-width:22px;height:20px;border-radius:10px;background:var(--surface);color:var(--muted);font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 6px;box-shadow:var(--shadow-sm);border:1px solid var(--border)}
+.cat.on .ci{background:var(--c);color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--c) 40%,transparent);transform:translateY(-1px)}
+.cat.on .cn{color:var(--c);font-weight:800}
+.c-all{--c:#15803d}.c-auto{--c:#2563eb}.c-realty{--c:#7c3aed}.c-phones{--c:#0891b2}.c-electronics{--c:#ea580c}
+.c-home{--c:#ca8a04}.c-clothes{--c:#db2777}.c-services{--c:#059669}.c-other{--c:#64748b}
 
-/* grid / cards */
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+/* ---------- главный баннер ---------- */
+.hero{position:relative;overflow:hidden;margin:14px 0 4px;border-radius:22px;padding:22px 20px;color:#fff;
+  background:radial-gradient(120% 140% at 100% 0%,#2bd46f 0%,rgba(43,212,111,0) 46%),linear-gradient(135deg,#0b4d26 0%,#15803d 55%,#1f9d50 100%);
+  box-shadow:0 14px 34px rgba(21,128,61,.28)}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.08)}
+.hero::before{width:220px;height:220px;right:-70px;bottom:-110px}
+.hero::after{width:120px;height:120px;right:70px;top:-60px}
+.hero h2{margin:0 0 6px;font-size:23px;line-height:1.2;letter-spacing:-.02em;max-width:520px;position:relative}
+.hero p{margin:0 0 16px;opacity:.9;position:relative;font-weight:600}
+.hero .btn{background:#fff;color:#0b4d26;position:relative}
+.hero .btn:hover{background:#eafff1}
+@media (min-width:720px){.hero{padding:30px 32px}.hero h2{font-size:30px}}
+
+/* ---------- ленты ---------- */
+.sec-head{display:flex;align-items:center;gap:10px;margin:18px 0 10px}
+.sec-head h3{margin:0;font-size:18px;letter-spacing:-.01em;flex:1;min-width:0}
+.sec-head .link{border:0;background:none;color:var(--muted);font-weight:600;font-size:14px;padding:4px}
+.sec-head select{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:7px 10px;font-size:14px;max-width:52%}
+.strip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin:0 -16px;padding-left:16px;padding-right:16px;scroll-padding:16px}
+.strip::-webkit-scrollbar{display:none}
+.mini{flex:none;width:128px;background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.mini .ph{aspect-ratio:1}
+.mini .body{padding:7px 9px 9px}
+.mini .price{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .title{font-size:12px;-webkit-line-clamp:1}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media (min-width:640px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}
-@media (min-width:960px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}
-.card{background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:relative;display:flex;flex-direction:column}
-.ph{position:relative;aspect-ratio:4/3;background:var(--surface-2);display:block}
+@media (min-width:960px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}}
+.card{background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:relative;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+@media (hover:hover){.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}}
+.ph{position:relative;aspect-ratio:4/3;background:var(--surface-2);display:block;overflow:hidden}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .nophoto{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted)}
 .nophoto .i{width:34px;height:34px;stroke-width:1.5}
-.badge{position:absolute;left:8px;bottom:8px;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:600;border-radius:6px;padding:2px 6px}
+.badge{position:absolute;left:8px;bottom:8px;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:700;border-radius:8px;padding:3px 7px;backdrop-filter:blur(4px)}
 .badge .i{width:14px;height:14px}
-.heart{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.92);
-  display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.18);color:#1f2937}
+.new-badge{position:absolute;left:8px;top:8px;background:var(--accent-2);color:#05341a;font-size:11px;font-weight:800;border-radius:8px;padding:3px 8px;letter-spacing:.02em;text-transform:uppercase}
+.sold-badge{position:absolute;left:8px;top:8px;background:#111827;color:#fff;font-size:11px;font-weight:800;border-radius:8px;padding:3px 8px;text-transform:uppercase;letter-spacing:.03em}
+.card.sold .ph img{filter:grayscale(1) brightness(.85)}
+.card.sold .price{color:var(--muted);text-decoration:line-through}
+.heart{position:absolute;right:8px;top:8px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.92);
+  display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.18);color:#1f2937;transition:transform .15s}
+.heart:active{transform:scale(.88)}
 .heart .i{width:18px;height:18px}
 .heart.on .i,.icon-btn.on .i{fill:var(--star);stroke:var(--star)}
-.card .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px;flex:1}
+.card .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px;flex:1}
 .price{font-weight:800;font-size:17px;letter-spacing:-.01em}
 .title{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.meta{color:var(--muted);font-size:12px;margin-top:auto;padding-top:4px}
+.meta{color:var(--muted);font-size:12px;margin-top:auto;padding-top:5px;display:flex;align-items:center;gap:4px;min-width:0}
+.meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* skeleton */
 .sk{background:var(--skeleton);border-radius:8px;position:relative;overflow:hidden}
-.sk::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:sh 1.2s infinite}
+.sk::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:sh 1.2s infinite}
 @keyframes sh{to{transform:translateX(100%)}}
-@media (prefers-color-scheme: dark){.sk::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}}
+:root[data-theme="dark"] .sk::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sk::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}}
 
-.empty{text-align:center;padding:56px 16px;color:var(--muted)}
-.empty .ic{width:64px;height:64px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;margin:0 auto 12px}
-.empty .ic .i{width:30px;height:30px}
-.empty b{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
-.btn{border:0;border-radius:10px;padding:12px 18px;font-weight:700;background:var(--accent);color:var(--accent-ink);
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
-.btn:hover{background:var(--accent-hover)}
-.btn:disabled{opacity:.75;cursor:default}
-.btn.ghost{background:var(--surface-2);color:var(--text)}
-.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
-.btn.block{width:100%}
-.btn .bar{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.22);width:0;transition:width .2s}
+.empty{text-align:center;padding:48px 16px;color:var(--muted)}
+.empty .ic{width:72px;height:72px;border-radius:24px;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;margin:0 auto 14px;color:var(--accent)}
+.empty .ic .i{width:32px;height:32px}
+.empty b{display:block;color:var(--text);font-size:17px;margin-bottom:4px}
+.empty p{margin:0 0 16px}
 .more{display:flex;justify-content:center;margin:18px 0}
 
-/* bottom nav */
-.bottombar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
-.bottombar .wrap{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;height:60px;padding:0 4px}
-.nav{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;line-height:1.1;color:var(--muted);font-weight:600;white-space:nowrap}
+/* ---------- нижнее меню ---------- */
+.bottombar{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;max-width:560px;margin:0 auto;
+  background:var(--glass);backdrop-filter:saturate(1.6) blur(16px);-webkit-backdrop-filter:saturate(1.6) blur(16px);
+  border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-lg)}
+.bottombar .row5{display:grid;grid-template-columns:repeat(5,1fr);align-items:center;height:66px;padding:0 4px}
+.nav{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;line-height:1.1;color:var(--muted);font-weight:700;white-space:nowrap;min-width:0}
+.nav span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .nav .i{width:23px;height:23px}
 .nav.on{color:var(--accent)}
-.nav.add .plus{width:46px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
-.nav.add .plus .i{width:22px;height:22px;stroke-width:2.4}
+.nav.on .i{stroke-width:2.2}
+.nav.add .plus{width:50px;height:50px;margin-top:-26px;border-radius:17px;background:linear-gradient(135deg,#1f9d50,#15803d);color:#fff;display:grid;place-items:center;
+  box-shadow:0 8px 20px rgba(21,128,61,.45);border:3px solid var(--surface)}
+.nav.add .plus .i{width:24px;height:24px;stroke-width:2.6}
 .nav.add{color:var(--text)}
 
-/* sheets */
+/* ---------- окна ---------- */
 .sheet{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;display:none;overscroll-behavior:contain}
 .sheet.open{display:block}
 @media (min-width:760px){
-  .sheet{background:rgba(0,0,0,.5);padding:32px 16px}
-  .sheet .panel{max-width:720px;margin:0 auto;border-radius:18px;overflow:hidden;min-height:0}
+  .sheet{background:rgba(0,0,0,.55);padding:32px 16px}
+  .sheet .panel{max-width:720px;margin:0 auto;border-radius:20px;overflow:hidden;min-height:0}
 }
 .panel{background:var(--bg);min-height:100%}
-.sheet-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border)}
+.sheet-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
 .sheet-head h2{font-size:16px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.icon-btn{width:40px;height:40px;border-radius:10px;border:0;background:var(--surface-2);display:grid;place-items:center;flex:none}
+
+.modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.modal-card{background:var(--surface);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:var(--shadow-lg);animation:up .2s ease-out}
+@media (min-width:640px){.modal{align-items:center}.modal-card{border-radius:22px}}
+@keyframes up{from{transform:translateY(30px);opacity:.4}}
+.modal-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.modal-head h3{margin:0;flex:1;font-size:18px}
 
 .gallery{position:relative;background:#000}
 .track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 .track::-webkit-scrollbar{display:none}
 .track img{flex:none;width:100%;aspect-ratio:4/3;object-fit:contain;scroll-snap-align:center;background:#000;cursor:zoom-in}
 .gallery .counter{position:absolute;right:12px;bottom:12px;background:rgba(0,0,0,.6);color:#fff;font-size:13px;padding:3px 9px;border-radius:8px}
-.gallery .nophoto{position:static;aspect-ratio:16/9;background:var(--surface-2)}
-.dots{display:flex;gap:6px;justify-content:center;padding:10px 0 0}
+.gallery .sold-banner{position:absolute;left:12px;top:12px;background:#111827;color:#fff;font-weight:800;border-radius:10px;padding:6px 10px;font-size:13px;display:flex;gap:6px;align-items:center}
+.gallery .sold-banner .i{width:16px;height:16px}
 .thumbs{display:flex;gap:6px;overflow-x:auto;padding:8px 12px 0;scrollbar-width:none}
-.thumbs img{width:64px;height:48px;object-fit:cover;border-radius:6px;opacity:.6;cursor:pointer;flex:none;border:2px solid transparent}
+.thumbs img{width:64px;height:48px;object-fit:cover;border-radius:8px;opacity:.55;cursor:pointer;flex:none;border:2px solid transparent}
 .thumbs img.on{opacity:1;border-color:var(--accent)}
 .detail{padding:16px;display:flex;flex-direction:column;gap:14px}
-.detail .price{font-size:26px}
+.detail .price{font-size:28px}
 .detail h1{font-size:19px;margin:2px 0 0;line-height:1.3}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 9px;font-size:13px;color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:4px 9px;font-size:13px;color:var(--muted)}
 .tag .i{width:15px;height:15px}
 .box{background:var(--surface);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
 .box h3{margin:0 0 10px;font-size:15px}
 .specs{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:0}
 .specs dt{color:var(--muted);font-size:12px}
-.specs dd{margin:0;font-weight:600}
+.specs dd{margin:0;font-weight:700}
 .desc{white-space:pre-wrap;margin:0;word-break:break-word}
 .seller{display:flex;align-items:center;gap:12px}
-.avatar{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:18px;flex:none}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:18px;flex:none}
 .seller .who{flex:1;min-width:0}
 .seller .who b{display:block}
 .row{display:flex;gap:10px}
-.row > *{flex:1}
+.row > *{flex:1;min-width:0}
+.share{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.share a,.share button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:14px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:700}
+.share .i{width:24px;height:24px}
+.share .tg{color:#229ed9}.share .wa{color:#25d366}.share .ln{color:var(--accent)}
+.owner{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.owner .btn{padding:11px 10px;font-size:14px}
+.owner .wide{grid-column:1/-1}
 .foot{color:var(--muted);font-size:12px;text-align:center}
+.callbar{position:sticky;bottom:0;z-index:2;display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border)}
+.callbar .btn{flex:1}
 
-.viewer{position:fixed;inset:0;z-index:90;background:#000;display:none;align-items:center;justify-content:center}
-.viewer.open{display:flex}
-.viewer img{max-width:100%;max-height:100%;object-fit:contain}
-.viewer .icon-btn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.15);color:#fff}
+.viewer{position:fixed;inset:0;z-index:90;background:#000;display:none}
+.viewer.open{display:block}
+.vtrack{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.vtrack::-webkit-scrollbar{display:none}
+.vtrack img{flex:none;width:100%;height:100%;object-fit:contain;scroll-snap-align:center}
+.viewer .icon-btn{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;background:rgba(255,255,255,.16);color:#fff}
+.viewer .vcount{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));color:#fff;background:rgba(255,255,255,.16);border-radius:10px;padding:4px 10px;font-size:14px}
 
-/* form */
+/* ---------- форма ---------- */
 form{padding:16px;display:flex;flex-direction:column;gap:16px}
 .field{display:flex;flex-direction:column;gap:6px}
-.field > label,.field > .lbl{font-weight:600;font-size:14px}
+.field > label,.field > .lbl{font-weight:700;font-size:14px}
 .field small{color:var(--muted);font-size:12px;font-weight:400}
-.field input,.field select,.field textarea{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:11px 12px;outline:none;width:100%}
+.field input,.field select,.field textarea{border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:12px;outline:none;width:100%;font-size:16px}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .field textarea{min-height:120px;resize:vertical}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .catpick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 @media (max-width:380px){.catpick{grid-template-columns:repeat(3,1fr)}}
-.catpick button{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:600;text-align:center}
-.catpick button .i{width:24px;height:24px;color:var(--muted)}
-.catpick button.on{border-color:var(--accent);background:var(--accent-soft)}
-.catpick button.on .i{color:var(--accent)}
+.catpick button{border:1.5px solid var(--border);background:var(--surface);border-radius:14px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:700;text-align:center;line-height:1.2}
+.catpick button .i{width:24px;height:24px;color:var(--c)}
+.catpick button.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface))}
 .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 @media (min-width:520px){.photos{grid-template-columns:repeat(4,1fr)}}
-.slot{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--surface-2)}
+.slot{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface-2)}
 .slot img{width:100%;height:100%;object-fit:cover;display:block}
 .slot .x{position:absolute;right:4px;top:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center}
 .slot .x .i{width:14px;height:14px;stroke-width:2.4}
-.slot .main{position:absolute;left:4px;bottom:4px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px}
-.addph{aspect-ratio:1;border-radius:10px;border:1.5px dashed var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;text-align:center;padding:4px}
+.slot .main{position:absolute;left:4px;bottom:4px;background:var(--accent);color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px}
+.addph{aspect-ratio:1;border-radius:12px;border:1.5px dashed var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--accent);font-size:12px;font-weight:800;cursor:pointer;text-align:center;padding:4px}
 .addph .i{width:28px;height:28px}
 .err{color:var(--danger);font-size:13px;display:none}
 .err.show{display:block}
 .section{display:none;flex-direction:column;gap:14px}
 .section.show{display:flex}
+.note{display:flex;gap:8px;align-items:flex-start;background:var(--accent-soft);color:var(--text);border-radius:12px;padding:10px 12px;font-size:13px}
+.note .i{color:var(--accent);width:18px;height:18px;margin-top:1px}
 details.adm summary{cursor:pointer;color:var(--muted);font-size:13px}
 
-.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(16px);opacity:0;
-  background:#111827;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:100;transition:.2s;pointer-events:none;max-width:92vw;text-align:center}
+.seg{display:flex;background:var(--surface-2);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:9px 6px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+.plist{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+
+/* ---------- выбор языка ---------- */
+.langpick{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;
+  background:radial-gradient(90% 60% at 100% 0%,rgba(43,212,111,.55) 0%,rgba(43,212,111,0) 60%),linear-gradient(160deg,#062e17 0%,#0b4d26 45%,#15803d 100%)}
+.lp-card{position:relative;width:100%;max-width:400px;background:var(--surface);border-radius:26px;padding:28px 20px 20px;box-shadow:0 30px 80px rgba(0,0,0,.35);text-align:center;animation:up .25s ease-out}
+.lp-logo{width:64px;height:64px;display:block;margin:0 auto 10px;filter:drop-shadow(0 8px 18px rgba(21,128,61,.35))}
+.lp-brand{font-weight:800;font-size:22px;letter-spacing:-.02em}
+.lp-brand span{color:var(--accent)}
+.lp-title{margin:14px 0 18px;font-size:15px;line-height:1.6;color:var(--muted);font-weight:600}
+.lp-list{display:flex;flex-direction:column;gap:10px}
+.lp-list button{display:flex;align-items:center;gap:14px;border:1.5px solid var(--border);background:var(--surface);border-radius:16px;padding:14px 16px;text-align:left;transition:border-color .15s,transform .1s}
+.lp-list button:hover{border-color:var(--accent)}
+.lp-list button:active{transform:scale(.98)}
+.lp-list button.on{border-color:var(--accent);background:var(--accent-soft)}
+.lp-code{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;flex:none;letter-spacing:.03em}
+.lp-code.ru{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
+.lp-code.tr{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+.lp-code.tk{background:linear-gradient(135deg,#22a355,#15803d)}
+.lp-name{flex:1;font-weight:800;font-size:17px}
+.lp-list .i{color:var(--muted)}
+.lp-close{position:absolute;top:12px;right:12px}
+
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(16px);opacity:0;
+  background:#111827;color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:110;transition:.2s;pointer-events:none;max-width:92vw;text-align:center;box-shadow:var(--shadow-lg)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<header class="topbar"><div class="wrap" id="topbar"></div></header>
-<nav class="cats" id="cats" aria-label="Категории"></nav>
+<!-- Выбор языка -->
+<div class="langpick" id="langPick" hidden>
+  <div class="lp-card" role="dialog" aria-modal="true" aria-labelledby="lpTitle">
+    <button class="icon-btn lp-close" id="lpClose" type="button" aria-label="✕" hidden><svg class="i"><use href="#i-x"/></svg></button>
+    <img class="lp-logo" src="/favicon.svg" alt="">
+    <div class="lp-brand">System<span>Market</span></div>
+    <p class="lp-title" id="lpTitle">Выберите язык<br>Dil seçin<br>Dili saýlaň</p>
+    <div class="lp-list" id="lpList">
+      <button type="button" data-lang="ru"><span class="lp-code ru">RU</span><span class="lp-name">Русский</span><svg class="i"><use href="#i-chev"/></svg></button>
+      <button type="button" data-lang="tr"><span class="lp-code tr">TR</span><span class="lp-name">Türkçe</span><svg class="i"><use href="#i-chev"/></svg></button>
+      <button type="button" data-lang="tk"><span class="lp-code tk">TM</span><span class="lp-name">Türkmençe</span><svg class="i"><use href="#i-chev"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="logo" href="#/" id="logoLink" data-i18n-aria="to_home"><img class="mark" src="/favicon.svg" alt=""><span class="txt">System<span>Market</span></span></a>
+    <h1 class="page-title" id="pageTitle" hidden></h1>
+    <span class="sp"></span>
+    <button class="icon-btn" id="themeBtn" type="button" data-i18n-aria="theme"><svg class="i"><use href="#i-moon"/></svg></button>
+    <button class="lang-btn" id="langBtn" type="button" data-i18n-aria="language"><svg class="i"><use href="#i-globe"/></svg><span id="langCode">RU</span></button>
+  </div>
+  <div class="wrap searchrow" id="searchRow">
+    <label class="search"><svg class="i"><use href="#i-search"/></svg>
+      <input id="q" type="search" enterkeyhint="search" autocomplete="off" data-i18n-ph="search_ph" placeholder="Поиск объявлений">
+      <button type="button" class="q-clear" id="qClear" data-i18n-aria="clear" hidden><svg class="i"><use href="#i-x"/></svg></button>
+    </label>
+    <button class="filter-btn" id="filterBtn" type="button" data-i18n-aria="filters"><svg class="i"><use href="#i-sliders"/></svg><span class="fcount" id="fCount" hidden></span></button>
+  </div>
+</header>
+<nav class="cats" id="cats" data-i18n-aria="categories"></nav>
 <main class="wrap">
-  <h1 class="sr">SystemMarket — объявления: авто, недвижимость, телефоны, электроника</h1>
-  <div id="filters"></div>
-  <div class="count" id="count"></div>
+  <h1 class="sr" data-i18n="seo_h1">SystemMarket — объявления: авто, недвижимость, телефоны, электроника</h1>
+  <div id="hero"></div>
+  <div id="recent"></div>
+  <div id="listHead"></div>
   <div id="list"></div>
+  <div id="sentinel"></div>
 </main>
 
-<nav class="bottombar" aria-label="Меню">
-  <div class="wrap">
-    <a class="nav" href="#/" data-nav="home"><svg class="i"><use href="#i-home"/></svg>Главная</a>
-    <a class="nav" href="#/fav" data-nav="fav"><svg class="i"><use href="#i-heart"/></svg>Избранное</a>
-    <a class="nav add" href="#/add" data-nav="add"><span class="plus"><svg class="i"><use href="#i-plus"/></svg></span>Подать</a>
-    <a class="nav" href="#/my" data-nav="my"><svg class="i"><use href="#i-list"/></svg>Мои</a>
-    <a class="nav" href="#/profile" data-nav="profile"><svg class="i"><use href="#i-user"/></svg>Профиль</a>
+<nav class="bottombar" data-i18n-aria="menu">
+  <div class="row5">
+    <a class="nav" href="#/" data-nav="home"><svg class="i"><use href="#i-home"/></svg><span data-i18n="nav_home">Главная</span></a>
+    <a class="nav" href="#/fav" data-nav="fav"><svg class="i"><use href="#i-heart"/></svg><span data-i18n="nav_fav">Избранное</span></a>
+    <a class="nav add" href="#/add" data-nav="add"><span class="plus"><svg class="i"><use href="#i-plus"/></svg></span><span data-i18n="nav_add">Подать</span></a>
+    <a class="nav" href="#/my" data-nav="my"><svg class="i"><use href="#i-list"/></svg><span data-i18n="nav_my">Мои</span></a>
+    <a class="nav" href="#/profile" data-nav="profile"><svg class="i"><use href="#i-user"/></svg><span data-i18n="nav_profile">Профиль</span></a>
   </div>
 </nav>
 
-<div class="sheet" id="detailSheet" role="dialog" aria-modal="true" aria-label="Объявление">
+<div class="sheet" id="detailSheet" role="dialog" aria-modal="true">
   <div class="panel">
     <div class="sheet-head">
-      <button class="icon-btn" data-close aria-label="Назад"><svg class="i"><use href="#i-back"/></svg></button>
-      <h2 id="detailHeadTitle">Объявление</h2>
-      <button class="icon-btn" id="shareBtn" aria-label="Поделиться"><svg class="i"><use href="#i-share"/></svg></button>
-      <button class="icon-btn" id="detailFav" aria-label="В избранное"><svg class="i"><use href="#i-heart"/></svg></button>
+      <button class="icon-btn" data-close type="button" data-i18n-aria="back"><svg class="i"><use href="#i-back"/></svg></button>
+      <h2 id="detailHeadTitle"></h2>
+      <button class="icon-btn" id="shareBtn" type="button" data-i18n-aria="share"><svg class="i"><use href="#i-share"/></svg></button>
+      <button class="icon-btn" id="detailFav" type="button" data-i18n-aria="fav_add"><svg class="i"><use href="#i-heart"/></svg></button>
     </div>
     <div id="detailBody"></div>
   </div>
 </div>
 
-<div class="sheet" id="formSheet" role="dialog" aria-modal="true" aria-label="Новое объявление">
+<div class="sheet" id="formSheet" role="dialog" aria-modal="true">
   <div class="panel">
     <div class="sheet-head">
-      <button class="icon-btn" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button>
-      <h2>Новое объявление</h2>
+      <button class="icon-btn" data-close type="button" data-i18n-aria="close"><svg class="i"><use href="#i-x"/></svg></button>
+      <h2 id="formTitle" data-i18n="new_listing">Новое объявление</h2>
     </div>
     <form id="addForm" novalidate>
-      <div class="field">
-        <span class="lbl">Категория</span>
+      <div class="note edit-only" hidden><svg class="i"><use href="#i-info"/></svg><span data-i18n="photos_locked">Фото и категорию изменить нельзя</span></div>
+      <div class="field add-only">
+        <span class="lbl" data-i18n="category">Категория</span>
         <div class="catpick" id="catPick"></div>
-        <div class="err" id="errCat">Выберите категорию</div>
+        <div class="err" id="errCat" data-i18n="err_cat">Выберите категорию</div>
       </div>
 
-      <div class="field">
-        <span class="lbl">Фотографии <small>от 1 до 6 — только ваши реальные фото, первое будет главным</small></span>
+      <div class="field add-only">
+        <span class="lbl"><span data-i18n="photos">Фотографии</span> <small data-i18n="photos_hint">от 1 до 6 — только ваши реальные фото, первое будет главным</small></span>
         <div class="photos" id="photoGrid"></div>
-        <div class="err" id="errPhotos">Добавьте хотя бы одно фото товара</div>
+        <div class="err" id="errPhotos" data-i18n="err_photos">Добавьте хотя бы одно фото товара</div>
         <input class="sr" type="file" id="photoInput" accept="image/*" multiple>
       </div>
 
       <div class="field">
-        <label for="fTitle">Заголовок</label>
-        <input id="fTitle" name="title" maxlength="80" placeholder="Например: Toyota Camry 2018" autocomplete="off">
-        <div class="err" id="errTitle">Напишите заголовок (минимум 3 символа)</div>
+        <label for="fTitle" data-i18n="f_title">Заголовок</label>
+        <input id="fTitle" name="title" maxlength="80" data-i18n-ph="f_title_ph" placeholder="Например: Toyota Camry 2018" autocomplete="off">
+        <div class="err" id="errTitle" data-i18n="err_title">Напишите заголовок (минимум 3 символа)</div>
       </div>
 
       <div class="section" id="autoFields">
         <div class="grid2">
-          <div class="field"><label for="fBrand">Марка</label><select id="fBrand" name="brand"></select></div>
-          <div class="field"><label for="fModel">Модель</label><input id="fModel" name="model" maxlength="40" placeholder="Camry"></div>
-          <div class="field"><label for="fYear">Год выпуска</label><input id="fYear" name="year" type="number" inputmode="numeric" min="1950" max="2035" placeholder="2018"></div>
-          <div class="field"><label for="fMileage">Пробег, км</label><input id="fMileage" name="mileage" type="number" inputmode="numeric" min="0" placeholder="120000"></div>
-          <div class="field"><label for="fGear">Коробка</label><select id="fGear" name="gear"><option>Автомат</option><option>Механика</option><option>Вариатор</option><option>Робот</option></select></div>
-          <div class="field"><label for="fFuel">Топливо</label><select id="fFuel" name="fuel"><option>Бензин</option><option>Газ</option><option>Бензин + газ</option><option>Дизель</option><option>Гибрид</option><option>Электро</option></select></div>
+          <div class="field"><label for="fBrand" data-i18n="spec_brand">Марка</label><select id="fBrand" name="brand"></select></div>
+          <div class="field"><label for="fModel" data-i18n="spec_model">Модель</label><input id="fModel" name="model" maxlength="40" placeholder="Camry"></div>
+          <div class="field"><label for="fYear" data-i18n="spec_year">Год выпуска</label><input id="fYear" name="year" type="number" inputmode="numeric" min="1950" max="2035" placeholder="2018"></div>
+          <div class="field"><label for="fMileage" data-i18n="f_mileage">Пробег, км</label><input id="fMileage" name="mileage" type="number" inputmode="numeric" min="0" placeholder="120000"></div>
+          <div class="field"><label for="fGear" data-i18n="spec_gear">Коробка</label><select id="fGear" name="gear"></select></div>
+          <div class="field"><label for="fFuel" data-i18n="spec_fuel">Топливо</label><select id="fFuel" name="fuel"></select></div>
         </div>
       </div>
 
       <div class="section" id="realtyFields">
         <div class="grid2">
-          <div class="field"><label for="fDeal">Тип сделки</label><select id="fDeal" name="deal"><option>Продажа</option><option>Аренда</option></select></div>
-          <div class="field"><label for="fRooms">Комнат</label><input id="fRooms" name="rooms" type="number" inputmode="numeric" min="0" placeholder="3"></div>
-          <div class="field"><label for="fArea">Площадь, м²</label><input id="fArea" name="area" type="number" inputmode="numeric" min="0" placeholder="85"></div>
-          <div class="field"><label for="fFloor">Этаж</label><input id="fFloor" name="floor" type="number" inputmode="numeric" placeholder="5"></div>
+          <div class="field"><label for="fDeal" data-i18n="spec_deal">Тип сделки</label><select id="fDeal" name="deal"></select></div>
+          <div class="field"><label for="fRooms" data-i18n="spec_rooms">Комнат</label><input id="fRooms" name="rooms" type="number" inputmode="numeric" min="0" placeholder="3"></div>
+          <div class="field"><label for="fArea" data-i18n="f_area">Площадь, м²</label><input id="fArea" name="area" type="number" inputmode="numeric" min="0" placeholder="85"></div>
+          <div class="field"><label for="fFloor" data-i18n="spec_floor">Этаж</label><input id="fFloor" name="floor" type="number" inputmode="numeric" placeholder="5"></div>
         </div>
       </div>
 
       <div class="grid2">
         <div class="field">
-          <label for="fPrice">Цена, TMT</label>
-          <input id="fPrice" name="price" type="number" inputmode="numeric" min="0" placeholder="0 — договорная">
-          <div class="err" id="errPrice">Укажите цену</div>
+          <label for="fPrice" data-i18n="f_price">Цена, TMT</label>
+          <input id="fPrice" name="price" type="number" inputmode="numeric" min="0" data-i18n-ph="f_price_ph" placeholder="0 — договорная">
+          <div class="err" id="errPrice" data-i18n="err_price">Укажите цену</div>
         </div>
         <div class="field">
-          <label for="fCity">Город</label>
+          <label for="fCity" data-i18n="city">Город</label>
           <select id="fCity" name="city"></select>
         </div>
       </div>
 
       <div class="field">
-        <label for="fDesc">Описание</label>
-        <textarea id="fDesc" name="desc" maxlength="3000" placeholder="Состояние, комплектация, причина продажи…"></textarea>
+        <label for="fDesc" data-i18n="description">Описание</label>
+        <textarea id="fDesc" name="desc" maxlength="3000" data-i18n-ph="f_desc_ph" placeholder="Состояние, комплектация, причина продажи…"></textarea>
       </div>
 
       <div class="grid2">
         <div class="field">
-          <label for="fName">Имя</label>
-          <input id="fName" name="name" maxlength="30" placeholder="Как к вам обращаться" autocomplete="given-name">
+          <label for="fName" data-i18n="f_name">Имя</label>
+          <input id="fName" name="name" maxlength="30" data-i18n-ph="f_name_ph" placeholder="Как к вам обращаться" autocomplete="given-name">
         </div>
         <div class="field">
-          <label for="fPhone">Телефон</label>
+          <label for="fPhone" data-i18n="f_phone">Телефон</label>
           <input id="fPhone" name="phone" type="tel" inputmode="tel" maxlength="20" placeholder="+993 6X XXXXXX" autocomplete="tel">
-          <div class="err" id="errPhone">Укажите номер телефона</div>
+          <div class="err" id="errPhone" data-i18n="err_phone">Укажите номер телефона</div>
         </div>
       </div>
 
-      <button class="btn block" type="submit" id="submitBtn"><span class="bar" id="upBar"></span><span id="submitTxt">Опубликовать</span></button>
-      <div class="foot">Публикуя объявление, вы подтверждаете, что информация в нём достоверна.</div>
+      <button class="btn block" type="submit" id="submitBtn"><span class="bar" id="upBar"></span><span id="submitTxt" data-i18n="publish">Опубликовать</span></button>
+      <div class="foot add-only" data-i18n="form_foot">Публикуя объявление, вы подтверждаете, что информация в нём достоверна.</div>
     </form>
   </div>
 </div>
 
-<div class="viewer" id="viewer"><img alt="" id="viewerImg"><button class="icon-btn" id="viewerClose" aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></div>
+<div class="modal" id="filterModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="fmTitle">
+    <div class="modal-head"><h3 id="fmTitle" data-i18n="filters">Фильтры</h3>
+      <button class="icon-btn" type="button" id="fmClose" data-i18n-aria="close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="field"><label for="fmCity" data-i18n="city">Город</label><select id="fmCity"></select></div>
+    <div class="field" style="margin-top:14px"><span class="lbl" data-i18n="price_range">Цена, TMT</span>
+      <div class="grid2"><input id="fmMin" type="number" inputmode="numeric" min="0" data-i18n-ph="price_from" placeholder="от">
+        <input id="fmMax" type="number" inputmode="numeric" min="0" data-i18n-ph="price_to" placeholder="до"></div></div>
+    <div class="row" style="margin-top:18px"><button class="btn ghost" type="button" id="fmReset" data-i18n="reset">Сбросить</button>
+      <button class="btn" type="button" id="fmApply" data-i18n="show_results">Показать</button></div>
+  </div>
+</div>
+
+<div class="viewer" id="viewer"><div class="vtrack" id="vtrack"></div><div class="vcount" id="vcount"></div>
+  <button class="icon-btn" id="viewerClose" type="button" data-i18n-aria="close"><svg class="i"><use href="#i-x"/></svg></button></div>
 <div class="toast" id="toast" role="status"></div>
 
 <!-- Иконки -->
@@ -335,9 +504,10 @@ details.adm summary{cursor:pointer;color:var(--muted);font-size:13px}
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9.2-8.6C1.2 8.2 3 4.5 6.6 4.5c2 0 3.4 1.1 4.4 2.6 1-1.5 2.4-2.6 4.4-2.6 3.6 0 5.4 3.7 3.8 6.9C19 15.6 12 20 12 20z"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-  <symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></symbol>
@@ -348,6 +518,19 @@ details.adm summary{cursor:pointer;color:var(--muted);font-size:13px}
   <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 3h3l2 5-2.5 1.5a11 11 0 0 0 7 7L16 14l5 2v3a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></symbol>
   <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/><path d="m4 4 16 16"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-tg" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M21.4 4.2 2.9 11.4c-1 .4-.9 1.7 0 2l4.6 1.5 1.8 5.5c.2.8 1.2 1 1.7.4l2.6-2.5 4.8 3.5c.6.4 1.5.1 1.6-.6l3.2-15.6c.2-.9-.7-1.7-1.6-1.4zM9.7 14.3l8-6.8-6.5 7.7-.3 3.1z"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-7.8 13.4L3 21l4.7-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.3c0 3.7 3 6.7 6.7 6.7l1-1.6-2.1-1-1 1c-1.3-.6-2.5-1.8-3-3l1-1-1-2.1z"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
   <symbol id="c-all" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
   <symbol id="c-auto" viewBox="0 0 24 24"><path d="M3 13.5 5 8.3A2 2 0 0 1 6.9 7h10.2A2 2 0 0 1 19 8.3l2 5.2V18a1 1 0 0 1-1 1h-1.5a1 1 0 0 1-1-1v-1h-11v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13.5h18M7 16h.01M17 16h.01"/></symbol>
   <symbol id="c-realty" viewBox="0 0 24 24"><path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 9h4a1 1 0 0 1 1 1v11M3 21h18M8 8h3M8 12h3M8 16h3"/></symbol>
@@ -363,40 +546,290 @@ details.adm summary{cursor:pointer;color:var(--muted);font-size:13px}
 (function(){
 "use strict";
 
+/* ===================== Языки =====================
+   Каждая строка: [русский, турецкий, туркменский].
+   В русском варианте «|» разделяет формы для 1 / 2–4 / 5+ (объявление/объявления/объявлений). */
+const LANGS = ['ru', 'tr', 'tk'];
+const LANG_CODE = {ru: 'RU', tr: 'TR', tk: 'TM'};
+const TXT = {
+  doc_title: ['SystemMarket — объявления', 'SystemMarket — ilanlar', 'SystemMarket — bildirişler'],
+  seo_h1: ['SystemMarket — объявления: авто, недвижимость, телефоны, электроника', 'SystemMarket — ilanlar: vasıta, emlak, telefon, elektronik', 'SystemMarket — bildirişler: awtoulaglar, gozgalmaýan emläk, telefonlar, elektronika'],
+  to_home: ['На главную', 'Ana sayfa', 'Baş sahypa'],
+  theme: ['Тема', 'Tema', 'Tema'],
+  language: ['Язык', 'Dil', 'Dil'],
+  search_ph: ['Поиск объявлений', 'İlan ara', 'Bildiriş gözle'],
+  clear: ['Очистить', 'Temizle', 'Arassala'],
+  filters: ['Фильтры', 'Filtreler', 'Süzgüçler'],
+  categories: ['Категории', 'Kategoriler', 'Kategoriýalar'],
+  menu: ['Меню', 'Menü', 'Menýu'],
+  nav_home: ['Главная', 'Ana sayfa', 'Baş sahypa'],
+  nav_fav: ['Избранное', 'Favoriler', 'Halanlarym'],
+  nav_add: ['Подать', 'İlan ver', 'Goş'],
+  nav_my: ['Мои', 'İlanlarım', 'Meniňki'],
+  nav_profile: ['Профиль', 'Profil', 'Profil'],
+  page_fav: ['Избранное', 'Favoriler', 'Halanlarym'],
+  page_my: ['Мои объявления', 'İlanlarım', 'Meniň bildirişlerim'],
+  page_profile: ['Профиль', 'Profil', 'Profil'],
+  cat_all: ['Все', 'Tümü', 'Ählisi'],
+  cat_auto: ['Авто', 'Vasıta', 'Awtoulaglar'],
+  cat_realty: ['Недвижимость', 'Emlak', 'Emläk'],
+  cat_phones: ['Телефоны', 'Telefonlar', 'Telefonlar'],
+  cat_electronics: ['Электроника', 'Elektronik', 'Elektronika'],
+  cat_home: ['Дом и сад', 'Ev ve bahçe', 'Öý we bag'],
+  cat_clothes: ['Одежда', 'Giyim', 'Egin-eşik'],
+  cat_services: ['Услуги', 'Hizmetler', 'Hyzmatlar'],
+  cat_other: ['Разное', 'Diğer', 'Dürli zatlar'],
+  hero_title: ['Покупайте и продавайте — легко', 'Kolayca alın ve satın', 'Aňsat satyn alyň we satyň'],
+  ads_count: ['{n} объявление|{n} объявления|{n} объявлений', '{n} ilan', '{n} bildiriş'],
+  free: ['бесплатно', 'ücretsiz', 'mugt'],
+  hero_cta: ['Подать объявление', 'İlan ver', 'Bildiriş goş'],
+  recent: ['Вы смотрели', 'Son baktıklarınız', 'Soňky seredilenler'],
+  feed_new: ['Свежие объявления', 'Yeni ilanlar', 'Täze bildirişler'],
+  found: ['Найдено: {n}', 'Bulunan: {n}', 'Tapyldy: {n}'],
+  sort: ['Сортировка', 'Sıralama', 'Tertip'],
+  sort_new: ['Сначала новые', 'Önce en yeni', 'Ilki täzeler'],
+  sort_cheap: ['Сначала дешевле', 'Önce en ucuz', 'Ilki arzanlar'],
+  sort_exp: ['Сначала дороже', 'Önce en pahalı', 'Ilki gymmatlar'],
+  sort_popular: ['Популярные', 'En popüler', 'Meşhurlar'],
+  city: ['Город', 'Şehir', 'Şäher'],
+  all_cities: ['Все города', 'Tüm şehirler', 'Ähli şäherler'],
+  price_range: ['Цена, TMT', 'Fiyat, TMT', 'Bahasy, TMT'],
+  price_from: ['от', 'en az', 'iň az'],
+  price_to: ['до', 'en çok', 'iň köp'],
+  reset: ['Сбросить', 'Sıfırla', 'Arassala'],
+  show_results: ['Показать', 'Göster', 'Görkez'],
+  badge_new: ['Новое', 'Yeni', 'Täze'],
+  sold: ['Продано', 'Satıldı', 'Satyldy'],
+  sold_banner: ['Товар продан', 'Bu ürün satıldı', 'Bu haryt satyldy'],
+  negotiable: ['Договорная', 'Pazarlıklı', 'Bahasy ylalaşyk'],
+  fav_add: ['В избранное', 'Favorilere ekle', 'Halanlaryma goş'],
+  fav_added: ['Добавлено в избранное', 'Favorilere eklendi', 'Halanlaryma goşuldy'],
+  fav_removed: ['Удалено из избранного', 'Favorilerden çıkarıldı', 'Halanlarymdan aýryldy'],
+  just_now: ['только что', 'az önce', 'häzirjik'],
+  min_ago: ['{n} мин назад', '{n} dk önce', '{n} min öň'],
+  hours_ago: ['{n} час назад|{n} часа назад|{n} часов назад', '{n} saat önce', '{n} sagat öň'],
+  yesterday: ['вчера, {time}', 'dün, {time}', 'düýn, {time}'],
+  nothing_found: ['Ничего не найдено', 'Sonuç bulunamadı', 'Hiç zat tapylmady'],
+  nothing_found_sub: ['Попробуйте изменить запрос или фильтры', 'Aramanızı veya filtreleri değiştirin', 'Gözlegi ýa-da süzgüçleri üýtgediň'],
+  no_ads: ['Объявлений пока нет', 'Henüz ilan yok', 'Häzirlikçe bildiriş ýok'],
+  no_ads_sub: ['Станьте первым — подайте объявление', 'İlk ilanı siz verin', 'Ilkinji bildirişi siz goşuň'],
+  fav_empty: ['В избранном пусто', 'Favori listeniz boş', 'Halanlaryňyz boş'],
+  fav_empty_sub: ['Нажимайте на сердечко, чтобы сохранить объявление', 'Kaydetmek için kalbe dokunun', 'Bildirişi saklamak üçin ýürejige basyň'],
+  browse: ['Смотреть объявления', 'İlanlara göz at', 'Bildirişlere seret'],
+  my_empty: ['У вас нет объявлений', 'Henüz ilanınız yok', 'Siziň bildirişiňiz ýok'],
+  my_empty_sub: ['Подайте объявление — это займёт пару минут', 'İlan vermek birkaç dakika sürer', 'Bildiriş goşmak birnäçe minut alýar'],
+  load_failed: ['Не удалось загрузить', 'Yüklenemedi', 'Ýükläp bolmady'],
+  retry: ['Повторить', 'Tekrar dene', 'Gaýtadan synanyş'],
+  show_more: ['Показать ещё', 'Daha fazla göster', 'Ýene görkez'],
+  loading: ['Загрузка…', 'Yükleniyor…', 'Ýüklenýär…'],
+  listing: ['Объявление', 'İlan', 'Bildiriş'],
+  back: ['Назад', 'Geri', 'Yza'],
+  close: ['Закрыть', 'Kapat', 'Ýap'],
+  share: ['Поделиться', 'Paylaş', 'Paýlaş'],
+  specs: ['Характеристики', 'Özellikler', 'Häsiýetleri'],
+  description: ['Описание', 'Açıklama', 'Beýany'],
+  seller: ['Продавец', 'Satıcı', 'Satyjy'],
+  call: ['Позвонить', 'Ara', 'Jaň et'],
+  number: ['Номер', 'Numara', 'Nomer'],
+  phone_copied: ['Номер скопирован', 'Numara kopyalandı', 'Nomer göçürildi'],
+  link: ['Ссылка', 'Bağlantı', 'Salgy'],
+  link_copied: ['Ссылка скопирована', 'Bağlantı kopyalandı', 'Salgy göçürildi'],
+  similar: ['Похожие объявления', 'Benzer ilanlar', 'Meňzeş bildirişler'],
+  listing_no: ['Объявление № {id}', 'İlan no: {id}', 'Bildiriş № {id}'],
+  open_failed: ['Не удалось открыть', 'Açılamadı', 'Açyp bolmady'],
+  edit: ['Редактировать', 'Düzenle', 'Üýtget'],
+  mark_sold: ['Отметить «Продано»', 'Satıldı olarak işaretle', '«Satyldy» diýip belle'],
+  unmark_sold: ['Снять «Продано»', 'Satıldı işaretini kaldır', '«Satyldy» belligini aýyr'],
+  marked_sold: ['Отмечено как продано', 'Satıldı olarak işaretlendi', 'Satyldy diýip bellendi'],
+  unmarked_sold: ['Объявление снова активно', 'İlan yeniden yayında', 'Bildiriş ýene işjeň'],
+  delete: ['Удалить объявление', 'İlanı sil', 'Bildirişi poz'],
+  del_confirm: ['Удалить объявление? Это нельзя отменить.', 'İlan silinsin mi? Bu işlem geri alınamaz.', 'Bildiriş pozulsynmy? Muny yzyna gaýtaryp bolmaz.'],
+  deleted: ['Объявление удалено', 'İlan silindi', 'Bildiriş pozuldy'],
+  saved: ['Изменения сохранены', 'Değişiklikler kaydedildi', 'Üýtgeşmeler ýatda saklandy'],
+  new_listing: ['Новое объявление', 'Yeni ilan', 'Täze bildiriş'],
+  edit_listing: ['Редактирование', 'İlanı düzenle', 'Bildirişi üýtgetmek'],
+  photos_locked: ['Фото и категорию изменить нельзя', 'Fotoğraflar ve kategori değiştirilemez', 'Suratlary we kategoriýany üýtgedip bolmaýar'],
+  category: ['Категория', 'Kategori', 'Kategoriýa'],
+  err_cat: ['Выберите категорию', 'Kategori seçin', 'Kategoriýany saýlaň'],
+  photos: ['Фотографии', 'Fotoğraflar', 'Suratlar'],
+  photos_hint: ['от 1 до 6 — только ваши реальные фото, первое будет главным', '1–6 adet, yalnızca kendi gerçek fotoğraflarınız; ilki ana fotoğraf olur', '1–6 sany, diňe öz hakyky suratlaryňyz; birinjisi esasy bolar'],
+  err_photos: ['Добавьте хотя бы одно фото товара', 'En az bir ürün fotoğrafı ekleyin', 'Iň bolmanda bir surat goşuň'],
+  add_photo: ['Добавить фото', 'Fotoğraf ekle', 'Surat goş'],
+  more_photo: ['Ещё фото', 'Daha ekle', 'Ýene surat'],
+  main_photo: ['Главное', 'Ana', 'Esasy'],
+  remove_photo: ['Убрать фото', 'Fotoğrafı kaldır', 'Suraty aýyr'],
+  f_title: ['Заголовок', 'Başlık', 'Ady'],
+  f_title_ph: ['Например: Toyota Camry 2018', 'Örneğin: Toyota Camry 2018', 'Mysal üçin: Toyota Camry 2018'],
+  err_title: ['Напишите заголовок (минимум 3 символа)', 'Başlık yazın (en az 3 karakter)', 'Ady ýazyň (iň az 3 harp)'],
+  spec_brand: ['Марка', 'Marka', 'Markasy'],
+  spec_model: ['Модель', 'Model', 'Modeli'],
+  spec_year: ['Год выпуска', 'Model yılı', 'Ýyly'],
+  spec_mileage: ['Пробег', 'Kilometre', 'Geçen ýoly'],
+  f_mileage: ['Пробег, км', 'Kilometre', 'Geçen ýoly, km'],
+  spec_gear: ['Коробка', 'Vites', 'Tizlik gutusy'],
+  spec_fuel: ['Топливо', 'Yakıt', 'Ýangyç'],
+  spec_deal: ['Тип сделки', 'İlan türü', 'Görnüşi'],
+  spec_rooms: ['Комнат', 'Oda sayısı', 'Otag sany'],
+  spec_area: ['Площадь', 'Alan', 'Meýdany'],
+  f_area: ['Площадь, м²', 'Alan, m²', 'Meýdany, m²'],
+  spec_floor: ['Этаж', 'Kat', 'Gat'],
+  km: ['км', 'km', 'km'],
+  m2: ['м²', 'm²', 'm²'],
+  f_price: ['Цена, TMT', 'Fiyat, TMT', 'Bahasy, TMT'],
+  f_price_ph: ['0 — договорная', '0 — pazarlıklı', '0 — ylalaşyk'],
+  err_price: ['Укажите цену', 'Fiyat girin', 'Bahasyny ýazyň'],
+  f_desc_ph: ['Состояние, комплектация, причина продажи…', 'Durumu, donanımı, satış nedeni…', 'Ýagdaýy, enjamlaşdyrylyşy, satylmagynyň sebäbi…'],
+  f_name: ['Имя', 'Adınız', 'Adyňyz'],
+  f_name_ph: ['Как к вам обращаться', 'Size nasıl hitap edelim', 'Size nähili ýüzlenmeli'],
+  f_phone: ['Телефон', 'Telefon', 'Telefon'],
+  err_phone: ['Укажите номер телефона', 'Telefon numarası girin', 'Telefon belgisini ýazyň'],
+  publish: ['Опубликовать', 'Yayınla', 'Ýerleşdir'],
+  save: ['Сохранить', 'Kaydet', 'Ýatda sakla'],
+  saving: ['Сохраняем…', 'Kaydediliyor…', 'Ýatda saklanýar…'],
+  uploading: ['Загрузка фото… {p}%', 'Fotoğraflar yükleniyor… {p}%', 'Suratlar ýüklenýär… {p}%'],
+  processing: ['Обработка…', 'İşleniyor…', 'Işlenýär…'],
+  form_foot: ['Публикуя объявление, вы подтверждаете, что информация в нём достоверна.', 'İlanı yayınlayarak bilgilerin doğru olduğunu onaylarsınız.', 'Bildirişi ýerleşdirmek bilen, ondaky maglumatlaryň dogrudygyny tassyklaýarsyňyz.'],
+  published: ['Объявление опубликовано', 'İlan yayınlandı', 'Bildiriş ýerleşdirildi'],
+  fill_fields: ['Заполните отмеченные поля', 'İşaretli alanları doldurun', 'Bellenen meýdançalary dolduryň'],
+  max_photos: ['Можно добавить не больше {n} фото', 'En fazla {n} fotoğraf ekleyebilirsiniz', 'Iň köp {n} surat goşup bolýar'],
+  not_photo: ['Это не фото: {name}', 'Bu bir fotoğraf değil: {name}', 'Bu surat däl: {name}'],
+  guest: ['Гость', 'Misafir', 'Myhman'],
+  guest_sub: ['Вход по номеру телефона появится позже', 'Telefon numarasıyla giriş yakında', 'Telefon belgisi bilen giriş ýakynda'],
+  my_count: ['Мои объявления: {n}', 'İlanlarım: {n}', 'Bildirişlerim: {n}'],
+  fav_count: ['Избранное: {n}', 'Favoriler: {n}', 'Halanlarym: {n}'],
+  device_note: ['Ваши объявления привязаны к этому браузеру. Если очистить данные браузера, изменить или удалить их отсюда будет нельзя.', 'İlanlarınız bu tarayıcıya bağlıdır. Tarayıcı verilerini silerseniz onları buradan düzenleyemez veya silemezsiniz.', 'Bildirişleriňiz şu brauzere baglanan. Brauzeriň maglumatlaryny arassalasaňyz, olary bu ýerden üýtgedip ýa-da pozup bilmersiňiz.'],
+  theme_auto: ['Авто', 'Otomatik', 'Awtomatik'],
+  theme_light: ['Светлая', 'Açık', 'Ýagty'],
+  theme_dark: ['Тёмная', 'Koyu', 'Garaňky'],
+  history_cleared: ['История очищена', 'Geçmiş temizlendi', 'Taryh arassalandy'],
+  admin_section: ['Для администратора', 'Yönetici için', 'Administrator üçin'],
+  admin_key: ['Ключ администратора', 'Yönetici anahtarı', 'Administrator açary'],
+  logout: ['Выйти', 'Çıkış', 'Çyk'],
+  admin_on: ['Режим администратора включён', 'Yönetici modu açıldı', 'Administrator tertibi açyldy'],
+  admin_off: ['Режим администратора выключен', 'Yönetici modu kapatıldı', 'Administrator tertibi ýapyldy'],
+  admin_bad: ['Неверный ключ', 'Yanlış anahtar', 'Nädogry açar'],
+  e_network: ['Нет связи с сервером', 'Sunucuya bağlanılamadı', 'Serwer bilen baglanyşyk ýok'],
+  e_server: ['Ошибка сервера ({n})', 'Sunucu hatası ({n})', 'Serwer ýalňyşlygy ({n})'],
+  e_rate_limit: ['Слишком много объявлений за час. Попробуйте позже.', 'Bir saatte çok fazla ilan. Daha sonra deneyin.', 'Bir sagatda gaty köp bildiriş. Biraz soňrak synanyşyň.'],
+  e_photo_bad: ['Не удалось прочитать фото. Подходят JPG, PNG, WEBP.', 'Fotoğraf okunamadı. JPG, PNG, WEBP uygundur.', 'Suraty okap bolmady. JPG, PNG, WEBP bolýar.'],
+  e_too_large: ['Фото слишком большие (максимум 40 МБ за раз)', 'Fotoğraflar çok büyük (tek seferde en fazla 40 MB)', 'Suratlar gaty uly (bir gezekde iň köp 40 MB)'],
+  e_not_found: ['Объявление не найдено', 'İlan bulunamadı', 'Bildiriş tapylmady'],
+  e_forbidden: ['Нет прав на это действие', 'Bu işlem için yetkiniz yok', 'Bu hereket üçin hukugyňyz ýok'],
+  e_city: ['Выберите город', 'Şehir seçin', 'Şäheri saýlaň'],
+};
+/* Значения, которые хранятся в базе по-русски, но показываются на выбранном языке */
+const VAL = {
+  'Ашхабад': ['Ашхабад', 'Aşkabat', 'Aşgabat'], 'Аркадаг': ['Аркадаг', 'Arkadağ', 'Arkadag'],
+  'Балканабат': ['Балканабат', 'Balkanabat', 'Balkanabat'], 'Дашогуз': ['Дашогуз', 'Daşoğuz', 'Daşoguz'],
+  'Мары': ['Мары', 'Mari', 'Mary'], 'Туркменабат': ['Туркменабат', 'Türkmenabat', 'Türkmenabat'],
+  'Туркменбаши': ['Туркменбаши', 'Türkmenbaşı', 'Türkmenbaşy'], 'Теджен': ['Теджен', 'Tejen', 'Tejen'],
+  'Байрамали': ['Байрамали', 'Bayramali', 'Baýramaly'], 'Другой': ['Другой', 'Diğer', 'Başga'],
+  'Другая': ['Другая', 'Diğer', 'Başga'],
+  'Автомат': ['Автомат', 'Otomatik', 'Awtomat'], 'Механика': ['Механика', 'Manuel', 'Mehanika'],
+  'Вариатор': ['Вариатор', 'CVT', 'Wariator'], 'Робот': ['Робот', 'Yarı otomatik', 'Robot'],
+  'Бензин': ['Бензин', 'Benzin', 'Benzin'], 'Газ': ['Газ', 'LPG', 'Gaz'], 'Бензин + газ': ['Бензин + газ', 'Benzin + LPG', 'Benzin + gaz'],
+  'Дизель': ['Дизель', 'Dizel', 'Dizel'], 'Гибрид': ['Гибрид', 'Hibrit', 'Gibrid'], 'Электро': ['Электро', 'Elektrik', 'Elektrik'],
+  'Продажа': ['Продажа', 'Satılık', 'Satlyk'], 'Аренда': ['Аренда', 'Kiralık', 'Kärende'],
+  'Продавец': ['Продавец', 'Satıcı', 'Satyjy'],
+};
+const TK_MONTHS = ['ýanwar', 'fewral', 'mart', 'aprel', 'maý', 'iýun', 'iýul', 'awgust', 'sentýabr', 'oktýabr', 'noýabr', 'dekabr'];
+
 /* ============ Справочники ============ */
-const CATS = [
-  {id:'all', name:'Все'}, {id:'auto', name:'Авто'}, {id:'realty', name:'Недвижимость'},
-  {id:'phones', name:'Телефоны'}, {id:'electronics', name:'Электроника'}, {id:'home', name:'Дом и сад'},
-  {id:'clothes', name:'Одежда'}, {id:'services', name:'Услуги'}, {id:'other', name:'Разное'}
-];
+const CATS = ['all', 'auto', 'realty', 'phones', 'electronics', 'home', 'clothes', 'services', 'other'];
 const CITIES = ['Ашхабад','Аркадаг','Балканабат','Дашогуз','Мары','Туркменабат','Туркменбаши','Теджен','Байрамали','Другой'];
 const BRANDS = ['Toyota','Lexus','Hyundai','Kia','Chevrolet','Mercedes-Benz','BMW','Nissan','Honda','Ford','Mitsubishi','Volkswagen','Lada','Другая'];
-const MAX_PHOTOS = 6, PAGE = 24;
+const GEARS = ['Автомат','Механика','Вариатор','Робот'];
+const FUELS = ['Бензин','Газ','Бензин + газ','Дизель','Гибрид','Электро'];
+const DEALS = ['Продажа','Аренда'];
+const MAX_PHOTOS = 6, PAGE = 24, DAY = 86400;
 
 /* ============ Утилиты ============ */
 const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const ic = (id, cls = 'i') => '<svg class="' + cls + '"><use href="#' + id + '"/></svg>';
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-const nf = new Intl.NumberFormat('ru-RU');
-const money = n => Number(n) > 0 ? nf.format(n) + ' TMT' : 'Договорная';
-function plural(n, f){ const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? f[2] : b > 1 && b < 5 ? f[1] : b === 1 ? f[0] : f[2]; }
-function ago(sec){
-  const t = sec * 1000, m = Math.floor((Date.now() - t) / 60000);
-  if (m < 1) return 'только что';
-  if (m < 60) return m + ' мин назад';
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + ' ' + plural(h, ['час','часа','часов']) + ' назад';
-  const d = new Date(t), y = new Date(); y.setDate(y.getDate() - 1);
-  if (d.toDateString() === y.toDateString()) return 'вчера, ' + d.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
-  return d.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
-}
-const catName = id => (CATS.find(c => c.id === id) || CATS[CATS.length - 1]).name;
 const store = {
   get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 };
+
+/* ---- язык: общий для всех сайтов на *.sstymmarket.click (кука sm_lang) ---- */
+function getCookie(name){ const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; }
+function baseDomain(){
+  const h = location.hostname;
+  if (!h.includes('.') || /^[\d.]+$/.test(h) || h.includes(':')) return '';
+  return h.split('.').slice(-2).join('.');
+}
+function saveLang(l){
+  store.set('sm_lang', l);
+  const attrs = '; path=/; max-age=31536000; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+  const d = baseDomain();
+  try {
+    document.cookie = 'sm_lang=' + l + attrs + (d ? '; domain=' + d : '');
+    if (getCookie('sm_lang') !== l) document.cookie = 'sm_lang=' + l + attrs;
+  } catch(e){}
+}
+function readLang(){
+  const c = getCookie('sm_lang');
+  if (LANGS.includes(c)) return c;
+  const s = store.get('sm_lang', '');
+  return LANGS.includes(s) ? s : '';
+}
+let LANG = readLang() || 'ru', LI = LANGS.indexOf(LANG);
+function t(key, vars){
+  const row = TXT[key];
+  let s = row ? (row[LI] != null ? row[LI] : row[0]) : key;
+  if (s.includes('|')) s = s.split('|')[0];
+  return vars ? s.replace(/\{(\w+)\}/g, (_, k) => vars[k] != null ? vars[k] : '') : s;
+}
+function tp(key, n){                       // с числом: русские формы 1 / 2–4 / 5+
+  const row = TXT[key];
+  let s = row ? (row[LI] != null ? row[LI] : row[0]) : key;
+  if (s.includes('|')){
+    const f = s.split('|'), a = Math.abs(n) % 100, b = a % 10;
+    s = a > 10 && a < 20 ? f[2] : b > 1 && b < 5 ? f[1] : b === 1 ? f[0] : f[2];
+  }
+  return s.replace(/\{n\}/g, fmtNum(n));
+}
+const valT = v => (VAL[v] ? VAL[v][LI] : v);
+const catName = id => t('cat_' + (CATS.includes(id) ? id : 'other'));
+let nf = new Intl.NumberFormat('ru-RU');
+function fmtNum(n){ return nf.format(Number(n) || 0); }
+const money = n => Number(n) > 0 ? fmtNum(n) + ' TMT' : t('negotiable');
+const two = n => String(n).padStart(2, '0');
+function fmtDay(d){
+  if (LANG === 'tk') return d.getDate() + ' ' + TK_MONTHS[d.getMonth()];
+  return d.toLocaleDateString(LANG === 'tr' ? 'tr-TR' : 'ru-RU', {day:'numeric', month:'long'});
+}
+function ago(sec){
+  const ts = sec * 1000, m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 1) return t('just_now');
+  if (m < 60) return t('min_ago', {n: m});
+  const h = Math.floor(m / 60);
+  if (h < 24) return tp('hours_ago', h);
+  const d = new Date(ts), y = new Date(); y.setDate(y.getDate() - 1);
+  if (d.toDateString() === y.toDateString()) return t('yesterday', {time: two(d.getHours()) + ':' + two(d.getMinutes())});
+  return fmtDay(d);
+}
 let toastT;
-function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600); }
+function applyStatic(root){
+  $$('[data-i18n]', root).forEach(el => { el.textContent = t(el.dataset.i18n); });
+  $$('[data-i18n-ph]', root).forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  $$('[data-i18n-aria]', root).forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+}
+
+/* ============ Тема ============ */
+function themeMode(){ return store.get('sm_theme', 'auto'); }
+function isDark(){ const m = themeMode(); return m === 'dark' || (m === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches); }
+function setTheme(mode){
+  store.set('sm_theme', mode);
+  if (mode === 'light' || mode === 'dark') document.documentElement.setAttribute('data-theme', mode);
+  else document.documentElement.removeAttribute('data-theme');
+  $('#themeBtn use').setAttribute('href', isDark() ? '#i-sun' : '#i-moon');
+  const meta = document.querySelector('meta[name=theme-color]');
+  if (meta) meta.content = isDark() ? '#0a0c0f' : '#15803d';
+}
 
 /* ============ Локальные данные устройства ============ */
 const favs = {
@@ -411,73 +844,123 @@ const mine = {
   add(id, token){ const a = this.all(); a[id] = token; store.set('sm_my_v2', a); },
   drop(id){ const a = this.all(); delete a[id]; store.set('sm_my_v2', a); }
 };
+const recent = {
+  all(){ return store.get('sm_recent', []); },
+  push(id){ const a = this.all().filter(x => x !== id); a.unshift(id); store.set('sm_recent', a.slice(0, 12)); },
+  set(a){ store.set('sm_recent', a); },
+  clear(){ store.set('sm_recent', []); }
+};
 const adminKey = () => store.get('sm_admin', '');
+const editToken = id => mine.token(id) || adminKey();
 
 /* ============ API сервера ============ */
-async function request(method, url, headers){
+function apiError(data, status){
+  if (data && data.code && TXT['e_' + data.code]) return new Error(t('e_' + data.code));
+  if (data && data.code && ({cat:1, title:1, price:1, phone:1, photo_required:1})[data.code])
+    return new Error(t({cat:'err_cat', title:'err_title', price:'err_price', phone:'err_phone', photo_required:'err_photos'}[data.code]));
+  return new Error(t('e_server', {n: status}));
+}
+async function request(method, url, body, headers){
   let r;
-  try { r = await fetch(url, {method, headers: headers || {}}); }
-  catch(e){ throw new Error('Нет связи с сервером'); }
+  const opt = {method, headers: Object.assign({}, headers || {})};
+  if (body !== undefined){ opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
+  try { r = await fetch(url, opt); }
+  catch(e){ throw new Error(t('e_network')); }
   let data = null; try { data = await r.json(); } catch(e){}
-  if (!r.ok) throw new Error((data && data.error) || ('Ошибка сервера (' + r.status + ')'));
+  if (!r.ok) throw apiError(data, r.status);
   return data;
 }
 const api = {
   list(p){ const q = new URLSearchParams(); Object.entries(p).forEach(([k, v]) => { if (v !== '' && v != null) q.set(k, v); }); return request('GET', '/api/listings?' + q); },
   get(id){ return request('GET', '/api/listings/' + encodeURIComponent(id)); },
-  remove(id, token){ return request('DELETE', '/api/listings/' + encodeURIComponent(id), {'X-Edit-Token': token}); },
+  peek(id){ return request('GET', '/api/listings?ids=' + encodeURIComponent(id)).then(r => { if (!r.items.length) throw new Error(t('e_not_found')); return r.items[0]; }); },
+  stats(){ return request('GET', '/api/stats'); },
+  update(id, body){ return request('PUT', '/api/listings/' + encodeURIComponent(id), body, {'X-Edit-Token': editToken(id)}); },
+  remove(id){ return request('DELETE', '/api/listings/' + encodeURIComponent(id), undefined, {'X-Edit-Token': editToken(id)}); },
   create(fd, onProgress){
     return new Promise((resolve, reject) => {
       const x = new XMLHttpRequest();
       x.open('POST', '/api/listings');
       x.upload.onprogress = e => { if (e.lengthComputable) onProgress(e.loaded / e.total); };
       x.onload = () => { let d = null; try { d = JSON.parse(x.responseText); } catch(e){}
-        x.status >= 200 && x.status < 300 ? resolve(d) : reject(new Error((d && d.error) || ('Ошибка сервера (' + x.status + ')'))); };
-      x.onerror = () => reject(new Error('Нет связи с сервером'));
+        x.status >= 200 && x.status < 300 ? resolve(d) : reject(apiError(d, x.status)); };
+      x.onerror = () => reject(new Error(t('e_network')));
       x.send(fd);
     });
   }
 };
 
-/* ============ Список ============ */
-const state = {page:'home', q:'', cat:'all', city:'', sort:'new', items:[], total:0, req:0};
+/* ============ Состояние ============ */
+const state = {page:'home', q:'', cat:'all', city:'', min:'', max:'', sort:'new', items:[], total:0, req:0, loading:false, stats:null};
 let lastListHash = '#/';
+const filtered = () => !!(state.q || state.cat !== 'all' || state.city || state.min || state.max);
 
+/* ============ Шапка, категории, баннер ============ */
 function renderTopbar(){
-  const tb = $('#topbar');
-  if (state.page === 'home'){
-    tb.innerHTML = '<a class="logo" href="#/" aria-label="SystemMarket — на главную"><img class="mark" src="/favicon.svg" alt=""><span class="txt">System<span>Market</span></span></a>' +
-      '<label class="search">' + ic('i-search') + '<input id="q" type="search" enterkeyhint="search" placeholder="Поиск объявлений" value="' + esc(state.q) + '"></label>';
-    let t; $('#q').addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { state.q = e.target.value; load(true); }, 350); });
-  } else {
-    tb.innerHTML = '<h1 class="page-title">' + ({fav:'Избранное', my:'Мои объявления', profile:'Профиль'})[state.page] + '</h1>';
-  }
+  const home = state.page === 'home';
+  $('#logoLink').hidden = !home;
+  $('#searchRow').hidden = !home;
+  const pt = $('#pageTitle');
+  pt.hidden = home;
+  if (!home) pt.textContent = t('page_' + state.page);
+  const active = (state.city ? 1 : 0) + (state.min || state.max ? 1 : 0);
+  $('#fCount').hidden = !active; $('#fCount').textContent = active;
+  $('#filterBtn').classList.toggle('on', !!active);
 }
 function renderCats(){
   const el = $('#cats');
   el.style.display = state.page === 'home' ? 'flex' : 'none';
-  el.innerHTML = CATS.map(c => '<button class="chip' + (c.id === state.cat ? ' on' : '') + '" data-cat="' + c.id + '">' + ic('c-' + c.id) + c.name + '</button>').join('');
+  const st = state.stats;
+  el.innerHTML = CATS.map(c => {
+    const n = st ? (c === 'all' ? st.total : st.cats[c]) : null;
+    return '<button class="cat c-' + c + (c === state.cat ? ' on' : '') + '" data-cat="' + c + '" type="button">' +
+      '<span class="ci">' + ic('c-' + c) + (n ? '<span class="cc">' + fmtNum(n) + '</span>' : '') + '</span><span class="cn">' + esc(catName(c)) + '</span></button>';
+  }).join('');
 }
-function renderFilters(){
-  const el = $('#filters');
-  if (state.page !== 'home'){ el.innerHTML = ''; return; }
-  el.innerHTML = '<div class="filters"><select id="cityF" aria-label="Город"><option value="">Все города</option>' +
-    CITIES.map(c => '<option' + (c === state.city ? ' selected' : '') + '>' + c + '</option>').join('') + '</select>' +
-    '<select id="sortF" aria-label="Сортировка">' + [['new','Сначала новые'],['cheap','Сначала дешевле'],['exp','Сначала дороже']]
-      .map(([v, t]) => '<option value="' + v + '"' + (v === state.sort ? ' selected' : '') + '>' + t + '</option>').join('') + '</select></div>';
-  $('#cityF').onchange = e => { state.city = e.target.value; load(true); };
-  $('#sortF').onchange = e => { state.sort = e.target.value; load(true); };
+function renderHero(){
+  const el = $('#hero');
+  if (state.page !== 'home' || filtered()){ el.innerHTML = ''; return; }
+  const total = state.stats ? state.stats.total : null;
+  el.innerHTML = '<section class="hero"><h2>' + esc(t('hero_title')) + '</h2>' +
+    '<p>' + (total != null ? esc(tp('ads_count', total)) + ' · ' : '') + esc(t('free')) + '</p>' +
+    '<a class="btn" href="#/add">' + ic('i-plus') + esc(t('hero_cta')) + '</a></section>';
 }
+async function loadStats(){
+  try { state.stats = await api.stats(); } catch(e){ return; }
+  if (state.page === 'home'){ renderCats(); renderHero(); }
+}
+
+/* ============ «Вы смотрели» ============ */
+async function renderRecent(){
+  const el = $('#recent');
+  const ids = recent.all();
+  if (state.page !== 'home' || filtered() || !ids.length){ el.innerHTML = ''; return; }
+  let r;
+  try { r = await api.list({ids: ids.join(','), limit: 12}); } catch(e){ el.innerHTML = ''; return; }
+  if (state.page !== 'home' || filtered()) return;
+  const byId = new Map(r.items.map(x => [x.id, x]));
+  const items = ids.map(id => byId.get(id)).filter(Boolean);
+  recent.set(items.map(x => x.id));
+  if (!items.length){ el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="sec-head"><h3>' + esc(t('recent')) + '</h3><button class="link" id="recentClear" type="button">' + esc(t('clear')) + '</button></div>' +
+    '<div class="strip">' + items.map(x => '<a class="mini" href="#/item/' + x.id + '"><span class="ph">' + photoBox(x.photos[0], x.title) + '</span>' +
+      '<span class="body" style="display:block"><span class="price" style="display:block">' + esc(money(x.price)) + '</span><span class="title">' + esc(x.title) + '</span></span></a>').join('') + '</div>';
+  $('#recentClear').onclick = () => { recent.clear(); el.innerHTML = ''; toast(t('history_cleared')); };
+}
+
+/* ============ Список ============ */
 function photoBox(p, alt){
   return p ? '<img loading="lazy" alt="' + esc(alt) + '" src="' + esc(p.thumb) + '">' : '<span class="nophoto">' + ic('i-camera') + '</span>';
 }
 function cardHTML(x){
-  return '<article class="card">' +
+  const isNew = !x.sold && (Date.now() / 1000 - x.created) < DAY;
+  return '<article class="card' + (x.sold ? ' sold' : '') + '">' +
     '<a href="#/item/' + x.id + '" class="ph">' + photoBox(x.photos[0], x.title) +
+      (x.sold ? '<span class="sold-badge">' + esc(t('sold')) + '</span>' : isNew ? '<span class="new-badge">' + esc(t('badge_new')) + '</span>' : '') +
       (x.photos.length > 1 ? '<span class="badge">' + ic('i-camera') + x.photos.length + '</span>' : '') + '</a>' +
-    '<button class="heart' + (favs.has(x.id) ? ' on' : '') + '" data-fav="' + x.id + '" aria-label="В избранное">' + ic('i-heart') + '</button>' +
-    '<a href="#/item/' + x.id + '" class="body"><div class="price">' + money(x.price) + '</div>' +
-      '<div class="title">' + esc(x.title) + '</div><div class="meta">' + esc(x.city) + ' · ' + ago(x.created) + '</div></a></article>';
+    '<button class="heart' + (favs.has(x.id) ? ' on' : '') + '" data-fav="' + x.id + '" type="button" aria-label="' + esc(t('fav_add')) + '">' + ic('i-heart') + '</button>' +
+    '<a href="#/item/' + x.id + '" class="body"><div class="price">' + esc(money(x.price)) + '</div>' +
+      '<div class="title">' + esc(x.title) + '</div><div class="meta">' + ic('i-pin', 'i" style="width:13px;height:13px') + '<span>' + esc(valT(x.city)) + ' · ' + esc(ago(x.created)) + '</span></div></a></article>';
 }
 function skeletons(n){
   return '<div class="grid">' + Array.from({length:n}, () =>
@@ -485,35 +968,49 @@ function skeletons(n){
     '<div class="sk" style="height:18px;width:60%"></div><div class="sk" style="height:14px;width:90%;margin-top:6px"></div><div class="sk" style="height:12px;width:40%;margin-top:8px"></div></div></div>').join('') + '</div>';
 }
 function emptyHTML(icon, title, text, link, linkText){
-  return '<div class="empty"><div class="ic">' + ic(icon) + '</div><b>' + title + '</b><p>' + text + '</p>' +
-    (link ? '<a class="btn" href="' + link + '">' + linkText + '</a>' : '') + '</div>';
+  return '<div class="empty"><div class="ic">' + ic(icon) + '</div><b>' + esc(title) + '</b><p>' + esc(text) + '</p>' +
+    (link ? '<a class="btn" href="' + link + '">' + esc(linkText) + '</a>' : '') + '</div>';
+}
+function renderListHead(){
+  const el = $('#listHead');
+  if (state.page !== 'home'){ el.innerHTML = ''; return; }
+  const title = filtered() ? t('found', {n: fmtNum(state.total)}) : t('feed_new');
+  el.innerHTML = '<div class="sec-head"><h3>' + esc(title) + '</h3><select id="sortF" aria-label="' + esc(t('sort')) + '">' +
+    ['new', 'cheap', 'exp', 'popular'].map(v => '<option value="' + v + '"' + (v === state.sort ? ' selected' : '') + '>' + esc(t('sort_' + v)) + '</option>').join('') + '</select></div>';
+  $('#sortF').onchange = e => { state.sort = e.target.value; load(true); };
 }
 function renderItems(){
-  const list = $('#list'), count = $('#count');
-  count.textContent = state.page === 'home' ? (state.total ? 'Найдено ' + nf.format(state.total) + ' ' + plural(state.total, ['объявление','объявления','объявлений']) : '') : '';
+  const list = $('#list');
+  renderListHead();
   if (!state.items.length){
     list.innerHTML = {
-      home: state.q || state.cat !== 'all' || state.city
-        ? emptyHTML('i-search', 'Ничего не найдено', 'Попробуйте изменить запрос или фильтры')
-        : emptyHTML('c-other', 'Объявлений пока нет', 'Станьте первым — подайте объявление', '#/add', 'Подать объявление'),
-      fav: emptyHTML('i-heart', 'В избранном пусто', 'Нажимайте на сердечко, чтобы сохранить объявление', '#/', 'Смотреть объявления'),
-      my: emptyHTML('i-list', 'У вас нет объявлений', 'Подайте объявление — это займёт пару минут', '#/add', 'Подать объявление')
+      home: filtered()
+        ? emptyHTML('i-search', t('nothing_found'), t('nothing_found_sub'))
+        : emptyHTML('c-other', t('no_ads'), t('no_ads_sub'), '#/add', t('hero_cta')),
+      fav: emptyHTML('i-heart', t('fav_empty'), t('fav_empty_sub'), '#/', t('browse')),
+      my: emptyHTML('i-list', t('my_empty'), t('my_empty_sub'), '#/add', t('hero_cta'))
     }[state.page];
+    $('#sentinel').innerHTML = '';
     return;
   }
-  list.innerHTML = '<div class="grid">' + state.items.map(cardHTML).join('') + '</div>' +
-    (state.items.length < state.total ? '<div class="more"><button class="btn ghost" id="moreBtn">Показать ещё</button></div>' : '');
-  const mb = $('#moreBtn'); if (mb) mb.onclick = () => { mb.disabled = true; mb.textContent = 'Загрузка…'; load(false); };
+  list.innerHTML = '<div class="grid">' + state.items.map(cardHTML).join('') + '</div>';
+  const more = state.items.length < state.total;
+  $('#sentinel').innerHTML = more ? '<div class="more"><button class="btn ghost" id="moreBtn" type="button">' + esc(t('show_more')) + '</button></div>' : '';
+  if (more){
+    const mb = $('#moreBtn');
+    mb.onclick = () => { mb.disabled = true; mb.textContent = t('loading'); load(false); };
+  }
 }
 async function load(reset){
   const req = ++state.req;
-  if (reset){ state.items = []; state.total = 0; $('#list').innerHTML = skeletons(state.page === 'home' ? 8 : 4); $('#count').textContent = ''; }
+  state.loading = true;
+  if (reset){ state.items = []; state.total = 0; $('#list').innerHTML = skeletons(state.page === 'home' ? 8 : 4); $('#sentinel').innerHTML = ''; }
   const p = {limit: PAGE, offset: reset ? 0 : state.items.length, sort: state.sort};
-  if (state.page === 'home'){ Object.assign(p, {q: state.q.trim(), cat: state.cat === 'all' ? '' : state.cat, city: state.city}); }
+  if (state.page === 'home') Object.assign(p, {q: state.q.trim(), cat: state.cat === 'all' ? '' : state.cat, city: state.city, min_price: state.min, max_price: state.max});
   else {
     const ids = state.page === 'fav' ? favs.all() : mine.ids();
-    if (!ids.length){ state.items = []; state.total = 0; renderItems(); return; }
-    p.ids = ids.join(','); p.limit = 60; p.offset = 0;
+    if (!ids.length){ state.items = []; state.total = 0; state.loading = false; renderItems(); return; }
+    Object.assign(p, {ids: ids.join(','), limit: 60, offset: 0, sort: 'new'});
   }
   try {
     const r = await api.list(p);
@@ -523,122 +1020,206 @@ async function load(reset){
     renderItems();
   } catch(e){
     if (req !== state.req) return;
-    $('#list').innerHTML = emptyHTML('i-cloud', 'Не удалось загрузить', esc(e.message)) + '<div class="more"><button class="btn ghost" id="retryBtn">Повторить</button></div>';
+    $('#list').innerHTML = emptyHTML('i-cloud', t('load_failed'), e.message) + '<div class="more"><button class="btn ghost" id="retryBtn" type="button">' + esc(t('retry')) + '</button></div>';
     $('#retryBtn').onclick = () => load(true);
+  } finally {
+    if (req === state.req) state.loading = false;
   }
 }
-function renderProfile(){
-  $('#count').textContent = '';
-  $('#list').innerHTML =
-    '<div class="box" style="margin-top:12px"><div class="seller"><div class="avatar">' + ic('i-user') + '</div><div class="who"><b>Гость</b><span class="meta">Вход по номеру телефона появится в следующей версии</span></div></div></div>' +
-    '<div class="box" style="margin-top:12px"><div class="row"><a class="btn ghost" href="#/my">Мои объявления: ' + mine.ids().length + '</a><a class="btn ghost" href="#/fav">Избранное: ' + favs.all().length + '</a></div>' +
-    '<p class="meta" style="margin:12px 0 0">Ваши объявления привязаны к этому браузеру. Если очистить данные браузера, удалить их отсюда будет нельзя.</p></div>' +
-    '<div class="box" style="margin-top:12px"><details class="adm"' + (adminKey() ? ' open' : '') + '><summary>Для администратора</summary>' +
-    '<div class="field" style="margin-top:10px"><label for="admKey">Ключ администратора</label><input id="admKey" type="password" value="' + esc(adminKey()) + '" autocomplete="off"></div>' +
-    '<div class="row" style="margin-top:10px"><button class="btn" id="admSave">Сохранить</button><button class="btn ghost" id="admClear">Выйти</button></div></details></div>';
-  $('#admSave').onclick = async () => {
-    const k = $('#admKey').value.trim();
-    try { const r = await request('GET', '/api/admin/check', {'X-Edit-Token': k});
-      if (r.admin){ store.set('sm_admin', k); toast('Режим администратора включён'); } else toast('Неверный ключ');
-    } catch(e){ toast(e.message); }
-  };
-  $('#admClear').onclick = () => { store.set('sm_admin', ''); $('#admKey').value = ''; toast('Режим администратора выключен'); };
-}
-function renderPage(){
-  renderTopbar(); renderCats(); renderFilters();
-  document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === state.page));
-  if (state.page === 'profile') renderProfile(); else load(true);
+/* автоподгрузка, когда долистали до конца */
+if ('IntersectionObserver' in window){
+  new IntersectionObserver(entries => {
+    if (entries.some(e => e.isIntersecting) && !state.loading && state.items.length && state.items.length < state.total && !document.querySelector('.sheet.open')){
+      const mb = $('#moreBtn'); if (mb){ mb.disabled = true; mb.textContent = t('loading'); }
+      load(false);
+    }
+  }, {rootMargin: '400px'}).observe($('#sentinel'));
 }
 
+/* ============ Профиль ============ */
+function renderProfile(){
+  $('#listHead').innerHTML = ''; $('#sentinel').innerHTML = '';
+  const tm = themeMode();
+  $('#list').innerHTML =
+    '<div class="box" style="margin-top:14px"><div class="seller"><div class="avatar">' + ic('i-user') + '</div><div class="who"><b>' + esc(t('guest')) + '</b><span class="meta">' + esc(t('guest_sub')) + '</span></div></div></div>' +
+    '<div class="box" style="margin-top:12px"><h3>' + esc(t('language')) + '</h3><div class="seg" id="profLang">' +
+      LANGS.map(l => '<button type="button" data-lang="' + l + '"' + (l === LANG ? ' class="on"' : '') + '>' + ({ru:'Русский', tr:'Türkçe', tk:'Türkmençe'})[l] + '</button>').join('') + '</div>' +
+      '<h3 style="margin-top:16px">' + esc(t('theme')) + '</h3><div class="seg" id="profTheme">' +
+      ['auto', 'light', 'dark'].map(m => '<button type="button" data-theme-set="' + m + '"' + (m === tm ? ' class="on"' : '') + '>' + esc(t('theme_' + m)) + '</button>').join('') + '</div></div>' +
+    '<div class="box" style="margin-top:12px"><div class="row"><a class="btn ghost" href="#/my">' + esc(t('my_count', {n: mine.ids().length})) + '</a><a class="btn ghost" href="#/fav">' + esc(t('fav_count', {n: favs.all().length})) + '</a></div>' +
+    '<p class="meta" style="margin:12px 0 0;display:block">' + esc(t('device_note')) + '</p></div>' +
+    '<div class="box" style="margin-top:12px"><details class="adm"' + (adminKey() ? ' open' : '') + '><summary>' + esc(t('admin_section')) + '</summary>' +
+    '<div class="field" style="margin-top:10px"><label for="admKey">' + esc(t('admin_key')) + '</label><input id="admKey" type="password" value="' + esc(adminKey()) + '" autocomplete="off"></div>' +
+    '<div class="row" style="margin-top:10px"><button class="btn" id="admSave" type="button">' + esc(t('save')) + '</button><button class="btn ghost" id="admClear" type="button">' + esc(t('logout')) + '</button></div></details></div>';
+  $('#profLang').onclick = e => { const b = e.target.closest('[data-lang]'); if (b && b.dataset.lang !== LANG){ saveLang(b.dataset.lang); location.reload(); } };
+  $('#profTheme').onclick = e => { const b = e.target.closest('[data-theme-set]'); if (!b) return; setTheme(b.dataset.themeSet); $$('#profTheme button').forEach(x => x.classList.toggle('on', x === b)); };
+  $('#admSave').onclick = async () => {
+    const k = $('#admKey').value.trim();
+    try { const r = await request('GET', '/api/admin/check', undefined, {'X-Edit-Token': k});
+      if (r.admin){ store.set('sm_admin', k); toast(t('admin_on')); } else toast(t('admin_bad'));
+    } catch(e){ toast(e.message); }
+  };
+  $('#admClear').onclick = () => { store.set('sm_admin', ''); $('#admKey').value = ''; toast(t('admin_off')); };
+}
+function renderPage(){
+  renderTopbar(); renderCats(); renderHero();
+  $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === state.page));
+  if (state.page === 'profile'){ $('#recent').innerHTML = ''; renderProfile(); return; }
+  renderRecent();
+  load(true);
+}
+
+/* ============ Фильтры ============ */
+function openFilters(){
+  $('#fmCity').innerHTML = '<option value="">' + esc(t('all_cities')) + '</option>' + CITIES.map(c => '<option value="' + c + '"' + (c === state.city ? ' selected' : '') + '>' + esc(valT(c)) + '</option>').join('');
+  $('#fmMin').value = state.min; $('#fmMax').value = state.max;
+  $('#filterModal').hidden = false;
+}
+function closeFilters(){ $('#filterModal').hidden = true; }
+$('#filterBtn').onclick = openFilters;
+$('#fmClose').onclick = closeFilters;
+$('#filterModal').onclick = e => { if (e.target.id === 'filterModal') closeFilters(); };
+$('#fmReset').onclick = () => { state.city = state.min = state.max = ''; closeFilters(); renderTopbar(); renderHero(); renderRecent(); load(true); };
+$('#fmApply').onclick = () => {
+  const num = v => { const n = parseInt(v, 10); return n > 0 ? String(n) : ''; };
+  state.city = $('#fmCity').value; state.min = num($('#fmMin').value); state.max = num($('#fmMax').value);
+  closeFilters(); renderTopbar(); renderHero(); renderRecent(); load(true);
+};
+
 /* ============ Объявление ============ */
+let current = null;
 async function openDetail(id){
   openSheet('detailSheet');
-  $('#detailHeadTitle').textContent = 'Объявление';
+  if (current && current.id === id){ renderDetail(current); return; }   // вернулись из редактирования
+  $('#detailHeadTitle').textContent = t('listing');
   $('#detailBody').innerHTML = '<div class="sk" style="aspect-ratio:4/3;border-radius:0"></div><div class="detail"><div class="sk" style="height:30px;width:50%"></div><div class="sk" style="height:20px;width:85%"></div><div class="sk" style="height:120px"></div></div>';
   let x;
   try { x = await api.get(id); }
-  catch(e){ $('#detailBody').innerHTML = emptyHTML('i-cloud', 'Не удалось открыть', esc(e.message)); return; }
+  catch(e){ $('#detailBody').innerHTML = emptyHTML('i-cloud', t('open_failed'), e.message); return; }
   if (!$('#detailSheet').classList.contains('open')) return;
+  recent.push(x.id);
+  renderDetail(x);
+}
+function renderDetail(x){
+  current = x;
   $('#detailHeadTitle').textContent = x.title;
   const favBtn = $('#detailFav');
   favBtn.classList.toggle('on', favs.has(x.id));
-  favBtn.onclick = () => { const on = favs.toggle(x.id); favBtn.classList.toggle('on', on); if (state.page === 'fav') needsReload = true; toast(on ? 'Добавлено в избранное' : 'Удалено из избранного'); };
+  favBtn.onclick = () => { const on = favs.toggle(x.id); favBtn.classList.toggle('on', on); if (state.page === 'fav') needsReload = true; toast(t(on ? 'fav_added' : 'fav_removed')); };
+  const url = location.origin + location.pathname + '#/item/' + x.id;
   $('#shareBtn').onclick = async () => {
-    const url = location.origin + location.pathname + '#/item/' + x.id;
     if (navigator.share){ try { await navigator.share({title: x.title, text: money(x.price), url}); } catch(e){} }
-    else if (navigator.clipboard){ navigator.clipboard.writeText(url).then(() => toast('Ссылка скопирована')); }
-    else toast(url);
+    else copy(url, t('link_copied'));
   };
 
   const e = x.extra || {};
   let specs = [];
-  if (x.cat === 'auto') specs = [['Марка', e.brand], ['Модель', e.model], ['Год выпуска', e.year], ['Пробег', e.mileage != null ? nf.format(e.mileage) + ' км' : ''], ['Коробка', e.gear], ['Топливо', e.fuel]];
-  if (x.cat === 'realty') specs = [['Тип сделки', e.deal], ['Комнат', e.rooms], ['Площадь', e.area != null ? e.area + ' м²' : ''], ['Этаж', e.floor]];
+  if (x.cat === 'auto') specs = [['spec_brand', valT(e.brand)], ['spec_model', e.model], ['spec_year', e.year], ['spec_mileage', e.mileage != null ? fmtNum(e.mileage) + ' ' + t('km') : ''], ['spec_gear', valT(e.gear)], ['spec_fuel', valT(e.fuel)]];
+  if (x.cat === 'realty') specs = [['spec_deal', valT(e.deal)], ['spec_rooms', e.rooms], ['spec_area', e.area != null ? e.area + ' ' + t('m2') : ''], ['spec_floor', e.floor]];
   specs = specs.filter(r => r[1] !== '' && r[1] != null);
-  const canDelete = mine.token(x.id) || adminKey();
+  const own = !!editToken(x.id);
   const ph = x.photos;
   const phone = String(x.phone || '').replace(/[^\d+]/g, '');
+  const shareText = x.title + ' — ' + money(x.price);
 
   $('#detailBody').innerHTML =
     '<div class="gallery">' + (ph.length
-      ? '<div class="track" id="track">' + ph.map((p, i) => '<img alt="' + esc(x.title) + '" src="' + esc(p.url) + '" data-full="' + esc(p.url) + '"' + (i ? ' loading="lazy"' : '') + '>').join('') + '</div>' +
+      ? '<div class="track" id="track">' + ph.map((p, i) => '<img alt="' + esc(x.title) + '" src="' + esc(p.url) + '" data-vi="' + i + '"' + (i ? ' loading="lazy"' : '') + '>').join('') + '</div>' +
         (ph.length > 1 ? '<div class="counter" id="counter">1 / ' + ph.length + '</div>' : '')
-      : '<div class="nophoto">' + ic('i-camera') + '</div>') + '</div>' +
+      : '<div class="nophoto" style="position:static;aspect-ratio:16/9">' + ic('i-camera') + '</div>') +
+      (x.sold ? '<div class="sold-banner">' + ic('i-tag') + esc(t('sold_banner')) + '</div>' : '') + '</div>' +
     (ph.length > 1 ? '<div class="thumbs" id="thumbs">' + ph.map((p, i) => '<img alt="" src="' + esc(p.thumb) + '" data-i="' + i + '"' + (i ? '' : ' class="on"') + '>').join('') + '</div>' : '') +
     '<div class="detail">' +
-      '<div><div class="price">' + money(x.price) + '</div><h1>' + esc(x.title) + '</h1></div>' +
-      '<div class="tags"><span class="tag">' + ic('c-' + x.cat) + catName(x.cat) + '</span><span class="tag">' + ic('i-pin') + esc(x.city) + '</span>' +
-        '<span class="tag">' + ic('i-clock') + ago(x.created) + '</span><span class="tag">' + ic('i-eye') + nf.format(x.views) + '</span></div>' +
-      (specs.length ? '<div class="box"><h3>Характеристики</h3><dl class="specs">' + specs.map(r => '<div><dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl></div>' : '') +
-      (x.desc ? '<div class="box"><h3>Описание</h3><p class="desc">' + esc(x.desc) + '</p></div>' : '') +
-      '<div class="box"><div class="seller"><div class="avatar">' + esc((x.name || 'П').trim().charAt(0).toUpperCase()) + '</div>' +
-        '<div class="who"><b>' + esc(x.name) + '</b><span class="meta">' + esc(x.phone) + '</span></div></div>' +
-        '<div class="row" style="margin-top:12px"><a class="btn" href="tel:' + esc(phone) + '">' + ic('i-phone') + 'Позвонить</a><button class="btn ghost" id="copyPhone">' + ic('i-copy') + 'Номер</button></div></div>' +
-      (canDelete ? '<button class="btn danger block" id="delBtn">Удалить объявление</button>' : '') +
-      '<div class="foot">Объявление № ' + esc(x.id) + '</div>' +
-    '</div>';
+      '<div><div class="price">' + esc(money(x.price)) + '</div><h1>' + esc(x.title) + '</h1></div>' +
+      '<div class="tags"><span class="tag c-' + esc(x.cat) + '" style="color:var(--c)">' + ic('c-' + x.cat) + esc(catName(x.cat)) + '</span><span class="tag">' + ic('i-pin') + esc(valT(x.city)) + '</span>' +
+        '<span class="tag">' + ic('i-clock') + esc(ago(x.created)) + '</span><span class="tag">' + ic('i-eye') + fmtNum(x.views) + '</span></div>' +
+      (specs.length ? '<div class="box"><h3>' + esc(t('specs')) + '</h3><dl class="specs">' + specs.map(r => '<div><dt>' + esc(t(r[0])) + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl></div>' : '') +
+      (x.desc ? '<div class="box"><h3>' + esc(t('description')) + '</h3><p class="desc">' + esc(x.desc) + '</p></div>' : '') +
+      '<div class="box"><div class="seller"><div class="avatar">' + esc((valT(x.name) || 'S').trim().charAt(0).toUpperCase()) + '</div>' +
+        '<div class="who"><b>' + esc(valT(x.name)) + '</b><span class="meta">' + esc(x.phone) + '</span></div></div></div>' +
+      '<div class="share"><a class="tg" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(shareText) + '">' + ic('i-tg') + 'Telegram</a>' +
+        '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + url) + '">' + ic('i-wa') + 'WhatsApp</a>' +
+        '<button class="ln" type="button" id="copyLink">' + ic('i-link') + esc(t('link')) + '</button></div>' +
+      (own ? '<div class="owner"><button class="btn line" type="button" id="editBtn">' + ic('i-edit') + esc(t('edit')) + '</button>' +
+        '<button class="btn line" type="button" id="soldBtn">' + ic(x.sold ? 'i-history' : 'i-tag') + esc(t(x.sold ? 'unmark_sold' : 'mark_sold')) + '</button>' +
+        '<button class="btn danger wide" type="button" id="delBtn">' + ic('i-trash') + esc(t('delete')) + '</button></div>' : '') +
+      '<div id="similar"></div>' +
+      '<div class="foot">' + esc(t('listing_no', {id: x.id})) + '</div>' +
+    '</div>' +
+    '<div class="callbar"><a class="btn" href="tel:' + esc(phone) + '">' + ic('i-phone') + esc(t('call')) + '</a><button class="btn ghost" type="button" id="copyPhone">' + ic('i-copy') + esc(t('number')) + '</button></div>';
 
   const track = $('#track'), counter = $('#counter'), thumbs = $('#thumbs');
   if (track && ph.length > 1) track.addEventListener('scroll', () => {
     const i = Math.round(track.scrollLeft / track.clientWidth);
     if (counter) counter.textContent = (i + 1) + ' / ' + ph.length;
-    if (thumbs) thumbs.querySelectorAll('img').forEach((t, k) => t.classList.toggle('on', k === i));
+    if (thumbs) $$('img', thumbs).forEach((im, k) => im.classList.toggle('on', k === i));
   }, {passive:true});
-  if (thumbs) thumbs.onclick = ev => { const t = ev.target.closest('[data-i]'); if (t) track.scrollTo({left: track.clientWidth * +t.dataset.i, behavior:'smooth'}); };
-  if (track) track.onclick = ev => { const im = ev.target.closest('[data-full]'); if (im){ $('#viewerImg').src = im.dataset.full; $('#viewer').classList.add('open'); } };
-  $('#copyPhone').onclick = () => {
-    (navigator.clipboard ? navigator.clipboard.writeText(x.phone) : Promise.reject()).then(() => toast('Номер скопирован'), () => toast(x.phone));
+  if (thumbs) thumbs.onclick = ev => { const im = ev.target.closest('[data-i]'); if (im) track.scrollTo({left: track.clientWidth * +im.dataset.i, behavior:'smooth'}); };
+  if (track) track.onclick = ev => { const im = ev.target.closest('[data-vi]'); if (im) openViewer(ph, +im.dataset.vi); };
+  $('#copyPhone').onclick = () => copy(x.phone, t('phone_copied'));
+  $('#copyLink').onclick = () => copy(url, t('link_copied'));
+  const editBtn = $('#editBtn');
+  if (editBtn) editBtn.onclick = () => location.replace('#/edit/' + x.id);
+  const soldBtn = $('#soldBtn');
+  if (soldBtn) soldBtn.onclick = async () => {
+    soldBtn.disabled = true;
+    try { const upd = await api.update(x.id, {sold: !x.sold}); needsReload = true; toast(t(upd.sold ? 'marked_sold' : 'unmarked_sold')); renderDetail(upd); loadStats(); }
+    catch(err){ soldBtn.disabled = false; toast(err.message); }
   };
   const del = $('#delBtn');
   if (del) del.onclick = async () => {
-    if (!confirm('Удалить объявление? Это нельзя отменить.')) return;
+    if (!confirm(t('del_confirm'))) return;
     del.disabled = true;
-    try { await api.remove(x.id, mine.token(x.id) || adminKey()); mine.drop(x.id); needsReload = true; toast('Объявление удалено'); closeSheet(); }
+    try { await api.remove(x.id); mine.drop(x.id); needsReload = true; toast(t('deleted')); loadStats(); closeSheet(); }
     catch(err){ del.disabled = false; toast(err.message); }
   };
+  renderSimilar(x);
+}
+async function renderSimilar(x){
+  let r;
+  try { r = await api.list({cat: x.cat, exclude: x.id, limit: 6, sort: 'new'}); } catch(e){ return; }
+  if (!current || current.id !== x.id || !r.items.length) return;
+  $('#similar').innerHTML = '<div class="sec-head" style="margin-top:4px"><h3>' + esc(t('similar')) + '</h3></div><div class="grid">' + r.items.map(cardHTML).join('') + '</div>';
+}
+function copy(text, okMsg){
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast(okMsg), () => toast(text));
 }
 
-/* ============ Подача объявления ============ */
-let draft = [], draftCat = '', sending = false;
+/* ---- просмотр фото на весь экран с листанием ---- */
+function openViewer(ph, start){
+  const tr = $('#vtrack'), cnt = $('#vcount');
+  tr.innerHTML = ph.map(p => '<img alt="" src="' + esc(p.url) + '">').join('');
+  cnt.textContent = (start + 1) + ' / ' + ph.length;
+  cnt.hidden = ph.length < 2;
+  $('#viewer').classList.add('open');
+  requestAnimationFrame(() => { tr.scrollLeft = tr.clientWidth * start; });
+  tr.onscroll = () => { cnt.textContent = (Math.round(tr.scrollLeft / tr.clientWidth) + 1) + ' / ' + ph.length; };
+}
+function closeViewer(){ $('#viewer').classList.remove('open'); $('#vtrack').innerHTML = ''; }
+$('#viewerClose').onclick = closeViewer;
+
+/* ============ Подача и редактирование ============ */
+let draft = [], draftCat = '', sending = false, formMode = 'add', editId = '';
+function fillSelect(sel, values, label){ $(sel).innerHTML = values.map(v => '<option value="' + esc(v) + '">' + esc(label ? label(v) : v) + '</option>').join(''); }
 function buildForm(){
-  $('#catPick').innerHTML = CATS.filter(c => c.id !== 'all').map(c => '<button type="button" data-pick="' + c.id + '">' + ic('c-' + c.id) + c.name + '</button>').join('');
-  $('#fCity').innerHTML = CITIES.map(c => '<option>' + c + '</option>').join('');
-  $('#fBrand').innerHTML = BRANDS.map(b => '<option>' + b + '</option>').join('');
+  $('#catPick').innerHTML = CATS.filter(c => c !== 'all').map(c => '<button type="button" class="c-' + c + '" data-pick="' + c + '">' + ic('c-' + c) + esc(catName(c)) + '</button>').join('');
+  fillSelect('#fCity', CITIES, valT);
+  fillSelect('#fBrand', BRANDS, valT);
+  fillSelect('#fGear', GEARS, valT);
+  fillSelect('#fFuel', FUELS, valT);
+  fillSelect('#fDeal', DEALS, valT);
   $('#catPick').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b) return;
-    draftCat = b.dataset.pick;
-    document.querySelectorAll('[data-pick]').forEach(x => x.classList.toggle('on', x === b));
-    $('#autoFields').classList.toggle('show', draftCat === 'auto');
-    $('#realtyFields').classList.toggle('show', draftCat === 'realty');
+    setCat(b.dataset.pick);
     $('#errCat').classList.remove('show');
   });
   $('#photoInput').addEventListener('change', async e => {
     const files = Array.from(e.target.files || []);
     e.target.value = '';
     const room = MAX_PHOTOS - draft.length;
-    if (files.length > room) toast('Можно добавить не больше ' + MAX_PHOTOS + ' фото');
+    if (files.length > room) toast(t('max_photos', {n: MAX_PHOTOS}));
     for (const f of files.slice(0, room)){
-      if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif|gif)$/i.test(f.name)){ toast('Это не фото: ' + f.name); continue; }
+      if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif|gif)$/i.test(f.name)){ toast(t('not_photo', {name: f.name})); continue; }
       const blob = await compress(f).catch(() => f);
       draft.push({blob, url: URL.createObjectURL(blob)});
       $('#errPhotos').classList.remove('show');
@@ -657,11 +1238,17 @@ function buildForm(){
   const saved = store.get('sm_contact', null);
   if (saved){ $('#fName').value = saved.name || ''; $('#fPhone').value = saved.phone || ''; }
 }
+function setCat(c){
+  draftCat = c;
+  $$('[data-pick]').forEach(x => x.classList.toggle('on', x.dataset.pick === c));
+  $('#autoFields').classList.toggle('show', c === 'auto');
+  $('#realtyFields').classList.toggle('show', c === 'realty');
+}
 function renderPhotos(){
   $('#photoGrid').innerHTML = draft.map((p, i) =>
-    '<div class="slot"><img alt="" src="' + p.url + '"><button type="button" class="x" data-rm="' + i + '" aria-label="Убрать фото">' + ic('i-x') + '</button>' +
-    (i === 0 ? '<span class="main">Главное</span>' : '') + '</div>').join('') +
-    (draft.length < MAX_PHOTOS ? '<label class="addph" for="photoInput">' + ic('i-camera') + (draft.length ? 'Ещё фото' : 'Добавить фото') + '</label>' : '');
+    '<div class="slot"><img alt="" src="' + p.url + '"><button type="button" class="x" data-rm="' + i + '" aria-label="' + esc(t('remove_photo')) + '">' + ic('i-x') + '</button>' +
+    (i === 0 ? '<span class="main">' + esc(t('main_photo')) + '</span>' : '') + '</div>').join('') +
+    (draft.length < MAX_PHOTOS ? '<label class="addph" for="photoInput">' + ic('i-camera') + esc(t(draft.length ? 'more_photo' : 'add_photo')) + '</label>' : '');
 }
 function compress(file, max = 1600, q = 0.82){
   return new Promise((res, rej) => {
@@ -678,14 +1265,40 @@ function compress(file, max = 1600, q = 0.82){
     img.src = url;
   });
 }
+function setFormMode(mode){
+  formMode = mode;
+  $$('.add-only').forEach(el => { el.hidden = mode !== 'add'; });
+  $$('.edit-only').forEach(el => { el.hidden = mode !== 'edit'; });
+  $('#formTitle').textContent = t(mode === 'add' ? 'new_listing' : 'edit_listing');
+  $('#submitTxt').textContent = t(mode === 'add' ? 'publish' : 'save');
+}
 function resetForm(){
-  draft.forEach(p => URL.revokeObjectURL(p.url)); draft = []; draftCat = '';
+  draft.forEach(p => URL.revokeObjectURL(p.url)); draft = []; draftCat = ''; editId = '';
   const keep = {name: $('#fName').value, phone: $('#fPhone').value};
   $('#addForm').reset(); $('#fName').value = keep.name; $('#fPhone').value = keep.phone;
-  document.querySelectorAll('[data-pick]').forEach(x => x.classList.remove('on'));
-  $('#autoFields').classList.remove('show'); $('#realtyFields').classList.remove('show');
-  document.querySelectorAll('.err').forEach(x => x.classList.remove('show'));
+  setCat('');
+  $$('.err').forEach(x => x.classList.remove('show'));
   renderPhotos();
+}
+function openAdd(){
+  if (formMode !== 'add'){ resetForm(); const c = store.get('sm_contact', null); if (c){ $('#fName').value = c.name || ''; $('#fPhone').value = c.phone || ''; } }
+  setFormMode('add');
+  openSheet('formSheet');
+}
+async function openEdit(id){
+  openSheet('formSheet');
+  let x = current && current.id === id ? current : null;
+  if (!x){ try { x = await api.peek(id); } catch(e){ toast(e.message); location.hash = lastListHash; return; } }
+  resetForm();
+  setFormMode('edit');
+  editId = id;
+  setCat(x.cat);
+  const e = x.extra || {};
+  const setv = (sel, v) => { $(sel).value = v == null ? '' : v; };
+  setv('#fTitle', x.title); setv('#fPrice', x.price); setv('#fCity', x.city); setv('#fDesc', x.desc);
+  setv('#fName', x.name === 'Продавец' ? '' : x.name); setv('#fPhone', x.phone);
+  if (x.cat === 'auto'){ setv('#fBrand', e.brand || 'Другая'); setv('#fModel', e.model); setv('#fYear', e.year); setv('#fMileage', e.mileage); setv('#fGear', e.gear || GEARS[0]); setv('#fFuel', e.fuel || FUELS[0]); }
+  if (x.cat === 'realty'){ setv('#fDeal', e.deal || DEALS[0]); setv('#fRooms', e.rooms); setv('#fArea', e.area); setv('#fFloor', e.floor); }
 }
 async function submitForm(e){
   e.preventDefault();
@@ -693,61 +1306,81 @@ async function submitForm(e){
   const v = id => $('#' + id).value.trim();
   let ok = true;
   const need = (cond, errId) => { $('#' + errId).classList.toggle('show', !cond); if (!cond) ok = false; };
-  need(!!draftCat, 'errCat');
-  need(draft.length > 0, 'errPhotos');
+  if (formMode === 'add'){ need(!!draftCat, 'errCat'); need(draft.length > 0, 'errPhotos'); }
   need(v('fTitle').length >= 3, 'errTitle');
   need(v('fPrice') !== '' && Number(v('fPrice')) >= 0, 'errPrice');
   need(v('fPhone').replace(/\D/g, '').length >= 6, 'errPhone');
-  if (!ok){ toast('Заполните отмеченные поля'); const f = document.querySelector('.err.show'); if (f) f.scrollIntoView({block:'center', behavior:'smooth'}); return; }
+  if (!ok){ toast(t('fill_fields')); const f = document.querySelector('.err.show'); if (f) f.scrollIntoView({block:'center', behavior:'smooth'}); return; }
 
-  const fd = new FormData();
-  fd.append('cat', draftCat);
-  ['title','price','city','desc','name','phone'].forEach(n => fd.append(n, v('f' + n[0].toUpperCase() + n.slice(1))));
+  const fields = {title: v('fTitle'), price: v('fPrice'), city: v('fCity'), desc: v('fDesc'), name: v('fName'), phone: v('fPhone')};
   const sec = draftCat === 'auto' ? '#autoFields' : draftCat === 'realty' ? '#realtyFields' : null;
-  if (sec) document.querySelectorAll(sec + ' [name]').forEach(el => fd.append(el.name, el.value.trim()));
-  draft.forEach((p, i) => fd.append('photos', p.blob, 'photo' + (i + 1) + '.jpg'));
-  store.set('sm_contact', {name: v('fName'), phone: v('fPhone')});
+  if (sec) $$(sec + ' [name]').forEach(el => { fields[el.name] = el.value.trim(); });
+  store.set('sm_contact', {name: fields.name, phone: fields.phone});
 
   sending = true;
   const btn = $('#submitBtn'), bar = $('#upBar'), txt = $('#submitTxt');
-  btn.disabled = true; txt.textContent = draft.length ? 'Загрузка фото… 0%' : 'Публикуем…';
+  btn.disabled = true;
   try {
-    const r = await api.create(fd, p => { bar.style.width = Math.round(p * 100) + '%'; if (draft.length) txt.textContent = p < 1 ? 'Загрузка фото… ' + Math.round(p * 100) + '%' : 'Обработка…'; });
+    if (formMode === 'edit'){
+      txt.textContent = t('saving');
+      const upd = await api.update(editId, fields);
+      needsReload = true;
+      toast(t('saved'));
+      const id = editId;
+      resetForm(); setFormMode('add');
+      current = upd;
+      location.replace('#/item/' + id);
+      return;
+    }
+    const fd = new FormData();
+    fd.append('cat', draftCat);
+    Object.entries(fields).forEach(([k, val]) => fd.append(k, val));
+    draft.forEach((p, i) => fd.append('photos', p.blob, 'photo' + (i + 1) + '.jpg'));
+    txt.textContent = t('uploading', {p: 0});
+    const r = await api.create(fd, p => { bar.style.width = Math.round(p * 100) + '%'; txt.textContent = p < 1 ? t('uploading', {p: Math.round(p * 100)}) : t('processing'); });
     mine.add(r.id, r.token);
     needsReload = true;
-    toast('Объявление опубликовано');
+    toast(t('published'));
     resetForm();
+    loadStats();
     lastListHash = '#/my';
+    sheetFromList = false;              // «Назад» из нового объявления ведёт в «Мои объявления»
     location.replace('#/item/' + r.id);
   } catch(err){
     toast(err.message);
   } finally {
-    sending = false; btn.disabled = false; bar.style.width = '0'; txt.textContent = 'Опубликовать';
+    sending = false; btn.disabled = false; bar.style.width = '0'; txt.textContent = t(formMode === 'add' ? 'publish' : 'save');
   }
 }
 
 /* ============ Окна и навигация ============ */
 let sheetFromList = false, firstRender = true, needsReload = false;
 function openSheet(id){
-  document.querySelectorAll('.sheet').forEach(s => s.classList.toggle('open', s.id === id));
+  $$('.sheet').forEach(s => s.classList.toggle('open', s.id === id));
   document.body.style.overflow = 'hidden';
   $('#' + id).scrollTop = 0;
 }
-function hideSheets(){ document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); document.body.style.overflow = ''; }
-function closeSheet(){ if (sheetFromList) history.back(); else location.hash = lastListHash; }
+function hideSheets(){ $$('.sheet').forEach(s => s.classList.remove('open')); document.body.style.overflow = ''; current = null; }
+function closeSheet(){
+  if (formMode === 'edit' && editId && $('#formSheet').classList.contains('open')){ location.replace('#/item/' + editId); return; }
+  if (sheetFromList) history.back(); else location.hash = lastListHash;
+}
 function route(){
   const parts = (location.hash || '#/').slice(2).split('/');
   const page = parts[0] || 'home';
-  if (firstRender){ firstRender = false; if (page === 'item' || page === 'add'){ state.page = 'home'; renderPage(); } }
+  const isSheet = page === 'item' || page === 'add' || page === 'edit';
+  if (firstRender){ firstRender = false; if (isSheet){ state.page = 'home'; renderPage(); } }
   if (page === 'item'){ openDetail(parts[1]); return; }
-  if (page === 'add'){ openSheet('formSheet'); return; }
+  if (page === 'add'){ openAdd(); return; }
+  if (page === 'edit'){ openEdit(parts[1]); return; }
   const wasOpen = !!document.querySelector('.sheet.open');
   const next = ['fav', 'my', 'profile'].includes(page) ? page : 'home';
   const sameList = wasOpen && next === state.page && (location.hash || '#/') === lastListHash;
   hideSheets(); sheetFromList = false;
   state.page = next; lastListHash = location.hash || '#/';
-  if (sameList && !needsReload){ // вернулись из объявления — список и прокрутку не трогаем
-    document.querySelectorAll('[data-fav]').forEach(b => b.classList.toggle('on', favs.has(b.dataset.fav)));
+  if (sameList && !needsReload){       // вернулись из объявления — список и прокрутку не трогаем
+    $$('[data-fav]').forEach(b => b.classList.toggle('on', favs.has(b.dataset.fav)));
+    if (state.page === 'home') renderRecent();
     return;
   }
   needsReload = false;
@@ -755,24 +1388,68 @@ function route(){
 }
 window.addEventListener('hashchange', e => {
   const from = e.oldURL.split('#')[1] || '/', to = location.hash.slice(1);
-  sheetFromList = !/^\/(item|add)/.test(from) && /^\/(item|add)/.test(to);
+  const sheetRe = /^\/(item|add|edit)/;
+  if (!sheetRe.test(from) && sheetRe.test(to)) sheetFromList = true;
+  else if (!sheetRe.test(to)) sheetFromList = false;
   route();
 });
 document.addEventListener('click', e => {
   const chip = e.target.closest('[data-cat]');
-  if (chip){ state.cat = chip.dataset.cat; renderCats(); load(true); chip.scrollIntoView({inline:'nearest', block:'nearest'}); return; }
+  if (chip){ state.cat = chip.dataset.cat; renderCats(); renderHero(); renderRecent(); load(true); chip.scrollIntoView({inline:'nearest', block:'nearest'}); return; }
   const heart = e.target.closest('[data-fav]');
-  if (heart){ const on = favs.toggle(heart.dataset.fav); heart.classList.toggle('on', on); toast(on ? 'Добавлено в избранное' : 'Удалено из избранного'); if (state.page === 'fav') load(true); return; }
+  if (heart){ const on = favs.toggle(heart.dataset.fav); heart.classList.toggle('on', on); toast(t(on ? 'fav_added' : 'fav_removed')); if (state.page === 'fav' && !document.querySelector('.sheet.open')) load(true); return; }
   if (e.target.closest('[data-close]')) closeSheet();
 });
-$('#viewer').onclick = () => $('#viewer').classList.remove('open');
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
-  if ($('#viewer').classList.contains('open')) $('#viewer').classList.remove('open');
+  if ($('#viewer').classList.contains('open')) closeViewer();
+  else if (!$('#filterModal').hidden) closeFilters();
+  else if (!$('#langPick').hidden && !$('#lpClose').hidden) $('#langPick').hidden = true;
   else if (document.querySelector('.sheet.open')) closeSheet();
 });
 
-buildForm(); renderPhotos(); route();
+/* поиск */
+let qTimer;
+$('#q').addEventListener('input', e => {
+  $('#qClear').hidden = !e.target.value;
+  clearTimeout(qTimer);
+  qTimer = setTimeout(() => { state.q = e.target.value; renderHero(); renderRecent(); load(true); }, 350);
+});
+$('#qClear').onclick = () => { $('#q').value = ''; $('#qClear').hidden = true; state.q = ''; renderHero(); renderRecent(); load(true); $('#q').focus(); };
+
+/* тема и язык в шапке */
+$('#themeBtn').onclick = () => setTheme(isDark() ? 'light' : 'dark');
+$('#langBtn').onclick = () => openLangPicker(false);
+$('#lpClose').onclick = () => { $('#langPick').hidden = true; };
+$('#lpList').onclick = e => {
+  const b = e.target.closest('[data-lang]'); if (!b) return;
+  const l = b.dataset.lang, first = !readLang();
+  saveLang(l);
+  if (first){ $('#langPick').hidden = true; start(l); }
+  else if (l !== LANG) location.reload();
+  else $('#langPick').hidden = true;
+};
+function openLangPicker(first){
+  $('#lpClose').hidden = first;
+  $$('#lpList [data-lang]').forEach(b => b.classList.toggle('on', !first && b.dataset.lang === LANG));
+  $('#langPick').hidden = false;
+}
+
+/* ============ Запуск ============ */
+function start(l){
+  LANG = l || readLang() || 'ru'; LI = LANGS.indexOf(LANG);
+  nf = new Intl.NumberFormat(LANG === 'tr' ? 'tr-TR' : 'ru-RU');
+  document.documentElement.lang = LANG;
+  document.title = t('doc_title');
+  $('#langCode').textContent = LANG_CODE[LANG];
+  applyStatic(document);
+  buildForm(); renderPhotos(); setFormMode('add');
+  route();
+  loadStats();
+}
+setTheme(themeMode());
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (themeMode() === 'auto') setTheme('auto'); });
+if (readLang()) start(); else openLangPicker(true);
 })();
 </script>
 </body>
