@@ -1,0 +1,4 @@
+# Python cache and local dev data
+__pycache__/
+*.pyc
+marketplace/server/data/
