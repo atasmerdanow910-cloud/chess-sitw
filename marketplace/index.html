@@ -239,8 +239,9 @@ details.adm summary{cursor:pointer;color:var(--muted);font-size:13px}
       </div>
 
       <div class="field">
-        <span class="lbl">Фотографии <small>до 6 штук, первое будет главным</small></span>
+        <span class="lbl">Фотографии <small>от 1 до 6 — только ваши реальные фото, первое будет главным</small></span>
         <div class="photos" id="photoGrid"></div>
+        <div class="err" id="errPhotos">Добавьте хотя бы одно фото товара</div>
         <input class="sr" type="file" id="photoInput" accept="image/*" multiple>
       </div>
 
@@ -619,6 +620,7 @@ function buildForm(){
       if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif|gif)$/i.test(f.name)){ toast('Это не фото: ' + f.name); continue; }
       const blob = await compress(f).catch(() => f);
       draft.push({blob, url: URL.createObjectURL(blob)});
+      $('#errPhotos').classList.remove('show');
       renderPhotos();
     }
   });
@@ -671,6 +673,7 @@ async function submitForm(e){
   let ok = true;
   const need = (cond, errId) => { $('#' + errId).classList.toggle('show', !cond); if (!cond) ok = false; };
   need(!!draftCat, 'errCat');
+  need(draft.length > 0, 'errPhotos');
   need(v('fTitle').length >= 3, 'errTitle');
   need(v('fPrice') !== '' && Number(v('fPrice')) >= 0, 'errPrice');
   need(v('fPhone').replace(/\D/g, '').length >= 6, 'errPhone');

@@ -247,6 +247,8 @@ def create_listing():
         return err("Укажите телефон")
 
     files = [x for x in request.files.getlist("photos") if x and x.filename][:MAX_PHOTOS]
+    if not files:
+        return err("Добавьте хотя бы одно фото товара")
     names = []
     try:
         for fs in files:
