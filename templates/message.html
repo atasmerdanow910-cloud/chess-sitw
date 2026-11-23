@@ -1,0 +1,19 @@
+{% from "_macros.html" import ic, logo, head, background %}<!doctype html>
+<html lang="ru">
+<head>
+{{ head(title ~ " · " ~ site.site_title) }}
+<meta name="robots" content="noindex">
+</head>
+<body>
+{% include "_sprite.html" %}
+{{ background() }}
+<main class="center-page">
+  <div class="login-card glass">
+    <span class="brand-mark">{{ ic(icon) }}</span>
+    <h1>{{ title }}</h1>
+    <p>{{ text }}</p>
+    <a class="btn btn-primary btn-block" href="/">На главную</a>
+  </div>
+</main>
+</body>
+</html>

@@ -1,17 +1,103 @@
-/* Публичная часть: инструкция, файлы, просмотр кода, нижнее меню. */
+/* Публичная часть: инструкция, файлы, просмотр кода, вход через Google, нижнее меню. */
 (function () {
   "use strict";
-  const { $, $$, esc, icon, logo, fmtSize, plural, copyText, toast, highlight, countLines } = window.UI;
+  const { $, $$, esc, icon, logo, glogo, fmtSize, fmtDate, plural, copyText, toast, highlight, countLines } = window.UI;
 
   const data = JSON.parse($("#initial-data").textContent);
+  const auth = data.auth || {};
   const codeCache = new Map();
+  const gatedFiles = () => auth.require_files && !auth.user;
+  const gatedApk = () => auth.require_apk && !auth.user;
 
   const ctx = () => ({
-    host: location.host || "vpn-python",
+    host: location.host || "example.com",
     title: data.site.site_title,
     apkName: data.apk.name || "pydroid3.apk",
     apkSize: data.apk.size ? fmtSize(data.apk.size) : "APK файл",
     fileName: (data.files[0] && data.files[0].filename) || "script.py",
+  });
+
+  const loginUrl = () => "/auth/google?next=" + encodeURIComponent(location.pathname + (location.hash || ""));
+
+  function avatar(user, cls) {
+    if (!user) return "";
+    const letter = esc((user.name || user.email || "?").trim().charAt(0).toUpperCase());
+    return user.picture
+      ? `<span class="avatar ${cls || ""}"><img src="${esc(user.picture)}" alt="" referrerpolicy="no-referrer"></span>`
+      : `<span class="avatar ${cls || ""}">${letter}</span>`;
+  }
+
+  /* ------------------------------------------------- модальные окна -- */
+  const openModals = [];
+  function openModal(el) {
+    if (!el.hidden) return;
+    el.hidden = false;
+    openModals.push(el);
+    document.documentElement.style.overflow = "hidden";
+    history.pushState({ modal: true }, "");
+  }
+  function closeModal(el, fromHistory) {
+    if (!el || el.hidden) return;
+    el.hidden = true;
+    const i = openModals.indexOf(el);
+    if (i >= 0) openModals.splice(i, 1);
+    if (!openModals.length) document.documentElement.style.overflow = "";
+    if (!fromHistory && history.state && history.state.modal) history.back();
+    if (el.id === "sheet") currentId = null;
+  }
+  window.addEventListener("popstate", () => {
+    const top = openModals[openModals.length - 1];
+    if (top) closeModal(top, true);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (lightbox) return closeLightbox();
+    const top = openModals[openModals.length - 1];
+    if (top) closeModal(top, false);
+  });
+  $$(".sheet-wrap, .modal-wrap").forEach((wrap) => wrap.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close]")) closeModal(wrap, false);
+  }));
+
+  /* ------------------------------------------------------ аккаунт -- */
+  const accountEl = $("#account");
+
+  function openAccount(reason) {
+    const body = $("#account-body");
+    if (auth.user) {
+      const u = auth.user;
+      body.innerHTML = `${avatar(u, "lg")}
+        <h3>${esc(u.name)}</h3><p>${esc(u.email)}</p>
+        <p class="fine">Аккаунт создан ${esc(fmtDate(u.created_at))}</p>
+        <form method="post" action="/auth/logout">
+          <input type="hidden" name="csrf" value="${esc(auth.csrf)}">
+          <button class="btn btn-glass btn-block" type="submit">${icon("logout")}Выйти</button>
+        </form>`;
+    } else {
+      body.innerHTML = `<div class="g-hero">${glogo()}</div>
+        <h3>Вход и регистрация</h3>
+        <p>${esc(reason || "Войдите с помощью аккаунта Google. При первом входе аккаунт создаётся автоматически.")}</p>
+        <a class="btn btn-google btn-block" href="${esc(loginUrl())}">${glogo()}Продолжить с Google</a>
+        <p class="fine">Мы получаем только имя, email и фото профиля. Пароль от Google сайт не видит.</p>`;
+    }
+    openModal(accountEl);
+  }
+
+  function renderTop() {
+    const host = $("#top-actions");
+    if (!auth.google) { host.innerHTML = ""; return; }
+    host.innerHTML = auth.user
+      ? `<button type="button" class="avatar-btn" data-account aria-label="Аккаунт">${avatar(auth.user)}</button>`
+      : `<button type="button" class="btn btn-glass btn-sm" data-login>${glogo()}Войти</button>`;
+    const tab = $("#tab-account");
+    if (tab && auth.user) {
+      tab.innerHTML = `${avatar(auth.user)}<span>Профиль</span>`;
+    }
+  }
+
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-login]")) { e.preventDefault(); openAccount(); }
+    else if (e.target.closest("[data-account]")) { e.preventDefault(); openAccount(); }
   });
 
   /* ---------------------------------------------------------- APK -- */
@@ -19,31 +105,63 @@
     const a = data.apk;
     const meta = $("#apk-meta");
     if (a.available) {
-      meta.textContent = [a.name, fmtSize(a.size), a.version ? "версия " + a.version : ""].filter(Boolean).join(" · ");
+      meta.innerHTML = icon("shield") + esc([a.name, fmtSize(a.size), a.version ? "версия " + a.version : ""].filter(Boolean).join(" · "));
     } else {
       meta.textContent = "Откроется страница Pydroid 3 в Google Play";
     }
+    $$("#apk-btn, [data-apk-link]").forEach((el) => el.addEventListener("click", (e) => {
+      if (a.available && gatedApk()) {
+        e.preventDefault();
+        openAccount("Чтобы скачать Pydroid 3, войдите через Google — это займёт несколько секунд.");
+      }
+    }));
+  }
+
+  function renderSecurity() {
+    const s = data.secure || {};
+    $("#chk-secure").hidden = !s.https;
+    const badges = [];
+    if (s.https) badges.push(`<span class="tag ok">${icon("lock")}HTTPS</span>`);
+    if (s.cloudflare) badges.push(`<span class="tag ok">${icon("cloud")}Cloudflare</span>`);
+    badges.push(`<span class="tag">${icon("shield")}Защита от флуда</span>`);
+    if (auth.google) badges.push(`<span class="tag">${icon("user")}Вход через Google</span>`);
+    $("#badges").innerHTML = badges.join("");
   }
 
   /* --------------------------------------------------- инструкция -- */
   function renderSteps() {
-    const total = data.steps.length;
     const c = ctx();
     $("#steps").innerHTML = data.steps.map((s, i) => {
-      const visual = s.photo
-        ? `<img src="${esc(s.photo)}" alt="Фото: ${esc(s.title)}" loading="lazy" data-zoom><span class="photo-badge">Нажмите, чтобы увеличить</span>`
-        : (window.Mockups[s.key] ? window.Mockups[s.key](c) : "");
+      const photos = s.photos || [];
+      const frames = photos.length
+        ? photos.map((src, k) => ({
+            cap: photos.length > 1 ? "Фото " + (k + 1) : "",
+            html: `<img src="${esc(src)}" alt="Фото: ${esc(s.title)}" loading="lazy" data-zoom>`,
+            photo: true,
+          }))
+        : (window.Mockups[s.key] ? window.Mockups[s.key](c) : []);
+      const many = frames.length > 1;
+      const visual = frames.map((f, k) => `
+        <figure class="frame">
+          <div class="phone${f.photo ? " is-photo" : ""}"><div class="phone-screen">${f.html}</div></div>
+          ${f.cap ? `<figcaption class="frame-cap">${many ? `<b>${k + 1}/${frames.length}</b>` : ""}${esc(f.cap)}</figcaption>` : ""}
+        </figure>`).join("");
       const tips = s.tips && s.tips.length
-        ? `<ul class="tips">${s.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : "";
+        ? `<ul class="tips">${s.tips.map((t) => `<li>${icon("info")}<span>${esc(t)}</span></li>`).join("")}</ul>` : "";
       return `<article class="step glass reveal" id="step-${esc(s.key)}">
         <div class="step-body">
-          <div class="step-head"><span class="step-num">${i + 1}</span>
-            <div><div class="step-kicker">Шаг ${i + 1} из ${total}</div><h3>${esc(s.title)}</h3></div></div>
+          <span class="step-num">ШАГ ${String(i + 1).padStart(2, "0")}</span>
+          <h3>${esc(s.title)}</h3>
           <p>${esc(s.text)}</p>${tips}
         </div>
-        <div class="step-visual"><div class="phone${s.photo ? " is-photo" : ""}"><div class="phone-screen">${visual}</div></div></div>
+        <div class="step-visual">
+          <div class="frames${many ? "" : " single"}">${visual}</div>
+          ${many ? `<div class="frames-hint">${icon("back")}листайте экраны</div>` : ""}
+        </div>
       </article>`;
     }).join("");
+    const hero = $("#hero-phone");
+    if (hero && window.Mockups.run) hero.innerHTML = window.Mockups.run(c)[0].html;
   }
 
   /* -------------------------------------------------------- файлы -- */
@@ -51,21 +169,23 @@
 
   function renderFiles() {
     const list = $("#file-list");
+    $("#gate-notice").hidden = !gatedFiles() || !data.files.length;
     const q = query.trim().toLowerCase();
     if (!data.files.length) {
-      list.innerHTML = `<div class="empty glass">${logo()}<b>Файлов пока нет</b>Скоро здесь появятся готовые скрипты.</div>`;
+      list.innerHTML = `<div class="empty glass">${logo()}<b>Скрипты скоро появятся</b>Загляните позже.</div>`;
       return;
     }
     const items = data.files.filter((f) =>
       !q || [f.title, f.filename, f.description, f.requirements.join(" ")].join(" ").toLowerCase().includes(q));
     if (!items.length) {
-      list.innerHTML = `<div class="empty glass"><b>Ничего не найдено</b>Попробуйте другой запрос.</div>`;
+      list.innerHTML = `<div class="empty glass"><b>Ничего не найдено</b>Измените запрос.</div>`;
       return;
     }
+    const lock = gatedFiles();
     list.innerHTML = items.map((f) => `
       <article class="file glass" data-id="${esc(f.id)}">
         <div class="file-top">
-          <span class="file-ico">${logo()}<em>.py</em></span>
+          <span class="file-ico">${logo()}</span>
           <div class="grow"><h3>${esc(f.title)}</h3><div class="file-name">${esc(f.filename)}</div></div>
         </div>
         ${f.description ? `<p class="file-desc">${esc(f.description)}</p>` : ""}
@@ -76,24 +196,24 @@
           ${f.requirements.map((r) => `<span class="tag req" title="Нужна библиотека">${esc(r)}</span>`).join("")}
         </div>
         <div class="file-actions">
-          <button class="btn btn-glass btn-sm" type="button" data-act="open">${icon("eye")}Код</button>
-          <button class="btn btn-blue btn-sm" type="button" data-act="copy">${icon("copy")}Копировать</button>
+          <button class="btn btn-glass btn-sm" type="button" data-act="open">${icon(lock ? "lock" : "eye")}Код</button>
+          <button class="btn btn-primary btn-sm" type="button" data-act="copy">${icon("copy")}Копировать</button>
           <a class="btn btn-glass btn-sm" data-act="dl" href="${esc(f.download_url)}">${icon("download")}Скачать</a>
         </div>
       </article>`).join("");
-    observePrefetch();
+    if (!lock) observePrefetch();
   }
 
   async function getCode(id) {
     if (codeCache.has(id)) return codeCache.get(id);
-    const res = await fetch("/api/files/" + encodeURIComponent(id));
+    const res = await fetch("/api/files/" + encodeURIComponent(id), { credentials: "same-origin" });
+    if (res.status === 401) { const e = new Error("login"); e.login = true; throw e; }
     if (!res.ok) throw new Error("HTTP " + res.status);
     const json = await res.json();
     codeCache.set(id, json.code);
     return json.code;
   }
 
-  // Код подгружается заранее, когда карточка видна — чтобы «Копировать» срабатывал сразу.
   let prefetchObserver = null;
   function observePrefetch() {
     if (!("IntersectionObserver" in window)) return;
@@ -109,21 +229,23 @@
     $$("#file-list .file").forEach((el) => prefetchObserver.observe(el));
   }
 
+  const GATE_TEXT = "Чтобы открыть код и скачать файлы, войдите через Google.";
+
   async function copyFile(id, btn) {
     try {
       const code = await getCode(id);
-      const ok = await copyText(code);
-      if (!ok) throw new Error("copy");
-      toast("Код скопирован — вставьте в Pydroid 3");
+      if (!(await copyText(code))) throw new Error("copy");
+      toast("Код скопирован. Вставьте его в Pydroid 3");
       if (btn) {
         btn.classList.add("done");
         const label = btn.lastChild;
         const old = label.textContent;
-        label.textContent = "Готово!";
+        label.textContent = "Скопировано";
         setTimeout(() => { label.textContent = old; btn.classList.remove("done"); }, 1600);
       }
     } catch (e) {
-      toast("Не удалось скопировать. Откройте «Код» и выделите текст", true);
+      if (e.login) return openAccount(GATE_TEXT);
+      toast("Не удалось скопировать. Откройте код и выделите текст вручную", true);
     }
   }
 
@@ -135,7 +257,7 @@
     if (tag) tag.lastChild.textContent = String(f.downloads);
   }
 
-  /* -------------------------------------------------- шторка кода -- */
+  /* -------------------------------------------------- просмотр кода -- */
   const sheet = $("#sheet");
   let currentId = null;
 
@@ -145,68 +267,48 @@
     currentId = id;
     $("#sheet-title").textContent = f.title;
     $("#sheet-sub").textContent = `${f.filename} · ${f.lines} ${plural(f.lines, "строка", "строки", "строк")} · ${fmtSize(f.size)}`;
-    const req = $("#sheet-req");
-    req.hidden = !f.requirements.length;
+    $("#sheet-req").hidden = !f.requirements.length;
     $("#sheet-req-code").textContent = "pip install " + f.requirements.join(" ");
     $("#sheet-dl").href = f.download_url;
     $("#sheet-dl").dataset.id = id;
     $("#gutter").textContent = "";
     $("#code").innerHTML = '<span class="loading">Загрузка кода…</span>';
     $("#code-box").scrollTo(0, 0);
-
-    if (sheet.hidden) {
-      sheet.hidden = false;
-      document.documentElement.style.overflow = "hidden";
-      history.pushState({ sheet: true }, "");
-    }
+    openModal(sheet);
     try {
       const code = await getCode(id);
       if (currentId !== id) return;
       $("#code").innerHTML = highlight(code);
-      const n = countLines(code);
       let g = "";
-      for (let i = 1; i <= n; i++) g += i + "\n";
+      for (let i = 1, n = countLines(code); i <= n; i++) g += i + "\n";
       $("#gutter").textContent = g;
     } catch (e) {
-      $("#code").textContent = "Не удалось загрузить код. Проверьте интернет.";
+      if (e.login) { closeModal(sheet, false); return openAccount(GATE_TEXT); }
+      $("#code").textContent = "Не удалось загрузить код. Проверьте подключение к интернету.";
     }
   }
 
-  function closeSheet(fromHistory) {
-    if (sheet.hidden) return;
-    sheet.hidden = true;
-    currentId = null;
-    document.documentElement.style.overflow = "";
-    if (!fromHistory && history.state && history.state.sheet) history.back();
-  }
-
-  sheet.addEventListener("click", (e) => {
-    if (e.target.closest("[data-close]")) closeSheet(false);
-  });
-  window.addEventListener("popstate", () => closeSheet(true));
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { closeSheet(false); closeLightbox(); }
-  });
-  $("#sheet-copy").addEventListener("click", (e) => { if (currentId) copyFile(currentId, null); });
+  $("#sheet-copy").addEventListener("click", () => { if (currentId) copyFile(currentId, null); });
   $("#sheet-req-copy").addEventListener("click", async () => {
     const ok = await copyText($("#sheet-req-code").textContent);
-    toast(ok ? "Команда скопирована. В Pydroid: ☰ → Pip" : "Не удалось скопировать", !ok);
+    toast(ok ? "Команда скопирована. В Pydroid 3: ☰ → Pip" : "Не удалось скопировать", !ok);
   });
   $("#sheet-dl").addEventListener("click", (e) => {
     bumpDownloads(e.currentTarget.dataset.id);
-    toast("Файл скачивается в «Загрузки»");
+    toast("Файл сохраняется в «Загрузки»");
   });
 
   $("#file-list").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-act]");
     if (!btn) return;
     const id = btn.closest(".file").dataset.id;
+    if (gatedFiles()) { e.preventDefault(); return openAccount(GATE_TEXT); }
     if (btn.dataset.act === "open") openSheet(id);
     else if (btn.dataset.act === "copy") copyFile(id, btn);
-    else if (btn.dataset.act === "dl") { bumpDownloads(id); toast("Файл скачивается в «Загрузки»"); }
+    else if (btn.dataset.act === "dl") { bumpDownloads(id); toast("Файл сохраняется в «Загрузки»"); }
   });
 
-  /* ------------------------------------------------------- поиск -- */
+  /* -------------------------------------------------------- поиск -- */
   const q = $("#q");
   q.addEventListener("input", () => {
     query = q.value;
@@ -236,28 +338,28 @@
     $$(".howto ol").forEach((ol) => { ol.hidden = ol.dataset.panel !== i; });
   });
 
-  /* ------------------------------------------------ лайтбокс фото -- */
+  /* ------------------------------------------------ увеличение фото -- */
   let lightbox = null;
   function closeLightbox() {
     if (lightbox) { lightbox.remove(); lightbox = null; }
   }
   document.addEventListener("click", (e) => {
     const img = e.target.closest("img[data-zoom]");
-    if (img) {
-      lightbox = document.createElement("div");
-      lightbox.className = "lightbox";
-      lightbox.innerHTML = `<img src="${esc(img.getAttribute("src"))}" alt="${esc(img.alt)}">
-        <button class="icon-btn" type="button" aria-label="Закрыть">${icon("x")}</button>`;
-      lightbox.addEventListener("click", closeLightbox);
-      document.body.appendChild(lightbox);
-    }
+    if (!img) return;
+    lightbox = document.createElement("div");
+    lightbox.className = "lightbox";
+    lightbox.innerHTML = `<img src="${esc(img.getAttribute("src"))}" alt="${esc(img.alt)}">
+      <button class="icon-btn" type="button" aria-label="Закрыть">${icon("x")}</button>`;
+    lightbox.addEventListener("click", closeLightbox);
+    document.body.appendChild(lightbox);
   });
 
-  /* --------------------------------------------- нижнее меню -- */
+  /* ------------------------------------------------- нижнее меню -- */
   const tabbar = $("#tabbar");
   const tabs = $$(".tab", tabbar);
   const sections = ["home", "guide", "files"].map((id) => document.getElementById(id));
   let searchMode = false;
+  let lockUntil = 0;
 
   function setTab(name) {
     const idx = tabs.findIndex((t) => t.dataset.tab === name);
@@ -269,7 +371,6 @@
     tabbar.style.setProperty("--i", idx);
   }
 
-  let lockUntil = 0;
   function spy() {
     if (searchMode || Date.now() < lockUntil) return;
     const y = window.scrollY + window.innerHeight * 0.4;
@@ -284,14 +385,15 @@
     ticking = true;
     requestAnimationFrame(() => { ticking = false; spy(); });
   }, { passive: true });
-
   window.addEventListener("scrollend", () => { lockUntil = 0; spy(); });
 
   tabs.forEach((t) => t.addEventListener("click", (e) => {
-    if (t.dataset.tab !== "search") {
+    const name = t.dataset.tab;
+    if (name === "account") { e.preventDefault(); return openAccount(); }
+    if (name !== "search") {
       searchMode = false;
-      setTab(t.dataset.tab);
-      lockUntil = Date.now() + 1500;   // пока идёт плавная прокрутка — не переключаем
+      setTab(name);
+      lockUntil = Date.now() + 1500;
       return;
     }
     e.preventDefault();
@@ -300,7 +402,7 @@
     $(".search").scrollIntoView({ behavior: "smooth", block: "start" });
     q.focus({ preventScroll: true });
   }));
-  q.addEventListener("focus", () => { searchMode = true; setTab("search"); });
+  q.addEventListener("focus", () => { if (tabs.some((t) => t.dataset.tab === "search")) { searchMode = true; setTab("search"); } });
   q.addEventListener("blur", () => { searchMode = false; spy(); });
 
   /* ------------------------------------------- плавное появление -- */
@@ -311,13 +413,16 @@
       entries.forEach((e) => {
         if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
       });
-    }, { rootMargin: "0px 0px -8% 0px" });
+    }, { rootMargin: "0px 0px -6% 0px" });
     els.forEach((el) => io.observe(el));
   }
 
+  renderTop();
   renderApk();
+  renderSecurity();
   renderSteps();
   renderFiles();
   reveal();
   spy();
+  if (data.flash) setTimeout(() => toast(data.flash), 300);
 })();

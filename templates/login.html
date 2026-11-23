@@ -1,40 +1,54 @@
 {% from "_macros.html" import ic, logo, head, background %}<!doctype html>
 <html lang="ru">
 <head>
-{{ head("Вход в админку") }}
+{{ head("Вход в админ-панель") }}
 <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
 {% include "_sprite.html" %}
-{{ background(10) }}
+{{ background() }}
 
-<main class="login">
-  <form class="login-card glass" method="post" action="/admin/login" autocomplete="off">
-    <div class="orb-wrap">
-      <div class="orb-ring"></div>
-      <div class="orb">{{ logo() }}</div>
-      <span class="mini-bubble m1"></span><span class="mini-bubble m2"></span>
-    </div>
-    <h1>Админ-панель</h1>
-    <p>Введите пароль, чтобы управлять файлами, APK и фото.</p>
-
-    {% if has_password %}
+<main class="center-page">
+  <div class="login-card glass">
+  {% if step == "2fa" %}
+    <form method="post" action="/admin/2fa" autocomplete="off">
+      <span class="brand-mark">{{ ic("smartphone") }}</span>
+      <h1>Подтверждение входа</h1>
+      <p>Введите 6-значный код из приложения Google Authenticator.</p>
       <input type="hidden" name="csrf" value="{{ csrf }}">
-      <div class="pw">
-        <input class="input" id="pw" type="password" name="password" placeholder="Пароль" required autofocus
-               autocomplete="current-password" aria-label="Пароль">
-        <button class="icon-btn" type="button" id="pw-toggle" aria-label="Показать пароль">{{ ic("eye") }}</button>
-      </div>
-      <button class="btn btn-blue btn-block" type="submit">{{ ic("lock") }}Войти</button>
-    {% else %}
-      <div class="msg err">Пароль ещё не задан. Выполните на сервере:
-        <code>sudo bash deploy/install.sh --password</code>
-      </div>
-    {% endif %}
-
-    {% if error %}<div class="msg err" role="alert">{{ error }}</div>{% endif %}
-    <a class="back-link" href="/">← Вернуться на сайт</a>
-  </form>
+      <input class="input code-input" name="code" inputmode="numeric" pattern="[0-9 ]*" maxlength="7"
+             autocomplete="one-time-code" placeholder="000000" required autofocus aria-label="Код подтверждения">
+      <button class="btn btn-primary btn-block" type="submit">{{ ic("check") }}Подтвердить</button>
+      {% if error %}<div class="msg err" role="alert">{{ error }}</div>{% endif %}
+    </form>
+    <form method="post" action="/admin/logout">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="back-link" type="submit">← Ввести пароль заново</button>
+    </form>
+  {% else %}
+    <form method="post" action="/admin/login" autocomplete="off">
+      <span class="brand-mark">{{ logo() }}</span>
+      <h1>Админ-панель</h1>
+      <p>{{ site.site_title }} · управление сайтом</p>
+      {% if has_password %}
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <div class="pw">
+          <input class="input" id="pw" type="password" name="password" placeholder="Пароль" required autofocus
+                 autocomplete="current-password" aria-label="Пароль">
+          <button class="icon-btn" type="button" id="pw-toggle" aria-label="Показать пароль">{{ ic("eye") }}</button>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">{{ ic("lock") }}Войти</button>
+      {% else %}
+        <div class="msg err">Пароль ещё не задан. Выполните на сервере:
+          <code>bash deploy/install.sh --password</code>
+        </div>
+      {% endif %}
+      {% if error %}<div class="msg err" role="alert">{{ error }}</div>{% endif %}
+    </form>
+    <a class="back-link" href="/">← На сайт</a>
+  {% endif %}
+    <div class="secure-note">{{ ic("shield") }}5 неверных попыток — блокировка входа на 10 минут</div>
+  </div>
 </main>
 
 <script src="/static/js/common.js?v={{ asset_v }}"></script>

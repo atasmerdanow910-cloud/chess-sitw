@@ -1,4 +1,4 @@
-/* Общие функции: пузыри, тост, копирование, подсветка Python. */
+/* Общие функции: уведомления, копирование, подсветка Python. */
 (function () {
   "use strict";
 
@@ -9,6 +9,7 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ESC[c]);
 
   const icon = (name) => `<svg class="i" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
+  const glogo = () => `<svg class="g" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-google"/></svg>`;
   const logo = () => `<svg class="py-logo" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><use href="#i-python"/></svg>`;
 
   function fmtSize(bytes) {
@@ -72,28 +73,6 @@
     toastTimer = setTimeout(() => el.classList.remove("show"), 2400);
   }
 
-  /* Летающие стеклянные пузыри на фоне */
-  function bubbles() {
-    const host = $(".bubbles");
-    if (!host || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const count = Number(host.dataset.count) || 14;
-    const frag = document.createDocumentFragment();
-    for (let i = 0; i < count; i++) {
-      const b = document.createElement("span");
-      b.className = "bubble" + (Math.random() < 0.35 ? " y" : "");
-      const size = 10 + Math.random() * Math.random() * 70;
-      const dur = 16 + Math.random() * 22;
-      b.style.setProperty("--x", (Math.random() * 100).toFixed(1) + "%");
-      b.style.setProperty("--s", size.toFixed(0) + "px");
-      b.style.setProperty("--d", dur.toFixed(1) + "s");
-      b.style.setProperty("--delay", (-Math.random() * dur).toFixed(1) + "s");
-      b.style.setProperty("--sway", ((Math.random() - 0.5) * 140).toFixed(0) + "px");
-      b.style.setProperty("--o", (0.45 + Math.random() * 0.5).toFixed(2));
-      frag.appendChild(b);
-    }
-    host.appendChild(frag);
-  }
-
   /* Мини-подсветка синтаксиса Python */
   const KW = new Set(("False None True and as assert async await break class continue def del elif else except " +
     "finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case").split(" "));
@@ -136,6 +115,5 @@
     return code.endsWith("\n") ? n - 1 : n;
   }
 
-  window.UI = { $, $$, esc, icon, logo, fmtSize, plural, fmtDate, copyText, toast, highlight, countLines };
-  bubbles();
+  window.UI = { $, $$, esc, icon, logo, glogo, fmtSize, plural, fmtDate, copyText, toast, highlight, countLines };
 })();

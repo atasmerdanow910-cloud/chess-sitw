@@ -6,10 +6,14 @@
 <svg class="py-logo" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><use href="#i-python"/></svg>
 {%- endmacro %}
 
+{% macro glogo() -%}
+<svg class="g" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-google"/></svg>
+{%- endmacro %}
+
 {% macro head(title, description="") -%}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#050914">
+<meta name="theme-color" content="#07090f">
 <title>{{ title }}</title>
 {% if description %}<meta name="description" content="{{ description }}">{% endif %}
 <meta property="og:title" content="{{ title }}">
@@ -17,14 +21,10 @@
 <link rel="icon" href="/static/favicon.svg?v={{ asset_v }}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/static/css/style.css?v={{ asset_v }}">
 {%- endmacro %}
 
-{% macro background(count=16) -%}
-<div class="bg" aria-hidden="true">
-  <div class="grid"></div>
-  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
-  <div class="bubbles" data-count="{{ count }}"></div>
-</div>
+{% macro background() -%}
+<div class="bg" aria-hidden="true"></div>
 {%- endmacro %}

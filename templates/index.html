@@ -1,99 +1,117 @@
-{% from "_macros.html" import ic, logo, head, background %}<!doctype html>
+{% from "_macros.html" import ic, logo, glogo, head, background %}<!doctype html>
 <html lang="ru">
 <head>
 {{ head(site.site_title, site.site_subtitle) }}
 </head>
 <body>
 {% include "_sprite.html" %}
-{{ background(16) }}
+{{ background() }}
 
 <header class="topbar">
   <div class="topbar-in glass">
-    <a class="brand" href="#home" aria-label="{{ site.site_title }} — наверх">
+    <a class="brand" href="#home" aria-label="{{ site.site_title }} — в начало">
       <span class="brand-mark">{{ logo() }}</span>
       <span class="brand-name">{{ site.site_title }}</span>
     </a>
-    <span class="chip"><span class="dot"></span>Android · Python 3</span>
+    <nav class="top-nav" aria-label="Разделы">
+      <a href="#guide">Инструкция</a>
+      <a href="#files">Файлы</a>
+    </nav>
+    <div class="top-actions" id="top-actions"></div>
   </div>
 </header>
 
 <main>
   <!-- ================================================= ГЛАВНАЯ -->
-  <section id="home" class="hero" data-tab="home">
-    <div class="orb-wrap">
-      <div class="orb-ring"></div>
-      <div class="orb">{{ logo() }}</div>
-      <span class="mini-bubble m1"></span><span class="mini-bubble m2"></span><span class="mini-bubble m3"></span>
-    </div>
-    <span class="chip">{{ ic("zap") }}Pydroid 3 · фото-инструкция · готовые скрипты</span>
-    <h1>{{ site.site_title }}</h1>
-    <p class="lead">{{ site.site_subtitle }}</p>
-
-    <div class="hero-actions">
-      <a class="btn btn-primary" id="apk-btn" href="{{ data.apk.url }}"
-         {% if not data.apk.available %}target="_blank" rel="noopener"{% endif %}>
-        {{ ic("download") }}<span id="apk-btn-label">Скачать Pydroid 3</span>
-      </a>
-      <a class="btn btn-glass" href="#guide">{{ ic("book") }}Инструкция</a>
-    </div>
-    <div class="hero-meta" id="apk-meta"></div>
-
-    <div class="stats glass">
-      <div class="stat"><b id="st-files">{{ data.stats.files }}</b><span>файлов .py</span></div>
-      <div class="stat"><b id="st-dl">{{ data.stats.file_downloads + data.stats.apk_downloads }}</b><span>скачиваний</span></div>
-      <div class="stat"><b>{{ data.steps|length }}</b><span>шагов</span></div>
-    </div>
-
-    <div class="features">
-      <div class="feature glass reveal">
-        <span class="feature-ico fi-yellow">{{ ic("package") }}</span>
-        <div><h3>Готовый APK</h3><p>Pydroid 3 уже на сайте — скачайте и установите за минуту.</p></div>
+  <section id="home" class="hero">
+    <div class="hero-text">
+      <span class="hero-badge glass"><span class="brand-mark">{{ logo() }}</span>Pydroid 3 для Android</span>
+      <h1>{{ site.site_title }}</h1>
+      <p class="lead">{{ site.site_subtitle }}</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" id="apk-btn" href="{{ data.apk.url }}"
+           {% if not data.apk.available %}target="_blank" rel="noopener"{% endif %}>
+          {{ ic("download") }}Скачать Pydroid 3
+        </a>
+        <a class="btn btn-glass" href="#guide">{{ ic("book") }}Инструкция</a>
       </div>
-      <div class="feature glass reveal">
-        <span class="feature-ico fi-blue">{{ ic("image") }}</span>
-        <div><h3>Фото-инструкция</h3><p>Каждый шаг показан на экране телефона: куда нажать и что включить.</p></div>
-      </div>
-      <div class="feature glass reveal">
-        <span class="feature-ico fi-green">{{ ic("code") }}</span>
-        <div><h3>Готовые .py файлы</h3><p>Смотрите код, копируйте одним нажатием или скачивайте файлом.</p></div>
-      </div>
+      <div class="hero-meta" id="apk-meta"></div>
+      <ul class="checks">
+        <li>{{ ic("check-circle") }}Бесплатно</li>
+        <li>{{ ic("check-circle") }}Пошаговая инструкция</li>
+        <li id="chk-secure" hidden>{{ ic("check-circle") }}Защищённое соединение</li>
+      </ul>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="stage glass"><div class="phone"><div class="phone-screen" id="hero-phone"></div></div></div>
     </div>
   </section>
 
+  <div class="stats glass">
+    <div class="stat"><b id="st-files">{{ data.stats.files }}</b><span>скриптов</span></div>
+    <div class="stat"><b id="st-dl">{{ data.stats.file_downloads + data.stats.apk_downloads }}</b><span>загрузок</span></div>
+    <div class="stat"><b>{{ data.steps|length }}</b><span>шагов</span></div>
+  </div>
+
+  <div class="features">
+    <div class="feature glass reveal">
+      <span class="feature-ico">{{ ic("package") }}</span>
+      <h3>Установщик Pydroid 3</h3>
+      <p>Файл APK доступен для прямой загрузки — без поиска по сторонним сайтам.</p>
+    </div>
+    <div class="feature glass reveal">
+      <span class="feature-ico">{{ ic("image") }}</span>
+      <h3>Инструкция с иллюстрациями</h3>
+      <p>Семь шагов: от загрузки приложения до запуска первого скрипта.</p>
+    </div>
+    <div class="feature glass reveal">
+      <span class="feature-ico">{{ ic("code") }}</span>
+      <h3>Библиотека скриптов</h3>
+      <p>Просмотр кода, копирование в один клик и загрузка готовых .py файлов.</p>
+    </div>
+  </div>
+
   <!-- ============================================== ИНСТРУКЦИЯ -->
-  <section id="guide" data-tab="guide">
+  <section id="guide">
     <div class="section-head">
       <span class="eyebrow">Инструкция</span>
       <h2>Установка и запуск за {{ data.steps|length }} шагов</h2>
-      <p>Скачайте Pydroid 3, дайте доступ к хранилищу и запустите свой первый скрипт. Жёлтый кружок показывает, куда нажать.</p>
+      <p>Синий маркер на экране показывает, куда нажать на каждом шаге.</p>
     </div>
     <div class="steps" id="steps"></div>
   </section>
 
   <!-- ================================================== ФАЙЛЫ -->
-  <section id="files" data-tab="files">
+  <section id="files">
     <div class="section-head">
       <span class="eyebrow">Файлы</span>
-      <h2>Готовые .py скрипты</h2>
+      <h2>Готовые скрипты</h2>
       <p>Откройте код, скопируйте его в Pydroid 3 или скачайте файл и запустите кнопкой ▶.</p>
     </div>
 
-    <label class="search glass" for="q">
-      {{ ic("search") }}
-      <input id="q" type="search" placeholder="Поиск по файлам…" autocomplete="off" enterkeyhint="search">
-      <button class="icon-btn" id="q-clear" type="button" aria-label="Очистить поиск" hidden>{{ ic("x") }}</button>
-    </label>
+    <div class="notice" id="gate-notice" hidden>
+      {{ ic("lock") }}<span>Чтобы открыть код и скачать файлы, войдите через Google.</span>
+      <button class="btn btn-google btn-sm" type="button" data-login>{{ glogo() }}Войти</button>
+    </div>
+
+    <div class="toolbar">
+      <label class="search glass" for="q">
+        {{ ic("search") }}
+        <input id="q" type="search" placeholder="Поиск по названию, файлу или описанию" autocomplete="off" enterkeyhint="search">
+        <button class="icon-btn" id="q-clear" type="button" aria-label="Очистить поиск" hidden>{{ ic("x") }}</button>
+      </label>
+    </div>
 
     <div class="howto glass">
       <h3>{{ ic("terminal") }}Как запустить .py файл</h3>
       <div class="seg" id="howto-seg" data-active="0" role="tablist">
         <span class="seg-ind"></span>
-        <button class="active" type="button" role="tab" aria-selected="true" data-i="0">Копировать</button>
+        <button class="active" type="button" role="tab" aria-selected="true" data-i="0">Копировать код</button>
         <button type="button" role="tab" aria-selected="false" data-i="1">Скачать файл</button>
       </div>
       <ol data-panel="0">
-        <li><span>Нажмите <b>«Копировать»</b> у нужного файла — код попадёт в буфер обмена.</span></li>
-        <li><span>Откройте <b>Pydroid 3</b>. В редакторе: долгое нажатие → <b>«Вставить»</b>.</span></li>
+        <li><span>Нажмите <b>«Копировать»</b> у нужного скрипта — код попадёт в буфер обмена.</span></li>
+        <li><span>Откройте <b>Pydroid 3</b>, в редакторе: долгое нажатие → <b>«Вставить»</b>.</span></li>
         <li><span>Нажмите жёлтую кнопку <span class="kbd">▶</span> — скрипт запустится.</span></li>
       </ol>
       <ol data-panel="1" hidden>
@@ -107,12 +125,27 @@
   </section>
 
   <footer class="footer">
-    <div class="brand"><span class="brand-mark">{{ logo() }}</span><span>{{ site.site_title }}</span></div>
-    <p id="contact-line" {% if not site.contact_url %}hidden{% endif %}>
-      Вопросы? <a id="contact-link" href="{{ site.contact_url or '#' }}" target="_blank" rel="noopener">Напишите нам</a>
-    </p>
-    <p>Pydroid 3 — стороннее приложение, все права принадлежат его разработчикам.</p>
-    <p>«Python» и логотип Python — товарные знаки Python Software Foundation.</p>
+    <div>
+      <div class="brand"><span class="brand-mark">{{ logo() }}</span><span>{{ site.site_title }}</span></div>
+      <p>Pydroid 3, пошаговая инструкция и готовые Python-скрипты для Android.</p>
+    </div>
+    <div>
+      <h4>Разделы</h4>
+      <ul>
+        <li><a href="#guide">Инструкция</a></li>
+        <li><a href="#files">Файлы</a></li>
+        <li><a href="{{ data.apk.url }}" data-apk-link>Скачать APK</a></li>
+        {% if site.contact_url %}<li><a href="{{ site.contact_url }}" target="_blank" rel="noopener">Связаться с нами</a></li>{% endif %}
+      </ul>
+    </div>
+    <div>
+      <h4>Безопасность</h4>
+      <div class="badges" id="badges"></div>
+    </div>
+    <div class="legal">
+      <p>Pydroid 3 — стороннее приложение, все права принадлежат его разработчикам.</p>
+      <p>«Python» и логотип Python — товарные знаки Python Software Foundation.</p>
+    </div>
   </footer>
 </main>
 
@@ -122,21 +155,25 @@
   <a class="tab active" href="#home" data-tab="home">{{ ic("home") }}<span>Главная</span></a>
   <a class="tab" href="#guide" data-tab="guide">{{ ic("book") }}<span>Инструкция</span></a>
   <a class="tab" href="#files" data-tab="files">{{ ic("code") }}<span>Файлы</span></a>
+  {% if data.auth.google %}
+  <a class="tab" href="#account" data-tab="account" id="tab-account">{{ ic("user") }}<span>Профиль</span></a>
+  {% else %}
   <a class="tab" href="#files" data-tab="search">{{ ic("search") }}<span>Поиск</span></a>
+  {% endif %}
 </nav>
 
-<!-- шторка с кодом -->
+<!-- просмотр кода -->
 <div class="sheet-wrap" id="sheet" hidden>
   <div class="sheet-backdrop" data-close></div>
-  <div class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
     <div class="sheet-grip"></div>
     <div class="sheet-head">
-      <span class="file-ico">{{ logo() }}<em>.py</em></span>
+      <span class="file-ico">{{ logo() }}</span>
       <div><h3 id="sheet-title"></h3><div class="sheet-sub" id="sheet-sub"></div></div>
       <button class="icon-btn" type="button" data-close aria-label="Закрыть">{{ ic("x") }}</button>
     </div>
     <div class="sheet-req" id="sheet-req" hidden>
-      <span>Нужны библиотеки:</span><code id="sheet-req-code"></code>
+      <span>Библиотеки:</span><code id="sheet-req-code"></code>
       <button class="icon-btn" type="button" id="sheet-req-copy" aria-label="Скопировать команду pip">{{ ic("copy") }}</button>
     </div>
     <div class="code-box" id="code-box"><pre class="gutter" id="gutter"></pre><pre class="code"><code id="code"></code></pre></div>
@@ -145,6 +182,18 @@
       <a class="btn btn-glass" id="sheet-dl" href="#">{{ ic("download") }}Скачать .py</a>
     </div>
     <div class="sheet-hint">Pydroid 3: вставьте код в редактор и нажмите ▶</div>
+  </div>
+</div>
+
+<!-- аккаунт -->
+<div class="modal-wrap" id="account" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <div class="modal sm" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <div class="modal-head">
+      <h3 id="account-title">Аккаунт</h3>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть">{{ ic("x") }}</button>
+    </div>
+    <div class="account" id="account-body"></div>
   </div>
 </div>
 
