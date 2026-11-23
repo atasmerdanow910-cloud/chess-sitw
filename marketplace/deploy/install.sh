@@ -128,14 +128,14 @@ if [ -f "$CERT" ]; then
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAIN;
+    server_name $DOMAIN www.$DOMAIN;
     location /.well-known/acme-challenge/ { root /var/www/html; }
     location / { return 301 https://\$host\$request_uri; }
 }
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
-    server_name $DOMAIN;
+    server_name $DOMAIN www.$DOMAIN;
     ssl_certificate $CERT;
     ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
@@ -149,7 +149,7 @@ else
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAIN _;
+    server_name $DOMAIN www.$DOMAIN _;
 $APPBLOCK
 }
 EOF
