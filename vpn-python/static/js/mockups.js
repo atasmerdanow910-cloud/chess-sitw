@@ -15,7 +15,26 @@
   const sb = () => `<div class="m-sb"><span>12:30</span><span class="ic">${SB_ICONS}</span></div>`;
   const tap = '<i class="tap"></i>';
   const app = (color, name) => `<span class="m-app" style="background:${color}">${icon(name)}</span>`;
-  const pyApp = () => `<span class="m-pyapp">${logo()}</span>`;
+
+  /* Настоящие скриншоты Pydroid 3 лежат в /static/img/pd (720×1538, как экран телефона) */
+  const V = (() => {
+    try { return new URL(document.currentScript.src).searchParams.get("v") || ""; } catch (e) { return ""; }
+  })();
+  const IMG = (name) => "/static/img/pd/" + name + ".webp" + (V ? "?v=" + V : "");
+  const pyApp = () => `<span class="m-pyapp"><img src="${IMG("icon")}" alt="" decoding="async"></span>`;
+
+  /* Кадр-скриншот: hits — где нажать, [x, y, ширина, высота] в процентах кадра.
+     Если нажатий несколько, рамки нумеруются по порядку. */
+  const shot = (name, capKey, hits) => {
+    const cap = window.I18N.t(capKey);
+    const marks = hits.map((h, i) =>
+      `<i class="hit" style="left:${h[0]}%;top:${h[1]}%;width:${h[2]}%;height:${h[3]}%">${hits.length > 1 ? `<b>${i + 1}</b>` : ""}</i>`).join("");
+    return {
+      cap, shot: true,
+      html: `<div class="shot"><img src="${IMG(name)}" alt="${esc(cap)}" width="720" height="1538" loading="lazy" decoding="async">${marks}</div>`,
+    };
+  };
+  const CONTINUE = [1.84, 90.73, 96.12, 6.18];
   const back = (title) => `<div class="m-appbar">${icon("back")}<span>${title}</span></div>`;
 
   /* Редактор Pydroid (тёмный) — общий фон для нескольких экранов */
@@ -54,6 +73,7 @@
             <small>${esc(c.apkName)} · ${esc(c.apkSize)}</small>
             <div class="m-actions" style="justify-content:flex-start"><span class="m-tbtn">${T("m_open")}${tap}</span></div>
           </div></div>` },
+        shot("01-play", "sh_play", [[1.2, 10.09, 71.13, 7.73]]),
       ];
     },
 
@@ -113,63 +133,35 @@
           <div class="m-dock"><i style="background:#34a853">${icon("phone")}</i><i style="background:#1e88e5">${icon("chat")}</i>
             <i style="background:#4285f4">${icon("globe")}</i><i style="background:#455a64">${icon("camera")}</i></div>
         </div>` },
+        shot("03-welcome", "sh_welcome", [CONTINUE]),
+        shot("04-goal", "sh_goal", [[1.84, 43.91, 96.12, 4.82], CONTINUE]),
+        shot("05-level", "sh_level", [[1.84, 43.91, 96.12, 4.82], CONTINUE]),
+        shot("06-types", "sh_types", [[1.84, 47.55, 96.12, 4.82], CONTINUE]),
+        shot("07-prefs", "sh_prefs", [CONTINUE]),
+        shot("08-ready", "sh_ready", [CONTINUE]),
+        shot("09-ad", "sh_ad", [[88.33, 1.95, 9.44, 4.42]]),
       ];
     },
 
-    /* 5. Доступ к хранилищу — подробно */
+    /* 5. Доступ к файлам: папка → Open → ALLOW → переключатель */
     storage() {
-      const appHead = `<div class="m-apphead">${pyApp()}<b>Pydroid 3</b><small>${T("m_app_ver")}</small></div>`;
       return [
-        { cap: window.I18N.t("m_st_cap1"), html: `<div class="m m-dark">${sb()}
-          ${pdBar("Pydroid 3")}${editorLines()}
-          <div class="m-dim"><div class="m-dialog"><span class="m-folder">${icon("folder")}</span>
-            <b>${T("m_st_q")}</b>
-            <div class="m-stack" style="margin-top:12px"><span class="m-tbtn hl">${T("m_allow")}${tap}</span><span class="m-tbtn">${T("m_deny")}</span></div>
-          </div></div></div>` },
-        { cap: window.I18N.t("m_st_cap2"), html: `<div class="m">${sb()}
-          ${back(T("m_app_info"))}${appHead}
-          <div class="m-btnrow"><span>${icon("external")}${T("m_open")}</span><span>${icon("x")}${T("m_stop")}</span></div>
-          <div class="m-list">
-            <div class="m-row"><div class="grow"><b>${T("m_notifs")}</b><small>${T("m_on")}</small></div></div>
-            <div class="m-row hl"><div class="grow"><b>${T("m_perms")}</b><small>${T("m_no_perms_given")}</small></div>${tap}</div>
-            <div class="m-row"><div class="grow"><b>${T("m_storage_cache")}</b><small>${T("m_used")}</small></div></div>
-          </div></div>` },
-        { cap: window.I18N.t("m_st_cap3"), html: `<div class="m">${sb()}
-          ${back(T("m_app_perms"))}${appHead}
-          <div class="m-sec">${T("m_allowed")}</div>
-          <div class="m-list"><div class="m-row"><div class="grow"><small>${T("m_no_perms")}</small></div></div></div>
-          <div class="m-sec">${T("m_not_allowed")}</div>
-          <div class="m-list"><div class="m-row hl">${app("#5f6368", "folder")}<div class="grow"><b>${T("m_files_media")}</b></div>${tap}</div></div>
-        </div>` },
-        { cap: window.I18N.t("m_st_cap4"), html: `<div class="m">${sb()}
-          ${back(T("m_files_media2"))}${appHead}
-          <div class="m-sec">${T("m_media_access")}</div>
-          <div class="m-list">
-            <div class="m-row hl"><span class="m-radio on"></span><div class="grow"><b>${T("m_allow")}</b></div>${tap}</div>
-            <div class="m-row"><span class="m-radio"></span><div class="grow"><b>${T("m_deny")}</b></div></div>
-          </div></div>` },
-        { cap: window.I18N.t("m_st_cap5"), html: `<div class="m">${sb()}
-          ${back(T("m_all_files"))}${appHead}
-          <div class="m-list"><div class="m-row hl"><div class="grow"><b>${T("m_manage_all")}</b></div>
-            <span class="m-switch">${tap}</span></div></div>
-          <div class="m-note">${icon("info")}<span>${T("m_st_note")}</span></div>
-        </div>` },
+        shot("10-folder", "sh_folder", [[65.24, 1.55, 8.74, 4.09]]),
+        shot("11-open", "sh_open", [[49.03, 7.0, 49.77, 5.73]]),
+        shot("12-allow", "sh_allow", [[38.35, 55.73, 23.3, 5.18]]),
+        shot("13-switch", "sh_switch", [[1.2, 18.23, 97.6, 7.14]]),
       ];
     },
 
-    /* 6. Открыть файл */
+    /* 6. Открыть файл: Internal storage → Download → файл */
     file(c) {
       return [
-        { cap: window.I18N.t("m_fi_cap1"), html: `<div class="m m-dark">${sb()}
-          ${pdBar("untitled.py", `<span class="m-hl-ico">${icon("folder")}</span>${icon("dots")}`)}${editorLines()}
-          <div class="m-pop"><span>New</span><span class="hl">Open${tap}</span><span>Save</span><span>Save as</span><span>Recent</span></div>
-        </div>` },
-        { cap: window.I18N.t("m_fi_cap2"), html: `<div class="m m-dark">${sb()}
-          <div class="m-pd-bar">${icon("back")}<span>Open</span><span class="sp"></span>${icon("search")}</div>
-          <div class="m-path"><span>Internal storage</span>›<span class="cur">Download</span></div>
+        shot("14-storage", "sh_storage", [[1.2, 8.09, 97.6, 6.55]]),
+        { cap: window.I18N.t("m_fi_cap2"), html: `<div class="m m-dark m-pdgray">${sb()}
+          <div class="m-pd-bar">${icon("back")}<span>Download</span></div>
           <div class="m-frow">${icon("folder")}<div>Telegram<small>${T("m_folder")}</small></div></div>
           <div class="m-frow">${icon("package")}<div>${esc(c.apkName)}<small>${esc(c.apkSize)}</small></div></div>
-          <div class="m-frow hl">${logo()}<div>${esc(c.fileName)}<small>${T("m_py_now")}</small></div>${tap}</div>
+          <div class="m-frow hl">${icon("file")}<div>${esc(c.fileName)}<small>${T("m_py_now")}</small></div>${tap}</div>
           <div class="m-frow">${icon("file")}<div>notes.txt<small>${T("m_2kb")}</small></div></div>
         </div>` },
       ];

@@ -19,6 +19,7 @@
       <a href="#files" data-i18n="nav_files">Файлы</a>
     </nav>
     <div class="top-actions" id="top-actions"></div>
+    <button class="icon-btn sp-top" type="button" data-support aria-label="Написать администратору" data-i18n-aria="sp_btn">{{ ic("chat") }}<span class="sp-dot" data-sp-dot hidden></span></button>
     <button class="icon-btn lang-btn" id="lang-btn" type="button" aria-label="Язык" data-i18n-aria="language">{{ ic("globe") }}<span data-lang-code>RU</span></button>
   </div>
 </header>
@@ -78,9 +79,17 @@
     <div class="section-head">
       <span class="eyebrow" data-i18n="nav_guide">Инструкция</span>
       <h2 data-i18n="guide_title" data-n="{{ data.steps|length }}">Установка и запуск за {{ data.steps|length }} шагов</h2>
-      <p data-i18n="guide_sub">Синий маркер на экране показывает, куда нажать на каждом шаге.</p>
+      <p data-i18n="guide_sub">Красная рамка показывает, куда нажать. Нажмите на экран, чтобы увеличить его.</p>
     </div>
     <div class="steps" id="steps"></div>
+    <div class="help-card glass reveal">
+      <span class="help-ico">{{ ic("chat") }}</span>
+      <div class="help-text">
+        <h3 data-i18n="sp_help_title">Что-то не получается?</h3>
+        <p data-i18n="sp_help_text">Напишите администратору, на каком шаге возникла проблема и что видно на экране. Ответ придёт сюда же, на сайт.</p>
+      </div>
+      <button class="btn btn-primary" type="button" data-support>{{ ic("chat") }}<span data-i18n="sp_write">Написать</span></button>
+    </div>
   </section>
 
   <!-- ================================================== ФАЙЛЫ -->
@@ -118,7 +127,7 @@
       </ol>
       <ol data-panel="1" hidden>
         <li><span data-i18n-html="howto_d1">Нажмите <b>«Скачать»</b> — файл сохранится в папку <b>Download</b>.</span></li>
-        <li><span data-i18n-html="howto_d2">В Pydroid 3: <span class="kbd">☰</span> → <b>Open</b> → <b>Internal storage</b> → <b>Download</b>.</span></li>
+        <li><span data-i18n-html="howto_d2">В Pydroid 3: значок папки → <b>Open</b> → <b>Internal storage</b> → <b>Download</b>.</span></li>
         <li><span data-i18n-html="howto_d3">Выберите файл и нажмите <span class="kbd">▶</span>.</span></li>
       </ol>
     </div>
@@ -137,6 +146,7 @@
         <li><a href="#guide" data-i18n="nav_guide">Инструкция</a></li>
         <li><a href="#files" data-i18n="nav_files">Файлы</a></li>
         <li><a href="{{ data.apk.url }}" data-apk-link data-i18n="dl_apk">Скачать APK</a></li>
+        <li><a href="#support" data-support data-i18n="sp_btn">Написать администратору</a></li>
         {% if site.contact_url %}<li><a href="{{ site.contact_url }}" target="_blank" rel="noopener" data-i18n="contact">Связаться с нами</a></li>{% endif %}
       </ul>
     </div>
@@ -196,6 +206,40 @@
       <button class="icon-btn" type="button" data-close aria-label="Закрыть" data-i18n-aria="close">{{ ic("x") }}</button>
     </div>
     <div class="account" id="account-body"></div>
+  </div>
+</div>
+
+<!-- связь с администратором -->
+<div class="modal-wrap" id="support" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <div class="modal sp-modal" role="dialog" aria-modal="true" aria-labelledby="sp-title">
+    <div class="modal-head">
+      <div class="sp-head">
+        <span class="sp-ava">{{ ic("shield") }}</span>
+        <div><h3 id="sp-title" data-i18n="sp_title">Администратор</h3><small data-i18n="sp_sub">Ошибки, вопросы и идеи — пишите сюда</small></div>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Закрыть" data-i18n-aria="close">{{ ic("x") }}</button>
+    </div>
+    <div class="sp-who" id="sp-who" hidden></div>
+    <div class="sp-msgs" id="sp-msgs" aria-live="polite"></div>
+    <form class="sp-form" id="sp-form" novalidate>
+      <div class="sp-topics" id="sp-topics" role="radiogroup" aria-label="Тема" data-i18n-aria="sp_topic">
+        <button type="button" role="radio" aria-checked="true" class="on" data-topic="bug" data-i18n="sp_t_bug">Ошибка</button>
+        <button type="button" role="radio" aria-checked="false" data-topic="question" data-i18n="sp_t_question">Вопрос</button>
+        <button type="button" role="radio" aria-checked="false" data-topic="idea" data-i18n="sp_t_idea">Идея</button>
+        <button type="button" role="radio" aria-checked="false" data-topic="other" data-i18n="sp_t_other">Другое</button>
+      </div>
+      <div class="sp-guest" id="sp-guest">
+        <input class="input" id="sp-name" maxlength="60" autocomplete="name" placeholder="Ваше имя (необязательно)" data-i18n-ph="sp_name_ph">
+        <input class="input" id="sp-contact" maxlength="120" autocomplete="off" placeholder="Telegram, телефон или email (по желанию)" data-i18n-ph="sp_contact_ph">
+      </div>
+      <div class="sp-compose">
+        <textarea class="input" id="sp-text" rows="1" maxlength="2000" placeholder="Опишите, что случилось…" data-i18n-ph="sp_ph"></textarea>
+        <button class="btn btn-primary sp-send" type="submit" aria-label="Отправить" data-i18n-aria="sp_send">{{ ic("send") }}</button>
+      </div>
+      <div class="sp-err" id="sp-err" role="alert" hidden></div>
+      <p class="sp-fine" data-i18n="sp_fine">Переписку видите только вы и администратор.</p>
+    </form>
   </div>
 </div>
 

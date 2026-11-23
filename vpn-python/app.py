@@ -6,6 +6,7 @@
 Задать пароль админки:    python3 app.py set-password
 Сбросить 2FA админки:     python3 app.py reset-2fa
 """
+import hashlib
 import hmac
 import io
 import os
@@ -52,6 +53,10 @@ MAX_IMG_BYTES = 15 * 1024 * 1024      # фото инструкции — до 1
 MAX_APK_BYTES = 500 * 1024 * 1024     # APK — до 500 МБ
 MAX_STEP_PHOTOS = 6                   # фото на один шаг инструкции
 MAX_PUBLIC_BODY = 64 * 1024           # тело запроса вне админки
+SUPPORT_MAX_LEN = 2000                # одно сообщение администратору
+SUPPORT_RATE = (6, 600)               # 6 сообщений за 10 минут с одного IP
+SUPPORT_NEW_RATE = (3, 3600)          # 3 новых переписки в час с одного IP
+SUPPORT_TOPICS = ("bug", "question", "idea", "other")
 
 # Защита от флуда (на один IP)
 RATE_GENERAL = (240, 60)              # 240 запросов в минуту
@@ -96,7 +101,8 @@ STEPS = [
         "title": "Скачайте Pydroid 3",
         "text": "Нажмите кнопку «Скачать Pydroid 3» в начале страницы. Если браузер "
                 "спросит подтверждение — нажмите «Скачать».",
-        "tips": ["Файл сохранится в папку «Загрузки» (Download)."],
+        "tips": ["Файл сохранится в папку «Загрузки» (Download).",
+                 "Есть Google Play? Установите Pydroid 3 оттуда и сразу переходите к шагу 4."],
     },
     {
         "key": "unknown",
@@ -114,27 +120,28 @@ STEPS = [
     {
         "key": "open",
         "title": "Откройте Pydroid 3",
-        "text": "Найдите Pydroid 3 на рабочем столе или в списке приложений. При первом "
-                "запуске приложение подготовит Python — дождитесь окончания.",
-        "tips": ["Для первого запуска нужно подключение к интернету."],
+        "text": "Нажмите на значок Pydroid 3. При первом запуске приложение задаст несколько "
+                "вопросов — выберите любой ответ и нажимайте «CONTINUE». Если появится реклама, "
+                "закройте её крестиком ✕.",
+        "tips": ["Ответы ни на что не влияют — можно выбрать любые.",
+                 "Для первого запуска нужно подключение к интернету."],
     },
     {
         "key": "storage",
-        "title": "Дайте доступ к хранилищу",
-        "text": "Когда появится запрос доступа к файлам — нажмите «Разрешить». Без этого "
-                "Pydroid 3 не увидит скачанные .py файлы.",
+        "title": "Дайте доступ к файлам",
+        "text": "Нажмите значок папки вверху → «Open». Pydroid 3 попросит доступ к файлам: "
+                "нажмите «ALLOW», включите переключатель и вернитесь назад кнопкой ‹.",
         "tips": [
-            "Запроса не было: Настройки → Приложения → Pydroid 3 → Разрешения → "
-            "Файлы и медиа → Разрешить.",
-            "Android 11 и новее: Настройки → Приложения → Специальный доступ → "
+            "Без этого разрешения Pydroid 3 не увидит скачанные .py файлы.",
+            "Окно не появилось: Настройки → Приложения → Специальный доступ → "
             "Доступ ко всем файлам → Pydroid 3 → Вкл.",
         ],
     },
     {
         "key": "file",
         "title": "Откройте .py файл",
-        "text": "Скачайте нужный файл в разделе «Файлы». В Pydroid 3 нажмите значок папки "
-                "вверху → «Open» → «Internal storage» → «Download» и выберите файл.",
+        "text": "Скачайте нужный файл в разделе «Файлы». В Pydroid 3: значок папки → «Open» → "
+                "«Internal storage» → «Download» → нажмите на файл.",
         "tips": ["Альтернатива: нажмите «Копировать» у файла и вставьте код в редактор "
                  "Pydroid (долгое нажатие → «Вставить»)."],
     },
@@ -199,6 +206,32 @@ CREATE TABLE IF NOT EXISTS security_log (
     event  TEXT NOT NULL,
     detail TEXT NOT NULL DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS support_threads (
+    id           TEXT PRIMARY KEY,
+    owner        TEXT NOT NULL UNIQUE,
+    user_id      INTEGER,
+    name         TEXT NOT NULL DEFAULT '',
+    contact      TEXT NOT NULL DEFAULT '',
+    lang         TEXT NOT NULL DEFAULT '',
+    created_at   INTEGER NOT NULL,
+    updated_at   INTEGER NOT NULL,
+    last_text    TEXT NOT NULL DEFAULT '',
+    last_from    TEXT NOT NULL DEFAULT '',
+    admin_unread INTEGER NOT NULL DEFAULT 0,
+    user_unread  INTEGER NOT NULL DEFAULT 0,
+    ip           TEXT NOT NULL DEFAULT '',
+    ua           TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_support_updated ON support_threads(updated_at DESC);
+CREATE TABLE IF NOT EXISTS support_messages (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    thread_id  TEXT NOT NULL,
+    sender     TEXT NOT NULL,
+    topic      TEXT NOT NULL DEFAULT '',
+    body       TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_support_msg ON support_messages(thread_id, id);
 """
 
 FILE_COLUMNS = ("id, title, description, filename, requirements, size, lines, "
@@ -881,6 +914,152 @@ def auth_logout():
     return redirect("/")
 
 
+# ------------------------------------------------ связь с администратором --
+# Посетитель пишет администратору с вошедшим аккаунтом Google или без него.
+# Без входа переписка привязана к случайному ключу устройства (заголовок X-User-Key,
+# хранится в браузере). После входа через Google переписка с этого устройства
+# переносится в аккаунт и видна на всех устройствах.
+
+DEVICE_KEY_RE = re.compile(r"[A-Za-z0-9_-]{32,128}")
+
+
+def device_owner():
+    key = request.headers.get("X-User-Key", "")
+    if not DEVICE_KEY_RE.fullmatch(key):
+        return None
+    return "d:" + hashlib.sha256(("vp-support:" + key).encode("utf-8")).hexdigest()
+
+
+def support_thread(con):
+    """Переписка текущего посетителя (или None). Объединяет переписку устройства с аккаунтом."""
+    dev = device_owner()
+    user = current_user()
+    if user is None:
+        return con.execute("SELECT * FROM support_threads WHERE owner = ?", (dev,)).fetchone() if dev else None
+    mine = "g:%d" % user["id"]
+    row = con.execute("SELECT * FROM support_threads WHERE owner = ?", (mine,)).fetchone()
+    old = con.execute("SELECT * FROM support_threads WHERE owner = ?", (dev,)).fetchone() if dev else None
+    if old is not None:
+        if row is None:
+            con.execute("UPDATE support_threads SET owner = ?, user_id = ?, name = ? WHERE id = ?",
+                        (mine, user["id"], user["name"], old["id"]))
+        else:
+            con.execute("UPDATE support_messages SET thread_id = ? WHERE thread_id = ?", (row["id"], old["id"]))
+            last = con.execute("SELECT * FROM support_messages WHERE thread_id = ? ORDER BY id DESC LIMIT 1",
+                               (row["id"],)).fetchone()
+            con.execute(
+                "UPDATE support_threads SET admin_unread = admin_unread + ?, user_unread = user_unread + ?, "
+                "updated_at = ?, last_text = ?, last_from = ? WHERE id = ?",
+                (old["admin_unread"], old["user_unread"], max(row["updated_at"], old["updated_at"]),
+                 last["body"][:160], last["sender"], row["id"]))
+            con.execute("DELETE FROM support_threads WHERE id = ?", (old["id"],))
+        con.commit()
+        row = con.execute("SELECT * FROM support_threads WHERE owner = ?", (mine,)).fetchone()
+    return row
+
+
+def support_msg(row, viewer):
+    return {"id": row["id"], "from": row["sender"], "mine": row["sender"] == viewer,
+            "topic": row["topic"], "text": row["body"], "created_at": row["created_at"]}
+
+
+def support_messages(con, thread_id, viewer, after=0):
+    rows = con.execute(
+        "SELECT * FROM (SELECT * FROM support_messages WHERE thread_id = ? AND id > ? "
+        "ORDER BY id DESC LIMIT 300) ORDER BY id", (thread_id, after)).fetchall()
+    return [support_msg(r, viewer) for r in rows]
+
+
+def support_add(con, thread, sender, topic, text):
+    ts = now()
+    cur = con.execute(
+        "INSERT INTO support_messages(thread_id, sender, topic, body, created_at) VALUES(?, ?, ?, ?, ?)",
+        (thread["id"], sender, topic, text, ts))
+    unread = "admin_unread" if sender == "user" else "user_unread"
+    con.execute(
+        "UPDATE support_threads SET updated_at = ?, last_text = ?, last_from = ?, %s = %s + 1 "
+        "WHERE id = ?" % (unread, unread), (ts, text[:160], sender, thread["id"]))
+    return con.execute("SELECT * FROM support_messages WHERE id = ?", (cur.lastrowid,)).fetchone()
+
+
+def support_guard():
+    """Только запросы со страниц сайта: без ключа устройства браузер чужого сайта не пройдёт."""
+    if device_owner() is None:
+        return bad("Обновите страницу и попробуйте ещё раз", 400, code="no_key")
+    return None
+
+
+@app.get("/api/support")
+def api_support():
+    err = support_guard()
+    if err:
+        return err
+    con = db()
+    thread = support_thread(con)
+    if thread is None:
+        return jsonify(ok=True, thread=None, messages=[], unread=0)
+    after = max(0, to_int(request.args.get("after")))
+    if thread["user_unread"]:
+        con.execute("UPDATE support_threads SET user_unread = 0 WHERE id = ?", (thread["id"],))
+        con.commit()
+    return jsonify(ok=True, thread={"id": thread["id"], "name": thread["name"], "contact": thread["contact"]},
+                   messages=support_messages(con, thread["id"], "user", after), unread=0)
+
+
+@app.get("/api/support/unread")
+def api_support_unread():
+    err = support_guard()
+    if err:
+        return err
+    thread = support_thread(db())
+    return jsonify(ok=True, unread=thread["user_unread"] if thread is not None else 0)
+
+
+@app.post("/api/support")
+def api_support_send():
+    err = support_guard()
+    if err:
+        return err
+    d = request.get_json(silent=True) or {}
+    text = clean_text(d.get("text"), SUPPORT_MAX_LEN + 1)
+    if len(text) < 2:
+        return bad("Напишите сообщение", code="empty")
+    if len(text) > SUPPORT_MAX_LEN:
+        return bad("Сообщение слишком длинное", code="too_long")
+    topic = d.get("topic") if d.get("topic") in SUPPORT_TOPICS else ""
+    ip = client_ip()
+    if not limiter.hit("sp:" + ip, *SUPPORT_RATE)[0]:
+        return bad("Слишком много сообщений. Попробуйте через несколько минут.", 429, code="rate_limit")
+    con = db()
+    thread = support_thread(con)
+    user = current_user()
+    name = user["name"] if user is not None else clean_text(d.get("name"), 60)
+    contact = clean_text(d.get("contact"), 120)
+    lang = d.get("lang") if d.get("lang") in ("ru", "tr", "tk") else ""
+    ua = clean_text(request.headers.get("User-Agent"), 200)
+    if thread is None:
+        if not limiter.hit("spn:" + ip, *SUPPORT_NEW_RATE)[0]:
+            return bad("Слишком много сообщений. Попробуйте позже.", 429, code="rate_limit")
+        owner = "g:%d" % user["id"] if user is not None else device_owner()
+        ts = now()
+        con.execute(
+            "INSERT INTO support_threads(id, owner, user_id, name, contact, lang, created_at, updated_at, ip, ua) "
+            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (secrets.token_hex(8), owner, user["id"] if user is not None else None,
+             name, contact, lang, ts, ts, ip, ua))
+        thread = support_thread(con)
+    else:
+        con.execute(
+            "UPDATE support_threads SET name = CASE WHEN ? != '' THEN ? ELSE name END, "
+            "contact = CASE WHEN ? != '' THEN ? ELSE contact END, "
+            "lang = CASE WHEN ? != '' THEN ? ELSE lang END, ip = ?, ua = ? WHERE id = ?",
+            (name, name, contact, contact, lang, lang, ip, ua, thread["id"]))
+    row = support_add(con, thread, "user", topic, text)
+    con.commit()
+    return jsonify(ok=True, message=support_msg(row, "user"),
+                   thread={"id": thread["id"], "name": name or thread["name"], "contact": contact or thread["contact"]}), 201
+
+
 # ------------------------------------------------------------- авторизация --
 
 def admin_required(fn):
@@ -1015,6 +1194,26 @@ def user_admin(row):
     }
 
 
+def support_admin(row):
+    return {
+        "id": row["id"], "name": row["name"], "contact": row["contact"], "lang": row["lang"],
+        "email": row["email"] or "", "picture": row["picture"] or "", "user_id": row["user_id"],
+        "created_at": row["created_at"], "updated_at": row["updated_at"],
+        "last_text": row["last_text"], "last_from": row["last_from"],
+        "unread": row["admin_unread"], "ip": row["ip"], "ua": row["ua"], "count": row["cnt"],
+    }
+
+
+def support_list(con):
+    rows = con.execute(
+        "SELECT t.*, u.email, u.picture, "
+        "(SELECT COUNT(*) FROM support_messages m WHERE m.thread_id = t.id) AS cnt "
+        "FROM support_threads t LEFT JOIN users u ON u.id = t.user_id "
+        "ORDER BY t.updated_at DESC LIMIT 300").fetchall()
+    unread = con.execute("SELECT COALESCE(SUM(admin_unread), 0) FROM support_threads").fetchone()[0]
+    return {"threads": [support_admin(r) for r in rows], "unread": unread}
+
+
 def admin_payload():
     con = db()
     con.execute("DELETE FROM ip_blocks WHERE until > 0 AND until < ?", (now(),))
@@ -1032,6 +1231,7 @@ def admin_payload():
     }
     data["users"] = [user_admin(r) for r in con.execute(
         "SELECT * FROM users ORDER BY last_login DESC LIMIT 500")]
+    data["support"] = support_list(con)
     data["stats"]["users"] = con.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     blocks = []
     for r in con.execute("SELECT * FROM ip_blocks ORDER BY created_at DESC LIMIT 300"):
@@ -1060,6 +1260,59 @@ def admin_payload():
 @admin_required
 def admin_data():
     return jsonify(admin_payload())
+
+
+def support_or_404(con, tid):
+    if not re.fullmatch(r"[a-f0-9]{16}", tid or ""):
+        abort(404)
+    row = con.execute("SELECT * FROM support_threads WHERE id = ?", (tid,)).fetchone()
+    if row is None:
+        abort(404)
+    return row
+
+
+@app.get("/admin/api/support")
+@admin_required
+def admin_support():
+    return jsonify(ok=True, **support_list(db()))
+
+
+@app.get("/admin/api/support/<tid>")
+@admin_required
+def admin_support_thread(tid):
+    con = db()
+    thread = support_or_404(con, tid)
+    if thread["admin_unread"]:
+        con.execute("UPDATE support_threads SET admin_unread = 0 WHERE id = ?", (tid,))
+        con.commit()
+    return jsonify(ok=True, messages=support_messages(con, tid, "admin", max(0, to_int(request.args.get("after")))))
+
+
+@app.post("/admin/api/support/<tid>")
+@admin_required
+def admin_support_reply(tid):
+    con = db()
+    thread = support_or_404(con, tid)
+    text = clean_text((request.get_json(silent=True) or {}).get("text"), 4001)
+    if not text:
+        return bad("Напишите ответ")
+    if len(text) > 4000:
+        return bad("Ответ слишком длинный")
+    row = support_add(con, thread, "admin", "", text)
+    con.execute("UPDATE support_threads SET admin_unread = 0 WHERE id = ?", (tid,))
+    con.commit()
+    return jsonify(ok=True, message=support_msg(row, "admin"))
+
+
+@app.delete("/admin/api/support/<tid>")
+@admin_required
+def admin_support_delete(tid):
+    con = db()
+    support_or_404(con, tid)
+    con.execute("DELETE FROM support_messages WHERE thread_id = ?", (tid,))
+    con.execute("DELETE FROM support_threads WHERE id = ?", (tid,))
+    con.commit()
+    return jsonify(ok=True)
 
 
 def insert_file(con, title, description, filename, code, requirements):
@@ -1344,6 +1597,9 @@ def admin_user_delete(uid):
     if row is None:
         abort(404)
     con.execute("DELETE FROM users WHERE id = ?", (uid,))
+    con.execute("DELETE FROM support_messages WHERE thread_id IN "
+                "(SELECT id FROM support_threads WHERE owner = ?)", ("g:%d" % uid,))
+    con.execute("DELETE FROM support_threads WHERE owner = ?", ("g:%d" % uid,))
     con.commit()
     log_event("user_deleted", row["email"])
     return jsonify(ok=True)

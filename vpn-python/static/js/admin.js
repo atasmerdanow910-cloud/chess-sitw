@@ -687,9 +687,171 @@
     } catch (err) { toast(err.message, true); }
   });
 
+  /* --------------------------------------------- сообщения посетителей -- */
+  const TOPIC = { bug: "Ошибка", question: "Вопрос", idea: "Идея", other: "Другое" };
+  const LANG = { ru: "RU", tr: "TR", tk: "TM" };
+  const baseTitle = document.title;
+  let spOpen = null;
+  let spMsgs = [];
+  const clock = (ts) => new Date(ts * 1000).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+  const when = (ts) => {
+    const d = new Date(ts * 1000);
+    return d.toDateString() === new Date().toDateString() ? clock(ts) : d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" });
+  };
+  const spThreadById = (id) => ((data.support && data.support.threads) || []).find((t) => t.id === id);
+
+  function shortUa(ua) {
+    if (!ua) return "браузер неизвестен";
+    const os = /Android [\d.]+/.exec(ua) || /iPhone OS [\d_]+/.exec(ua) || /Windows NT [\d.]+/.exec(ua) || /Mac OS X [\d_]+/.exec(ua) || /Linux/.exec(ua);
+    const br = /(?:YaBrowser|OPR|Edg|Firefox|Chrome|Version)\/[\d.]+/.exec(ua);
+    return [os && os[0].replace(/_/g, "."), br && br[0]].filter(Boolean).join(", ") || ua.slice(0, 60);
+  }
+
+  function renderSupport() {
+    const sup = data.support || { threads: [], unread: 0 };
+    const n = sup.unread || 0;
+    const badge = $("#sp-badge");
+    badge.hidden = !n;
+    badge.textContent = n > 99 ? "99+" : String(n);
+    document.title = (n ? "(" + n + ") " : "") + baseTitle;
+    $("#sp-count").textContent = sup.threads.length;
+    const box = $("#sp-threads");
+    if (!sup.threads.length) {
+      box.innerHTML = `<div class="empty"><b>Сообщений пока нет</b>Когда посетитель напишет, переписка появится здесь.</div>`;
+      return;
+    }
+    box.innerHTML = sup.threads.map((t) => `
+      <button type="button" class="sp-trow${t.id === spOpen ? " on" : ""}" data-thread="${esc(t.id)}">
+        <div class="grow">
+          <b>${esc(t.name || "Гость")}${t.lang ? `<span class="tag">${esc(LANG[t.lang] || t.lang)}</span>` : ""}</b>
+          <small>${esc(t.email || t.contact || "без контакта")}</small>
+          <small>${t.last_from === "admin" ? "Вы: " : ""}${esc(t.last_text)}</small>
+        </div>
+        <div style="display:grid;gap:6px;justify-items:end"><time>${when(t.updated_at)}</time>${t.unread ? `<span class="atab-badge">${t.unread}</span>` : ""}</div>
+      </button>`).join("");
+  }
+
+  function renderThreadMsgs(t) {
+    const box = $("#sp-amsgs");
+    if (!box || !t) return;
+    let day = "";
+    box.innerHTML = spMsgs.length ? spMsgs.map((m) => {
+      const d = new Date(m.created_at * 1000).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+      const sep = d !== day ? `<div class="sp-day">${esc((day = d))}</div>` : "";
+      const from = m.mine ? "" : `<span class="sp-from">${icon("user")}${esc(t.name || "Гость")}</span>`;
+      const topic = m.topic ? `<span class="sp-topic">${esc(TOPIC[m.topic] || m.topic)}</span>` : "";
+      return `${sep}<div class="sp-msg ${m.mine ? "me" : "them"}">${from}${topic}<p>${esc(m.text)}</p><time>${clock(m.created_at)}</time></div>`;
+    }).join("") : `<div class="sp-hint">Сообщений нет</div>`;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function openThread(id, quiet) {
+    const t = spThreadById(id);
+    if (!t) return;
+    spOpen = id;
+    if (!quiet) {
+      const meta = [t.email ? "Google: " + t.email : "без входа через Google",
+        t.contact ? "контакт: " + t.contact : "", t.lang ? "язык: " + (LANG[t.lang] || t.lang) : ""].filter(Boolean);
+      $("#sp-thread").innerHTML = `
+        <div class="sp-thread-head">
+          <div class="who"><b>${esc(t.name || "Гость")}</b>
+            <small>${meta.map(esc).join(" · ")}</small>
+            <small>IP ${esc(t.ip || "—")} · ${esc(shortUa(t.ua))} · с ${esc(fmtDate(t.created_at))}</small></div>
+          <div class="acts">
+            <button class="btn btn-glass btn-sm" type="button" data-sp-block title="Заблокировать IP на сутки">${icon("ban")}IP</button>
+            <button class="btn btn-glass btn-sm" type="button" data-sp-del>${icon("trash")}Удалить</button>
+          </div>
+        </div>
+        <div class="sp-msgs" id="sp-amsgs"></div>
+        <form class="sp-form" id="sp-reply" novalidate>
+          <div class="sp-compose">
+            <textarea class="input" id="sp-reply-text" rows="2" maxlength="4000" placeholder="Ответ посетителю…"></textarea>
+            <button class="btn btn-primary sp-send" type="submit" aria-label="Отправить">${icon("send")}</button>
+          </div>
+          <p class="sp-fine">Ctrl + Enter — отправить. Ответ посетитель увидит на сайте.</p>
+        </form>`;
+      renderSupport();
+    }
+    try {
+      const r = await api("GET", "/admin/api/support/" + id);
+      if (spOpen !== id) return;
+      spMsgs = r.messages;
+      renderThreadMsgs(t);
+      if (t.unread) {
+        data.support.unread = Math.max(0, data.support.unread - t.unread);
+        t.unread = 0;
+        renderSupport();
+      }
+    } catch (e) { toast(e.message, true); }
+  }
+
+  async function refreshSupport() {
+    try {
+      const r = await api("GET", "/admin/api/support");
+      data.support = { threads: r.threads, unread: r.unread };
+      if (spOpen && !spThreadById(spOpen)) {
+        spOpen = null;
+        $("#sp-thread").innerHTML = `<div class="sp-hint">Выберите переписку в списке</div>`;
+      }
+      renderSupport();
+      const t = spOpen && spThreadById(spOpen);
+      if (t && (t.unread || t.count !== spMsgs.length)) openThread(spOpen, true);
+    } catch (e) { /* попробуем позже */ }
+  }
+  setInterval(() => { if (!document.hidden) refreshSupport(); }, 20000);
+
+  $("#sp-threads").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-thread]");
+    if (b) openThread(b.dataset.thread);
+  });
+  $("#sp-thread").addEventListener("submit", async (e) => {
+    if (e.target.id !== "sp-reply") return;
+    e.preventDefault();
+    const ta = $("#sp-reply-text"), btn = $(".sp-send", e.target), text = ta.value.trim();
+    if (!text) { ta.focus(); return; }
+    busy(btn, true);
+    try {
+      const r = await api("POST", "/admin/api/support/" + spOpen, { text });
+      const t = spThreadById(spOpen);
+      spMsgs.push(r.message);
+      ta.value = "";
+      if (t) {
+        t.last_text = text; t.last_from = "admin"; t.updated_at = r.message.created_at; t.count = spMsgs.length;
+        renderThreadMsgs(t);
+      }
+      renderSupport();
+    } catch (err) { toast(err.message, true); } finally { busy(btn, false); }
+  });
+  $("#sp-thread").addEventListener("keydown", (e) => {
+    if (e.target.id === "sp-reply-text" && e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      $("#sp-reply").requestSubmit();
+    }
+  });
+  $("#sp-thread").addEventListener("click", async (e) => {
+    const t = spThreadById(spOpen);
+    if (!t) return;
+    if (e.target.closest("[data-sp-del]")) {
+      if (!confirm("Удалить всю переписку с «" + (t.name || "Гость") + "»?")) return;
+      try {
+        await api("DELETE", "/admin/api/support/" + t.id);
+        spOpen = null;
+        $("#sp-thread").innerHTML = `<div class="sp-hint">Переписка удалена</div>`;
+        await refreshSupport();
+      } catch (err) { toast(err.message, true); }
+    } else if (e.target.closest("[data-sp-block]")) {
+      if (!t.ip || !confirm("Заблокировать IP " + t.ip + " на сутки? С этого адреса нельзя будет открыть сайт.")) return;
+      try {
+        await api("POST", "/admin/api/blocks", { ip: t.ip, minutes: 1440, reason: "Спам в сообщениях" });
+        toast("IP заблокирован на сутки");
+      } catch (err) { toast(err.message, true); }
+    }
+  });
+
   /* ----------------------------------------------------------------- */
   function renderAll() {
     renderStats();
+    renderSupport();
     renderFiles();
     renderApk();
     renderSteps();

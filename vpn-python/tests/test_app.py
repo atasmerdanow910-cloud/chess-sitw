@@ -38,7 +38,8 @@ def csrf_from(html):
 
 def reset_state():
     con = site.connect()
-    for table in ("files", "users", "ip_blocks", "security_log", "login_fail"):
+    for table in ("files", "users", "ip_blocks", "security_log", "login_fail",
+                  "support_threads", "support_messages"):
         con.execute("DELETE FROM %s" % table)
     for key, value in site.DEFAULT_SETTINGS.items():
         site.set_setting(con, key, value)
@@ -302,6 +303,96 @@ class TotpUnit(unittest.TestCase):
     def test_rfc6238_vector(self):
         secret = base64.b32encode(b"12345678901234567890").decode()
         self.assertEqual(sec.totp_code(secret, 59 // 30), "287082")
+
+
+DEV_A = "a" * 40
+DEV_B = "b" * 40
+
+
+def sp(c, method="GET", url="/api/support", payload=None, key=DEV_A):
+    headers = {"X-User-Key": key} if key else {}
+    return c.open(url, method=method, json=payload, headers=headers)
+
+
+class Support(GoogleLogin):
+    """Сообщения администратору: без входа (ключ устройства) и с аккаунтом Google."""
+
+    def test_guest_writes_admin_replies(self):
+        c = client()
+        self.assertEqual(sp(c, key=None).get_json()["code"], "no_key")
+        self.assertEqual(sp(c, "POST", payload={"text": "x"}).get_json()["code"], "empty")
+        self.assertIsNone(sp(c).get_json()["thread"])
+        r = sp(c, "POST", payload={"text": "Не открывается шаг 5", "topic": "bug",
+                                   "name": "Аман", "contact": "@aman", "lang": "tk"})
+        self.assertEqual(r.status_code, 201)
+        self.assertTrue(r.get_json()["message"]["mine"])
+        a = admin_client()
+        lst = api(a, "GET", "/admin/api/support").get_json()
+        self.assertEqual(lst["unread"], 1)
+        t = lst["threads"][0]
+        self.assertEqual((t["name"], t["contact"], t["lang"], t["count"]), ("Аман", "@aman", "tk", 1))
+        self.assertEqual(a.get("/admin/api/data").get_json()["support"]["unread"], 1)
+        msgs = api(a, "GET", "/admin/api/support/" + t["id"]).get_json()["messages"]
+        self.assertEqual([(m["from"], m["topic"], m["text"]) for m in msgs], [("user", "bug", "Не открывается шаг 5")])
+        self.assertEqual(api(a, "GET", "/admin/api/support").get_json()["unread"], 0)
+        self.assertEqual(api(a, "POST", "/admin/api/support/" + t["id"], {"text": "Включите доступ к файлам"}).status_code, 200)
+        self.assertEqual(sp(c, url="/api/support/unread").get_json()["unread"], 1)
+        got = sp(c).get_json()
+        self.assertEqual([(m["from"], m["mine"]) for m in got["messages"]], [("user", True), ("admin", False)])
+        self.assertEqual(sp(c, url="/api/support/unread").get_json()["unread"], 0)
+        last = got["messages"][0]["id"]
+        self.assertEqual([m["text"] for m in sp(c, url="/api/support?after=%d" % last).get_json()["messages"]],
+                         ["Включите доступ к файлам"])
+        # другое устройство чужую переписку не видит
+        self.assertIsNone(sp(client(), key=DEV_B).get_json()["thread"])
+        # без входа в админку ответить нельзя
+        self.assertEqual(client().post("/admin/api/support/" + t["id"], json={"text": "x"}).status_code, 401)
+        # удаление переписки
+        self.assertEqual(api(a, "DELETE", "/admin/api/support/" + t["id"]).status_code, 200)
+        self.assertIsNone(sp(c).get_json()["thread"])
+
+    def test_rate_limit(self):
+        c = client()
+        codes = [sp(c, "POST", payload={"text": "сообщение %d" % i}).status_code for i in range(8)]
+        self.assertEqual(codes.count(201), site.SUPPORT_RATE[0])
+        self.assertEqual(codes[-1], 429)
+
+    def test_google_account_takes_device_thread(self):
+        self.configure(require_files=False)
+        c = client()
+        sp(c, "POST", payload={"text": "Вопрос до входа"})
+        self.login(c)
+        got = sp(c).get_json()
+        self.assertEqual([m["text"] for m in got["messages"]], ["Вопрос до входа"])
+        self.assertEqual(got["thread"]["name"], "Иван")
+        sp(c, "POST", payload={"text": "Вопрос после входа"})
+        # с другого устройства тот же аккаунт видит всю переписку
+        c2 = client()
+        self.login(c2)
+        self.assertEqual(len(sp(c2, key=DEV_B).get_json()["messages"]), 2)
+        a = admin_client()
+        threads = api(a, "GET", "/admin/api/support").get_json()["threads"]
+        self.assertEqual(len(threads), 1)
+        self.assertEqual(threads[0]["email"], "user@gmail.com")
+        # удалённый пользователь теряет и переписку
+        uid = a.get("/admin/api/data").get_json()["users"][0]["id"]
+        self.assertEqual(api(a, "DELETE", "/admin/api/users/%d" % uid).status_code, 200)
+        self.assertEqual(api(a, "GET", "/admin/api/support").get_json()["threads"], [])
+
+    def test_two_threads_merge_on_login(self):
+        self.configure(require_files=False)
+        c = client()
+        self.login(c)
+        sp(c, "POST", payload={"text": "С аккаунта"})
+        g = client()
+        sp(g, "POST", payload={"text": "С гостевого устройства"}, key=DEV_B)
+        self.login(g)
+        got = sp(g, key=DEV_B).get_json()
+        self.assertEqual(sorted(m["text"] for m in got["messages"]), ["С аккаунта", "С гостевого устройства"])
+        a = admin_client()
+        lst = api(a, "GET", "/admin/api/support").get_json()
+        self.assertEqual(len(lst["threads"]), 1)
+        self.assertEqual(lst["unread"], 2)
 
 
 if __name__ == "__main__":

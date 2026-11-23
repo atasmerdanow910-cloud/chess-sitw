@@ -64,18 +64,50 @@ CREATE TABLE IF NOT EXISTS listings (
     views       INTEGER NOT NULL DEFAULT 0,
     created     INTEGER NOT NULL,
     sold        INTEGER NOT NULL DEFAULT 0,
-    updated     INTEGER NOT NULL DEFAULT 0
+    updated     INTEGER NOT NULL DEFAULT 0,
+    owner_hash  TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_created ON listings(created DESC);
 CREATE INDEX IF NOT EXISTS idx_cat ON listings(cat, created DESC);
 CREATE INDEX IF NOT EXISTS idx_ip ON listings(ip, created);
+
+-- Переписка покупателя с продавцом по конкретному объявлению
+CREATE TABLE IF NOT EXISTS conversations (
+    id            TEXT PRIMARY KEY,
+    listing_id    TEXT NOT NULL,
+    buyer_hash    TEXT NOT NULL,
+    buyer_name    TEXT NOT NULL DEFAULT '',
+    created       INTEGER NOT NULL,
+    updated       INTEGER NOT NULL,
+    last_text     TEXT NOT NULL DEFAULT '',
+    last_sender   TEXT NOT NULL DEFAULT '',
+    buyer_unread  INTEGER NOT NULL DEFAULT 0,
+    seller_unread INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (listing_id, buyer_hash)
+);
+CREATE INDEX IF NOT EXISTS idx_conv_buyer ON conversations(buyer_hash, updated DESC);
+CREATE INDEX IF NOT EXISTS idx_conv_listing ON conversations(listing_id);
+CREATE TABLE IF NOT EXISTS messages (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    conv_id  TEXT NOT NULL,
+    sender   TEXT NOT NULL,
+    body     TEXT NOT NULL,
+    created  INTEGER NOT NULL,
+    ip       TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conv_id, id);
+CREATE INDEX IF NOT EXISTS idx_msg_ip ON messages(ip, created);
 """
 
 # Колонки, которых не было в первых версиях базы, — добавляются при запуске.
 MIGRATIONS = {
     "sold": "ALTER TABLE listings ADD COLUMN sold INTEGER NOT NULL DEFAULT 0",
     "updated": "ALTER TABLE listings ADD COLUMN updated INTEGER NOT NULL DEFAULT 0",
+    "owner_hash": "ALTER TABLE listings ADD COLUMN owner_hash TEXT NOT NULL DEFAULT ''",
 }
+CHAT_MSG_PER_MIN = 20        # сообщений в минуту с одного IP
+CHAT_NEW_PER_HOUR = 30       # новых диалогов в час с одного IP
+CHAT_MAX_LEN = 2000
 
 
 def init_db():
@@ -90,6 +122,7 @@ def init_db():
                     con.execute(sql)
                 except sqlite3.OperationalError:
                     pass  # другой процесс gunicorn успел добавить колонку
+        con.execute("CREATE INDEX IF NOT EXISTS idx_owner ON listings(owner_hash)")
         con.commit()
     finally:
         con.close()
@@ -214,6 +247,15 @@ def check_fields(title, price, city, phone):
     return None
 
 
+UID_RE = re.compile(r"[A-Za-z0-9_-]{32,128}")
+
+
+def user_hash():
+    """Анонимный ключ устройства (X-User-Key) → его хеш. Сам ключ на сервере не хранится."""
+    key = request.headers.get("X-User-Key", "")
+    return sha("u:" + key) if UID_RE.fullmatch(key) else None
+
+
 def edit_rights(row):
     token = request.headers.get("X-Edit-Token", "")
     is_owner = bool(token) and hmac.compare_digest(sha(token), row["token_hash"])
@@ -333,10 +375,10 @@ def create_listing():
     now = int(time.time())
     con.execute(
         "INSERT INTO listings (id, cat, title, price, city, descr, name, phone, extra, photos, token_hash, ip,"
-        " created, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        " created, updated, owner_hash) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (lid, cat, title, price, city, clean(f.get("desc"), 3000), clean(f.get("name"), 30) or "Продавец",
          phone, json.dumps(parse_extra(cat, f), ensure_ascii=False), json.dumps(names), sha(token), ip,
-         now, now),
+         now, now, user_hash() or ""),
     )
     con.commit()
     return {"id": lid, "token": token}, 201
@@ -390,10 +432,180 @@ def delete_listing(lid):
         return err("Объявление не найдено", 404, "not_found")
     if not edit_rights(row):
         return err("Нет прав на удаление", 403, "forbidden")
+    con.execute("DELETE FROM messages WHERE conv_id IN (SELECT id FROM conversations WHERE listing_id = ?)", (lid,))
+    con.execute("DELETE FROM conversations WHERE listing_id = ?", (lid,))
     con.execute("DELETE FROM listings WHERE id = ?", (lid,))
     con.commit()
     delete_photo_files(json.loads(row["photos"]))
     return {"ok": True}
+
+
+# ---------------------------------------------------------------- чат
+def chat_limit_hit(con, ip):
+    n = con.execute("SELECT COUNT(*) FROM messages WHERE ip = ? AND created > ?",
+                    (ip, int(time.time()) - 60)).fetchone()[0]
+    return n >= CHAT_MSG_PER_MIN
+
+
+def conv_row(con, cid, me):
+    """Диалог + объявление, если текущее устройство в нём участвует. Иначе None."""
+    if not re.fullmatch(r"[a-f0-9]{16}", cid or ""):
+        return None
+    row = con.execute(
+        "SELECT c.*, l.title, l.price, l.photos, l.sold, l.name AS seller_name, l.owner_hash"
+        " FROM conversations c JOIN listings l ON l.id = c.listing_id WHERE c.id = ?", (cid,)).fetchone()
+    if row is None or me not in (row["buyer_hash"], row["owner_hash"]):
+        return None
+    return row
+
+
+def conv_public(row, me):
+    role = "buyer" if row["buyer_hash"] == me else "seller"
+    photos = json.loads(row["photos"])
+    return {
+        "id": row["id"], "role": role,
+        "unread": row["buyer_unread"] if role == "buyer" else row["seller_unread"],
+        "updated": row["updated"], "last_text": row["last_text"],
+        "last_mine": row["last_sender"] == role,
+        "other_name": row["seller_name"] if role == "buyer" else row["buyer_name"],
+        "listing": {"id": row["listing_id"], "title": row["title"], "price": row["price"], "sold": bool(row["sold"]),
+                    "thumb": photo_urls(photos[:1])[0]["thumb"] if photos else ""},
+    }
+
+
+def add_message(con, conv, sender, body, ip):
+    now = int(time.time())
+    con.execute("INSERT INTO messages (conv_id, sender, body, created, ip) VALUES (?,?,?,?,?)",
+                (conv["id"], sender, body, now, ip))
+    other = "seller_unread" if sender == "buyer" else "buyer_unread"
+    con.execute(f"UPDATE conversations SET updated = ?, last_text = ?, last_sender = ?, {other} = {other} + 1"
+                " WHERE id = ?", (now, body[:140], sender, conv["id"]))
+
+
+@app.post("/api/me/claim")
+def claim_listings():
+    """Привязать свои старые объявления (по ключам редактирования) к устройству — чтобы видеть их чаты."""
+    me = user_hash()
+    if not me:
+        return err("Нет ключа устройства", 401, "no_user")
+    d = request.get_json(silent=True) or {}
+    items = d.get("items") if isinstance(d.get("items"), list) else []
+    con, claimed = db(), 0
+    for it in items[:100]:
+        if not isinstance(it, dict):
+            continue
+        lid, token = str(it.get("id", "")), str(it.get("token", ""))
+        row = con.execute("SELECT token_hash, owner_hash FROM listings WHERE id = ?", (lid,)).fetchone()
+        if row and not row["owner_hash"] and token and hmac.compare_digest(sha(token), row["token_hash"]):
+            con.execute("UPDATE listings SET owner_hash = ? WHERE id = ?", (me, lid))
+            claimed += 1
+    con.commit()
+    return {"claimed": claimed}
+
+
+@app.post("/api/chats")
+def start_chat():
+    """Покупатель пишет продавцу: создаёт диалог по объявлению (или продолжает существующий)."""
+    me = user_hash()
+    if not me:
+        return err("Нет ключа устройства", 401, "no_user")
+    d = request.get_json(silent=True) or {}
+    body = clean(d.get("text"), CHAT_MAX_LEN)
+    if not body:
+        return err("Пустое сообщение", code="empty")
+    con, ip = db(), client_ip()
+    lst = con.execute("SELECT id, owner_hash FROM listings WHERE id = ?", (str(d.get("listing_id", "")),)).fetchone()
+    if not lst:
+        return err("Объявление не найдено", 404, "not_found")
+    if lst["owner_hash"] == me:
+        return err("Это ваше объявление", code="own_listing")
+    if chat_limit_hit(con, ip):
+        return err("Слишком много сообщений", 429, "rate_limit_chat")
+    conv = con.execute("SELECT * FROM conversations WHERE listing_id = ? AND buyer_hash = ?", (lst["id"], me)).fetchone()
+    name = clean(d.get("name"), 30)
+    if conv is None:
+        recent = con.execute(
+            "SELECT COUNT(*) FROM conversations c JOIN messages m ON m.conv_id = c.id AND m.id ="
+            " (SELECT MIN(id) FROM messages WHERE conv_id = c.id) WHERE m.ip = ? AND c.created > ?",
+            (ip, int(time.time()) - 3600)).fetchone()[0]
+        if recent >= CHAT_NEW_PER_HOUR:
+            return err("Слишком много новых диалогов", 429, "rate_limit_chat")
+        cid, now = secrets.token_hex(8), int(time.time())
+        con.execute("INSERT INTO conversations (id, listing_id, buyer_hash, buyer_name, created, updated)"
+                    " VALUES (?,?,?,?,?,?)", (cid, lst["id"], me, name, now, now))
+        conv = con.execute("SELECT * FROM conversations WHERE id = ?", (cid,)).fetchone()
+    elif name:
+        con.execute("UPDATE conversations SET buyer_name = ? WHERE id = ?", (name, conv["id"]))
+    add_message(con, conv, "buyer", body, ip)
+    con.commit()
+    return {"conv": conv_public(conv_row(con, conv["id"], me), me)}, 201
+
+
+@app.get("/api/chats")
+def list_chats():
+    me = user_hash()
+    if not me:
+        return {"items": [], "unread": 0}
+    rows = db().execute(
+        "SELECT c.*, l.title, l.price, l.photos, l.sold, l.name AS seller_name, l.owner_hash"
+        " FROM conversations c JOIN listings l ON l.id = c.listing_id"
+        " WHERE c.buyer_hash = ? OR l.owner_hash = ? ORDER BY c.updated DESC LIMIT 100", (me, me)).fetchall()
+    items = [conv_public(r, me) for r in rows]
+    return {"items": items, "unread": sum(i["unread"] for i in items)}
+
+
+@app.get("/api/chats/unread")
+def chats_unread():
+    me = user_hash()
+    if not me:
+        return {"unread": 0}
+    n = db().execute(
+        "SELECT COALESCE(SUM(CASE WHEN c.buyer_hash = ? THEN c.buyer_unread ELSE c.seller_unread END), 0)"
+        " FROM conversations c JOIN listings l ON l.id = c.listing_id"
+        " WHERE c.buyer_hash = ? OR l.owner_hash = ?", (me, me, me)).fetchone()[0]
+    return {"unread": n}
+
+
+@app.get("/api/chats/<cid>/messages")
+def chat_messages(cid):
+    me = user_hash()
+    con = db()
+    row = conv_row(con, cid, me) if me else None
+    if row is None:
+        return err("Диалог не найден", 404, "not_found")
+    role = "buyer" if row["buyer_hash"] == me else "seller"
+    after = to_int(request.args.get("after", 0), 0, 10**12) or 0
+    msgs = con.execute("SELECT id, sender, body, created FROM messages WHERE conv_id = ? AND id > ? ORDER BY id LIMIT 300",
+                       (cid, after)).fetchall()
+    mine_unread = "buyer_unread" if role == "buyer" else "seller_unread"
+    if row[mine_unread]:
+        con.execute(f"UPDATE conversations SET {mine_unread} = 0 WHERE id = ?", (cid,))
+        con.commit()
+    return {
+        "conv": conv_public(row, me),
+        "messages": [{"id": m["id"], "mine": m["sender"] == role, "text": m["body"], "created": m["created"]} for m in msgs],
+    }
+
+
+@app.post("/api/chats/<cid>/messages")
+def chat_send(cid):
+    me = user_hash()
+    con = db()
+    row = conv_row(con, cid, me) if me else None
+    if row is None:
+        return err("Диалог не найден", 404, "not_found")
+    d = request.get_json(silent=True) or {}
+    body = clean(d.get("text"), CHAT_MAX_LEN)
+    if not body:
+        return err("Пустое сообщение", code="empty")
+    ip = client_ip()
+    if chat_limit_hit(con, ip):
+        return err("Слишком много сообщений", 429, "rate_limit_chat")
+    role = "buyer" if row["buyer_hash"] == me else "seller"
+    add_message(con, row, role, body, ip)
+    con.commit()
+    m = con.execute("SELECT id, created FROM messages WHERE conv_id = ? ORDER BY id DESC LIMIT 1", (cid,)).fetchone()
+    return {"message": {"id": m["id"], "mine": True, "text": body, "created": m["created"]}}, 201
 
 
 @app.get("/api/admin/check")

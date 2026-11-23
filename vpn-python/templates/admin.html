@@ -39,6 +39,7 @@
 
   <nav class="atabs glass" id="atabs" aria-label="Разделы админки">
     <button type="button" data-tab="files" class="active">Файлы</button>
+    <button type="button" data-tab="support">Сообщения<span class="atab-badge" id="sp-badge" hidden></span></button>
     <button type="button" data-tab="apk">APK</button>
     <button type="button" data-tab="photos">Фото</button>
     <button type="button" data-tab="users">Люди</button>
@@ -117,8 +118,21 @@
   <section data-panel="photos" hidden>
     <div class="card glass">
       <h2>{{ ic("image") }}Иллюстрации инструкции</h2>
-      <p class="sub">Сделайте скриншоты на телефоне (кнопки «Питание» + «Громкость вниз») и загрузите их по порядку — до 6 на шаг. Пока своих фото нет, на сайте показаны нарисованные экраны.</p>
+      <p class="sub">Сделайте скриншоты на телефоне (кнопки «Питание» + «Громкость вниз») и загрузите их по порядку — до 6 на шаг. Пока своих фото нет, на сайте показаны встроенные скриншоты Pydroid 3 и нарисованные экраны.</p>
       <div class="alist" id="asteps"></div>
+    </div>
+  </section>
+
+  <!-- ================================================ СООБЩЕНИЯ -->
+  <section data-panel="support" hidden>
+    <div class="card glass">
+      <h2>{{ ic("chat") }}Сообщения посетителей <span class="tag" id="sp-count"></span></h2>
+      <p class="sub">Посетители пишут сюда об ошибках, с вопросами и идеями — с аккаунтом Google или без него.
+        Ваш ответ они увидят на сайте в окне «Написать администратору», а на кнопке появится красная отметка.</p>
+      <div class="sp-admin">
+        <div class="sp-threads" id="sp-threads"></div>
+        <div class="sp-thread" id="sp-thread"><div class="sp-hint">Выберите переписку в списке</div></div>
+      </div>
     </div>
   </section>
 
@@ -126,10 +140,11 @@
   <section data-panel="users" hidden>
     <div class="card glass">
       <h2>{{ glogo() }}Вход через Google <span class="tag" id="g-status"></span></h2>
-      <p class="sub">Посетители регистрируются и входят через аккаунт Google.</p>
+      <p class="sub">Посетители регистрируются и входят через аккаунт Google в один клик. Вход необязателен:
+        без аккаунта сайтом тоже можно пользоваться (если не включить ограничения ниже).
+        После входа ваш сайт появится у человека в аккаунте Google в списке «Связанные приложения».</p>
       <div class="msg err" id="g-https-warn" hidden>
-        Google разрешает вход только на сайтах с доменом и HTTPS. Сначала подключите домен через Cloudflare
-        (вкладка «Защита») и укажите адрес сайта в «Настройках».
+        Google разрешает вход только на сайтах с доменом и HTTPS. Укажите адрес сайта (https://…) во вкладке «Настройки».
       </div>
       <form id="google-form" novalidate>
         <div class="field"><label for="g-id">Client ID</label>
@@ -148,14 +163,18 @@
         <div class="msg" id="g-msg" hidden></div>
       </form>
       <details class="guide" style="margin-top:14px">
-        <summary>Как получить Client ID и Secret</summary>
+        <summary>Как получить Client ID и Secret (10 минут, бесплатно)</summary>
         <ol>
-          <li>Откройте <b>console.cloud.google.com</b> и создайте проект.</li>
-          <li><b>APIs &amp; Services → OAuth consent screen</b>: тип <b>External</b>, укажите название и email, сохраните.
-            Затем нажмите <b>Publish app</b>, чтобы входить мог любой пользователь.</li>
-          <li><b>Credentials → Create credentials → OAuth client ID</b>, тип <b>Web application</b>.</li>
-          <li>В <b>Authorized redirect URIs</b> вставьте адрес из поля «Redirect URI» выше.</li>
-          <li>Скопируйте <b>Client ID</b> и <b>Client Secret</b> сюда и сохраните.</li>
+          <li>Откройте <b>console.cloud.google.com</b> под своим аккаунтом Google и создайте проект (например, «VPN Python»).</li>
+          <li>Меню → <b>APIs &amp; Services → OAuth consent screen</b> (в новом интерфейсе — <b>Google Auth Platform</b>) →
+            <b>Get started</b>: название приложения (его увидят люди), ваш email, тип аудитории <b>External</b>.</li>
+          <li>В разделе <b>Branding</b> → <b>Authorized domains</b> добавьте основной домен сайта, например <b>sstymmarket.click</b>.</li>
+          <li><b>Clients</b> (или <b>Credentials → Create credentials → OAuth client ID</b>) → тип <b>Web application</b>.
+            В <b>Authorized redirect URIs</b> вставьте адрес из поля «Redirect URI» выше — символ в символ.</li>
+          <li>Скопируйте <b>Client ID</b> и <b>Client Secret</b> в поля выше и нажмите «Сохранить».</li>
+          <li>В разделе <b>Audience</b> нажмите <b>Publish app</b> (статус <b>In production</b>). Пока приложение в режиме
+            «Testing», войти могут только добавленные вами тестовые пользователи. Проверка Google не нужна:
+            сайт просит только имя, email и фото.</li>
         </ol>
       </details>
     </div>
