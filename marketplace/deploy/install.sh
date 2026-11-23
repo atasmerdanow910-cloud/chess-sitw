@@ -28,6 +28,10 @@ mkdir -p "$APP" "$DATA/uploads" "$WEB"
 chown -R systemmarket:systemmarket "$DATA"
 chmod 755 "$DATA" "$DATA/uploads"
 
+SCHEME=https
+[ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ] || SCHEME=http
+SITE_URL="$SCHEME://$DOMAIN"
+
 echo "==> Скачиваю код"
 TMP=$(mktemp -d)
 curl -fsSL "$RAW/server/app.py" -o "$TMP/app.py"
@@ -35,8 +39,28 @@ curl -fsSL "$RAW/server/requirements.txt" -o "$TMP/requirements.txt"
 curl -fsSL "$RAW/index.html" -o "$TMP/index.html"
 install -m 644 "$TMP/app.py" "$APP/app.py"
 install -m 644 "$TMP/requirements.txt" "$APP/requirements.txt"
-install -m 644 "$TMP/index.html" "$WEB/index.html"
+sed "s#__SITE_URL__#$SITE_URL#g" "$TMP/index.html" > "$TMP/index.out"
+install -m 644 "$TMP/index.out" "$WEB/index.html"
+for f in favicon.svg favicon-48.png favicon-192.png favicon-512.png maskable-512.png apple-touch-icon.png og.jpg site.webmanifest; do
+  curl -fsSL "$RAW/static/$f" -o "$TMP/$f"
+  install -m 644 "$TMP/$f" "$WEB/$f"
+done
 rm -rf "$TMP"
+
+echo "==> robots.txt и sitemap.xml для Google"
+cat > "$WEB/robots.txt" <<EOF
+User-agent: *
+Allow: /
+
+Sitemap: $SITE_URL/sitemap.xml
+EOF
+cat > "$WEB/sitemap.xml" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>$SITE_URL/</loc><changefreq>hourly</changefreq><priority>1.0</priority></url>
+</urlset>
+EOF
+chmod 644 "$WEB/robots.txt" "$WEB/sitemap.xml"
 
 echo "==> Python-окружение (1–3 минуты)"
 [ -x "$APP/venv/bin/python" ] || python3 -m venv "$APP/venv"
@@ -95,6 +119,7 @@ APPBLOCK=$(cat <<EOF
         try_files \$uri =404;
     }
     location = /index.html { add_header Cache-Control "no-cache"; }
+    location = /site.webmanifest { default_type application/manifest+json; }
     location / { try_files \$uri /index.html; }
 EOF
 )

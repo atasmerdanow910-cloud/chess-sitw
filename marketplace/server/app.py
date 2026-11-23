@@ -314,6 +314,13 @@ if DEV:
     def dev_index():
         return send_from_directory(os.path.dirname(HERE), "index.html")
 
+    @app.get("/<name>")
+    def dev_static(name):
+        static = os.path.join(os.path.dirname(HERE), "static")
+        if os.path.isfile(os.path.join(static, name)):
+            return send_from_directory(static, name)
+        return send_from_directory(os.path.dirname(HERE), "index.html")
+
     @app.get("/uploads/<path:name>")
     def dev_uploads(name):
         if not re.fullmatch(r"[a-f0-9]{24}(_t)?\.jpg", name):

@@ -4,9 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#15803d">
-<meta name="description" content="SystemMarket — объявления: авто, недвижимость, телефоны, электроника и другое.">
-<title>SystemMarket — объявления</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2315803d'/%3E%3Cpath d='M21 11.5c-.8-1.6-2.6-2.5-4.9-2.5-3 0-5 1.5-5 3.7 0 2 1.4 3 4.6 3.6 2.4.5 3.3 1 3.3 2s-1.1 1.8-3 1.8c-1.9 0-3.3-.8-4-2.2' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>SystemMarket — объявления: авто, недвижимость, телефоны</title>
+<meta name="description" content="SystemMarket — бесплатные объявления: продажа авто, квартир, телефонов, электроники, вещей и услуг. Подайте объявление с фото за минуту.">
+<link rel="canonical" href="__SITE_URL__/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-48.png" sizes="48x48" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SystemMarket">
+<meta property="og:title" content="SystemMarket — объявления">
+<meta property="og:description" content="Авто, недвижимость, телефоны, электроника и другое. Подайте объявление с фото за минуту.">
+<meta property="og:url" content="__SITE_URL__/">
+<meta property="og:image" content="__SITE_URL__/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"SystemMarket","alternateName":"System Market","url":"__SITE_URL__/"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"SystemMarket","url":"__SITE_URL__/","logo":"__SITE_URL__/favicon-512.png"}
+</script>
 <style>
 :root{
   --bg:#f2f3f5; --surface:#ffffff; --surface-2:#eceef1; --text:#111418; --muted:#687080;
@@ -39,7 +59,7 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .topbar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border)}
 .topbar .wrap{display:flex;gap:12px;align-items:center;height:60px}
 .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;letter-spacing:-.02em;white-space:nowrap}
-.logo .mark{width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:17px;font-weight:900}
+.logo .mark{width:32px;height:32px;display:block;flex:none}
 .logo .txt span{color:var(--accent)}
 @media (max-width:420px){.logo .txt{display:none}}
 .search{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:10px;padding:0 12px;min-width:0;height:40px;border:1px solid transparent}
@@ -198,6 +218,7 @@ details.adm summary{cursor:pointer;color:var(--muted);font-size:13px}
 <header class="topbar"><div class="wrap" id="topbar"></div></header>
 <nav class="cats" id="cats" aria-label="Категории"></nav>
 <main class="wrap">
+  <h1 class="sr">SystemMarket — объявления: авто, недвижимость, телефоны, электроника</h1>
   <div id="filters"></div>
   <div class="count" id="count"></div>
   <div id="list"></div>
@@ -425,7 +446,7 @@ let lastListHash = '#/';
 function renderTopbar(){
   const tb = $('#topbar');
   if (state.page === 'home'){
-    tb.innerHTML = '<a class="logo" href="#/"><span class="mark">S</span><span class="txt">System<span>Market</span></span></a>' +
+    tb.innerHTML = '<a class="logo" href="#/" aria-label="SystemMarket — на главную"><img class="mark" src="/favicon.svg" alt=""><span class="txt">System<span>Market</span></span></a>' +
       '<label class="search">' + ic('i-search') + '<input id="q" type="search" enterkeyhint="search" placeholder="Поиск объявлений" value="' + esc(state.q) + '"></label>';
     let t; $('#q').addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { state.q = e.target.value; load(true); }, 350); });
   } else {
