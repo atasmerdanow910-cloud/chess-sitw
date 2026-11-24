@@ -51,6 +51,12 @@ android {
         }
     }
 
+    lint {
+        // Android lint of third-party plugins crashes on some JDKs and does not check our Dart code.
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+
     buildTypes {
         release {
             // Without key.properties the APK is signed with a debug key (testing only).
