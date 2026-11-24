@@ -7,6 +7,7 @@ index.html и загруженные фото.
 Ошибки возвращаются как {"error": "<текст по-русски>", "code": "<код>"} —
 по коду сайт показывает сообщение на выбранном языке.
 """
+import fcntl
 import hashlib
 import hmac
 import json
@@ -39,7 +40,8 @@ CITIES = {"Ашхабад", "Аркадаг", "Балканабат", "Дашо�
 MAX_PHOTOS = 6
 MAX_SIDE = 1600
 THUMB_SIDE = 480
-PER_IP_PER_HOUR = 15
+PER_IP_PER_HOUR = 60           # объявлений в час с одного IP (у мобильного оператора он общий у многих)
+PER_USER_PER_HOUR = 15         # объявлений в час с одного устройства
 PAGE_MAX = 60
 MAX_PRICE = 10_000_000_000
 
@@ -52,7 +54,8 @@ MEDIA_TYPES = {"jpg": "image/jpeg", "mp4": "video/mp4", "mov": "video/quicktime"
 IMAGE_MAX = 15 * 1024 * 1024
 VIDEO_MAX = 30 * 1024 * 1024
 AUDIO_MAX = 6 * 1024 * 1024
-MEDIA_DAY_BYTES = 300 * 1024 * 1024      # файлов с одного IP за сутки
+MEDIA_DAY_BYTES = 300 * 1024 * 1024      # файлов с одного устройства за сутки
+MEDIA_IP_DAY_BYTES = 3 * 1024 * 1024 * 1024   # и с одного IP (общий IP мобильного оператора)
 MIN_FREE_BYTES = 1024 * 1024 * 1024      # на диске всегда остаётся минимум 1 ГБ
 
 os.makedirs(UPLOADS, exist_ok=True)
@@ -205,6 +208,68 @@ CREATE TABLE IF NOT EXISTS bans (
     reason  TEXT NOT NULL DEFAULT '',
     created INTEGER NOT NULL
 );
+-- Уведомления: кому и что случилось. Повтор того же события (grp) сливается с непрочитанным.
+CREATE TABLE IF NOT EXISTS notifications (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    owner      TEXT NOT NULL,
+    kind       TEXT NOT NULL,
+    actor      TEXT NOT NULL DEFAULT '',
+    text       TEXT NOT NULL DEFAULT '',
+    listing_id TEXT NOT NULL DEFAULT '',
+    ltitle     TEXT NOT NULL DEFAULT '',
+    thumb      TEXT NOT NULL DEFAULT '',
+    data       TEXT NOT NULL DEFAULT '{}',
+    link       TEXT NOT NULL DEFAULT '',
+    grp        TEXT NOT NULL DEFAULT '',
+    cnt        INTEGER NOT NULL DEFAULT 1,
+    created    INTEGER NOT NULL,
+    is_read    INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_notif_owner ON notifications(owner, id);
+-- Кто смотрел объявление: один человек — один просмотр
+CREATE TABLE IF NOT EXISTS views (
+    listing_id TEXT NOT NULL,
+    viewer     TEXT NOT NULL,
+    first_seen INTEGER NOT NULL,
+    last_seen  INTEGER NOT NULL,
+    PRIMARY KEY (listing_id, viewer)
+);
+CREATE INDEX IF NOT EXISTS idx_views_seen ON views(listing_id, last_seen);
+-- Избранное на сервере: «в избранном у N» и уведомления о снижении цены
+CREATE TABLE IF NOT EXISTS favorites (
+    listing_id TEXT NOT NULL,
+    owner      TEXT NOT NULL,
+    created    INTEGER NOT NULL,
+    PRIMARY KEY (listing_id, owner)
+);
+CREATE INDEX IF NOT EXISTS idx_fav_owner ON favorites(owner);
+-- Сохранённые поиски: уведомление о новых подходящих объявлениях
+CREATE TABLE IF NOT EXISTS saved_searches (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    owner   TEXT NOT NULL,
+    params  TEXT NOT NULL,
+    label   TEXT NOT NULL DEFAULT '',
+    created INTEGER NOT NULL,
+    hits    INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (owner, params)
+);
+-- Посетители сайта по дням — для администратора
+CREATE TABLE IF NOT EXISTS visits (
+    visitor    TEXT NOT NULL,
+    day        INTEGER NOT NULL,
+    ip         TEXT NOT NULL DEFAULT '',
+    ua         TEXT NOT NULL DEFAULT '',
+    lang       TEXT NOT NULL DEFAULT '',
+    app        INTEGER NOT NULL DEFAULT 0,
+    user_id    INTEGER NOT NULL DEFAULT 0,
+    first_seen INTEGER NOT NULL,
+    last_seen  INTEGER NOT NULL,
+    hits       INTEGER NOT NULL DEFAULT 0,
+    views      INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (visitor, day)
+);
+CREATE INDEX IF NOT EXISTS idx_visits_seen ON visits(last_seen);
+CREATE INDEX IF NOT EXISTS idx_visits_day ON visits(day);
 """
 
 # Колонки, которых не было в первых версиях базы, — добавляются при запуске.
@@ -213,6 +278,11 @@ MIGRATIONS = {
         "sold": "INTEGER NOT NULL DEFAULT 0",
         "updated": "INTEGER NOT NULL DEFAULT 0",
         "owner_hash": "TEXT NOT NULL DEFAULT ''",
+        "bumped": "INTEGER NOT NULL DEFAULT 0",
+        "price_old": "INTEGER NOT NULL DEFAULT 0",
+        "torg": "INTEGER NOT NULL DEFAULT 0",
+        "swap": "INTEGER NOT NULL DEFAULT 0",
+        "credit": "INTEGER NOT NULL DEFAULT 0",
     },
     "conversations": {
         "last_kind": "TEXT NOT NULL DEFAULT 'text'",
@@ -222,15 +292,27 @@ MIGRATIONS = {
         "media": "TEXT NOT NULL DEFAULT ''",
         "meta": "TEXT NOT NULL DEFAULT '{}'",
         "media_size": "INTEGER NOT NULL DEFAULT 0",
+        "sender_hash": "TEXT NOT NULL DEFAULT ''",
     },
 }
-CHAT_MSG_PER_MIN = 20        # сообщений в минуту с одного IP
-CHAT_NEW_PER_HOUR = 30       # новых диалогов в час с одного IP
+CHAT_MSG_PER_MIN = 20        # сообщений в минуту с одного устройства
+CHAT_IP_PER_MIN = 150        # и с одного IP
+CHAT_NEW_PER_HOUR = 30       # новых диалогов в час с одного устройства
+CHAT_NEW_IP_PER_HOUR = 150   # и с одного IP
+TZ_OFFSET = 5 * 3600         # Ашхабад, UTC+5: «сегодня» в статистике
+BUMP_EVERY = 86400           # поднять объявление можно раз в сутки
+VIEW_MILESTONES = (1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000)
+NOTIF_KEEP = 200             # уведомлений на человека
+SEARCHES_MAX = 20            # сохранённых поисков на человека
+VISITS_KEEP_DAYS = 30        # посетители для администратора хранятся 30 дней
 CHAT_MAX_LEN = 2000
 
 
 def init_db():
-    con = sqlite3.connect(DB_PATH, timeout=10)
+    # Процессы gunicorn стартуют одновременно: настраиваем базу по очереди, иначе «database is locked».
+    lock = open(os.path.join(DATA, ".init.lock"), "w")
+    fcntl.flock(lock, fcntl.LOCK_EX)
+    con = sqlite3.connect(DB_PATH, timeout=30)
     try:
         con.execute("PRAGMA journal_mode=WAL")
         con.executescript(SCHEMA)
@@ -243,18 +325,27 @@ def init_db():
                     except sqlite3.OperationalError:
                         pass  # другой процесс gunicorn успел добавить колонку
         con.execute("CREATE INDEX IF NOT EXISTS idx_owner ON listings(owner_hash)")
+        con.execute("UPDATE listings SET bumped = created WHERE bumped = 0")
+        con.execute("CREATE INDEX IF NOT EXISTS idx_bumped ON listings(bumped DESC)")
+        con.execute("CREATE INDEX IF NOT EXISTS idx_msg_sender ON messages(sender_hash, created)")
         con.commit()
     finally:
         con.close()
+        lock.close()
 
 
 init_db()
+
+
+def _ulower(v):
+    return v.lower() if isinstance(v, str) else v
 
 
 def db():
     if "db" not in g:
         g.db = sqlite3.connect(DB_PATH, timeout=10)
         g.db.row_factory = sqlite3.Row
+        g.db.create_function("ulower", 1, _ulower, deterministic=True)
     return g.db
 
 
@@ -303,7 +394,145 @@ def public(row):
         "extra": json.loads(row["extra"]), "photos": photo_urls(json.loads(row["photos"])),
         "views": row["views"], "created": row["created"],
         "sold": bool(row["sold"]), "updated": row["updated"],
+        "bumped": row["bumped"], "price_old": row["price_old"] if row["price_old"] > row["price"] > 0 else 0,
+        "torg": bool(row["torg"]), "swap": bool(row["swap"]), "credit": bool(row["credit"]),
     }
+
+
+def local_day(ts):
+    return (ts + TZ_OFFSET) // 86400
+
+
+def day_start(ts):
+    return local_day(ts) * 86400 - TZ_OFFSET
+
+
+def bump_wait(row, now):
+    return max(0, max(row["bumped"], row["created"]) + BUMP_EVERY - now)
+
+
+def flag(v):
+    return 1 if str(v).lower() in ("1", "true", "on", "yes") else 0
+
+
+def viewer_hash():
+    """Кто смотрит: устройство или аккаунт; без ключа — IP и браузер."""
+    return user_hash() or sha("ip:" + client_ip() + (request.headers.get("User-Agent") or ""))
+
+
+def listing_stats(con, row, viewer):
+    lid, now = row["id"], int(time.time())
+    one = lambda sql, *a: con.execute(sql, a).fetchone()[0]
+    return {
+        "views_today": one("SELECT COUNT(*) FROM views WHERE listing_id = ? AND last_seen >= ?", lid, day_start(now)),
+        "watching": one("SELECT COUNT(*) FROM views WHERE listing_id = ? AND last_seen >= ? AND viewer <> ?", lid, now - 300, viewer),
+        "favs": one("SELECT COUNT(*) FROM favorites WHERE listing_id = ?", lid),
+    }
+
+
+# ---------------------------------------------------------------- уведомления
+def notify(con, owner, kind, link, grp="", actor="", text="", lst=None, data=None):
+    """Уведомление для хеша (устройство или аккаунт). Повтор события grp сливается с непрочитанным: «3 новых сообщения»."""
+    if not owner:
+        return
+    cnt = 1
+    if grp:
+        old = con.execute("SELECT id, cnt FROM notifications WHERE owner = ? AND grp = ? AND is_read = 0", (owner, grp)).fetchone()
+        if old is not None:
+            cnt = old["cnt"] + 1
+            con.execute("DELETE FROM notifications WHERE id = ?", (old["id"],))
+    con.execute(
+        "INSERT INTO notifications (owner, kind, actor, text, listing_id, ltitle, thumb, data, link, grp, cnt, created)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        (owner, kind, (actor or "")[:60], (text or "")[:200], lst["id"] if lst else "", lst["title"] if lst else "",
+         thumb_of(lst["photos"]) if lst else "", json.dumps(data or {}, ensure_ascii=False), link, grp, cnt, int(time.time())))
+    con.execute("DELETE FROM notifications WHERE owner = ? AND id NOT IN"
+                " (SELECT id FROM notifications WHERE owner = ? ORDER BY id DESC LIMIT ?)", (owner, owner, NOTIF_KEEP))
+
+
+def notify_favorites(con, row, kind, data):
+    """Всем, у кого объявление в избранном (кроме продавца)."""
+    for (owner,) in con.execute("SELECT owner FROM favorites WHERE listing_id = ? AND owner <> ?",
+                                (row["id"], row["owner_hash"] or "-")).fetchall():
+        notify(con, owner, kind, "#/item/" + row["id"], grp=kind + ":" + row["id"], lst=row, data=data)
+
+
+def notif_public(n):
+    return {"id": n["id"], "kind": n["kind"], "actor": n["actor"], "text": n["text"], "listing_id": n["listing_id"],
+            "ltitle": n["ltitle"], "thumb": n["thumb"], "data": json.loads(n["data"] or "{}"), "link": n["link"],
+            "count": n["cnt"], "created": n["created"], "read": bool(n["is_read"])}
+
+
+# ---------------------------------------------------------------- сохранённые поиски
+def search_params(d):
+    """Параметры поиска: только известные ключи в одном виде — так одинаковые поиски не дублируются."""
+    d = d if isinstance(d, dict) else {}
+    p = {}
+    q = clean(d.get("q"), 60).lower()
+    if q:
+        p["q"] = q
+    if d.get("cat") in CATS:
+        p["cat"] = d["cat"]
+    if d.get("city") in CITIES:
+        p["city"] = d["city"]
+    for k, hi in (("min", MAX_PRICE), ("max", MAX_PRICE), ("yfrom", 2035), ("yto", 2035), ("kmax", 5_000_000), ("rooms", 50)):
+        v = to_int(d.get(k), 1, hi)
+        if v:
+            p[k] = v
+    for k in ("brand", "gear", "fuel", "deal"):
+        v = clean(d.get(k), 40)
+        if v:
+            p[k] = v
+    for k in ("photo", "torg", "swap", "credit"):
+        if flag(d.get(k)):
+            p[k] = 1
+    return p
+
+
+def listing_matches(p, row):
+    extra = json.loads(row["extra"] or "{}")
+    if p.get("cat") and row["cat"] != p["cat"]:
+        return False
+    if p.get("city") and row["city"] != p["city"]:
+        return False
+    if p.get("min") and row["price"] < p["min"]:
+        return False
+    if p.get("max") and not 0 < row["price"] <= p["max"]:
+        return False
+    if p.get("photo") and row["photos"] in ("", "[]"):
+        return False
+    for k in ("torg", "swap", "credit"):
+        if p.get(k) and not row[k]:
+            return False
+    for k in ("brand", "gear", "fuel", "deal"):
+        if p.get(k) and extra.get(k) != p[k]:
+            return False
+    y, km, r = extra.get("year"), extra.get("mileage"), extra.get("rooms")
+    if p.get("yfrom") and not (y and y >= p["yfrom"]):
+        return False
+    if p.get("yto") and not (y and y <= p["yto"]):
+        return False
+    if p.get("kmax") and not (km is not None and km <= p["kmax"]):
+        return False
+    if p.get("rooms") and not (r is not None and (r >= 4 if p["rooms"] >= 4 else r == p["rooms"])):
+        return False
+    if p.get("q") and p["q"] not in (row["title"] + " " + row["descr"] + " " + row["extra"]).lower():
+        return False
+    return True
+
+
+def match_saved_searches(con, row):
+    """Новое объявление: уведомить тех, кто сохранил подходящий поиск."""
+    for srch in con.execute("SELECT * FROM saved_searches WHERE owner <> ? ORDER BY id DESC LIMIT 5000",
+                            (row["owner_hash"] or "-",)).fetchall():
+        try:
+            p = json.loads(srch["params"])
+        except ValueError:
+            continue
+        if listing_matches(p, row):
+            con.execute("UPDATE saved_searches SET hits = hits + 1 WHERE id = ?", (srch["id"],))
+            notify(con, srch["owner"], "match", "#/item/" + row["id"], grp="match:%d" % srch["id"], actor=srch["label"],
+                   lst=row, data={"price": row["price"], "search": srch["id"]})
 
 
 def save_photo(fs):
@@ -427,7 +656,8 @@ def banned(con, who):
 
 @app.after_request
 def private_no_store(resp):
-    if request.path.startswith(("/api/me", "/api/chats", "/api/support", "/api/admin", "/auth/")):
+    if request.path.startswith(("/api/me", "/api/chats", "/api/support", "/api/admin", "/auth/", "/api/notifications",
+                                "/api/favorites", "/api/searches", "/api/visit")):
         resp.headers["Cache-Control"] = "no-store"
     return resp
 
@@ -451,6 +681,7 @@ def stats():
 @app.get("/api/listings")
 def list_listings():
     a = request.args
+    con = db()
     where, params = [], []
     ids = [i for i in a.get("ids", "").split(",") if re.fullmatch(r"[a-z0-9]{6,32}", i)][:200]
     if "ids" in a:
@@ -476,6 +707,31 @@ def list_listings():
         params.append(hi)
     if a.get("with_photos") == "1":
         where.append("photos <> '[]'")    # только объявления с фото
+    seller_of = a.get("seller_of", "")
+    if seller_of:                        # другие объявления того же продавца (сам хеш наружу не отдаём)
+        so = con.execute("SELECT owner_hash FROM listings WHERE id = ?", (seller_of,)).fetchone() \
+            if re.fullmatch(r"[a-z0-9]{6,32}", seller_of) else None
+        if not so or not so[0]:
+            return {"items": [], "total": 0}
+        where.append("owner_hash = ?")
+        params.append(so[0])
+    for key in ("torg", "swap", "credit"):
+        if a.get(key) == "1":
+            where.append(key + " = 1")
+    for key in ("brand", "gear", "fuel", "deal"):
+        v = clean(a.get(key), 40)
+        if v:
+            where.append("json_extract(extra, '$.%s') = ?" % key)
+            params.append(v)
+    for key, field, op, hi in (("yfrom", "year", ">=", 2035), ("yto", "year", "<=", 2035), ("kmax", "mileage", "<=", 5_000_000)):
+        v = to_int(a.get(key), 1, hi)
+        if v:
+            where.append("CAST(json_extract(extra, '$.%s') AS INTEGER) %s ?" % (field, op))
+            params.append(v)
+    rooms = to_int(a.get("rooms"), 1, 50)
+    if rooms:
+        where.append("CAST(json_extract(extra, '$.rooms') AS INTEGER) " + (">= ?" if rooms >= 4 else "= ?"))
+        params.append(rooms)
     ex = a.get("exclude", "")
     if re.fullmatch(r"[a-z0-9]{6,32}", ex):
         where.append("id <> ?")
@@ -483,30 +739,43 @@ def list_listings():
     q = clean(a.get("q"), 60).lower()
     if q:
         like = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-        where.append("(lower(title) LIKE ? ESCAPE '\\' OR lower(descr) LIKE ? ESCAPE '\\' OR lower(extra) LIKE ? ESCAPE '\\')")
+        where.append("(ulower(title) LIKE ? ESCAPE '\\' OR ulower(descr) LIKE ? ESCAPE '\\' OR ulower(extra) LIKE ? ESCAPE '\\')")
         params += [like, like, like]
     order = {
         "cheap": "price = 0, price ASC, created DESC",
         "exp": "price DESC, created DESC",
         "popular": "views DESC, created DESC",
-    }.get(a.get("sort"), "created DESC")
+    }.get(a.get("sort"), "bumped DESC, created DESC")
     limit = to_int(a.get("limit", 24), 1, PAGE_MAX) or 24
     offset = to_int(a.get("offset", 0), 0, 1_000_000) or 0
     w = ("WHERE " + " AND ".join(where)) if where else ""
-    total = db().execute(f"SELECT COUNT(*) FROM listings {w}", params).fetchone()[0]
-    rows = db().execute(f"SELECT * FROM listings {w} ORDER BY {order} LIMIT ? OFFSET ?", params + [limit, offset]).fetchall()
+    total = con.execute(f"SELECT COUNT(*) FROM listings {w}", params).fetchone()[0]
+    rows = con.execute(f"SELECT * FROM listings {w} ORDER BY {order} LIMIT ? OFFSET ?", params + [limit, offset]).fetchall()
     return {"items": [public(r) for r in rows], "total": total}
 
 
 @app.get("/api/listings/<lid>")
 def get_listing(lid):
     con = db()
-    con.execute("UPDATE listings SET views = views + 1 WHERE id = ?", (lid,))
-    con.commit()
     row = con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()
     if not row:
         return err("Объявление не найдено", 404, "not_found")
-    return dict(public(row), own=is_owner(row))
+    own, viewer, now = is_owner(row), viewer_hash(), int(time.time())
+    if not own:                          # свои просмотры не считаем
+        if con.execute("INSERT OR IGNORE INTO views (listing_id, viewer, first_seen, last_seen) VALUES (?,?,?,?)",
+                       (lid, viewer, now, now)).rowcount:
+            con.execute("UPDATE listings SET views = views + 1 WHERE id = ?", (lid,))
+            if row["views"] + 1 in VIEW_MILESTONES and row["owner_hash"]:
+                notify(con, row["owner_hash"], "views", "#/item/" + lid, grp="views:" + lid, lst=row, data={"n": row["views"] + 1})
+        else:
+            con.execute("UPDATE views SET last_seen = ? WHERE listing_id = ? AND viewer = ?", (now, lid, viewer))
+        con.execute("UPDATE visits SET views = views + 1 WHERE visitor = ? AND day = ?", (viewer, local_day(now)))
+        con.commit()
+        row = con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()
+    d = dict(public(row), own=own, **listing_stats(con, row, viewer))
+    if own:
+        d["bump_in"] = bump_wait(row, now)
+    return d
 
 
 @app.post("/api/listings")
@@ -516,9 +785,12 @@ def create_listing():
     con = db()
     recent = con.execute("SELECT COUNT(*) FROM listings WHERE ip = ? AND created > ?",
                          (ip, int(time.time()) - 3600)).fetchone()[0]
-    if recent >= PER_IP_PER_HOUR:
+    me = user_hash()
+    if not recent < PER_IP_PER_HOUR or (me and con.execute(
+            "SELECT COUNT(*) FROM listings WHERE owner_hash = ? AND created > ?",
+            (me, int(time.time()) - 3600)).fetchone()[0] >= PER_USER_PER_HOUR):
         return err("Слишком много объявлений за час. Попробуйте позже.", 429, "rate_limit")
-    if banned(con, user_hash()):
+    if banned(con, me):
         return err("Доступ ограничен администратором", 403, "banned")
 
     cat = f.get("cat")
@@ -534,6 +806,8 @@ def create_listing():
 
     # Фото необязательны: без них на сайте показывается логотип SystemMarket.
     files = [x for x in request.files.getlist("photos") if x and x.filename][:MAX_PHOTOS]
+    if files and shutil.disk_usage(UPLOADS).free < MIN_FREE_BYTES:   # на диске всегда остаётся 1 ГБ
+        return err("На сервере закончилось место", 507, "disk_full")
     names = []
     try:
         for fs in files:
@@ -547,11 +821,12 @@ def create_listing():
     now = int(time.time())
     con.execute(
         "INSERT INTO listings (id, cat, title, price, city, descr, name, phone, extra, photos, token_hash, ip,"
-        " created, updated, owner_hash) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        " created, updated, owner_hash, bumped, torg, swap, credit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (lid, cat, title, price, city, clean(f.get("desc"), 3000), clean(f.get("name"), 30) or "Продавец",
          phone, json.dumps(parse_extra(cat, f), ensure_ascii=False), json.dumps(names), sha(token), ip,
-         now, now, user_hash() or ""),
+         now, now, me or "", now, flag(f.get("torg")), flag(f.get("swap")), flag(f.get("credit"))),
     )
+    match_saved_searches(con, con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone())
     con.commit()
     return {"id": lid, "token": token}, 201
 
@@ -586,14 +861,43 @@ def update_listing(lid):
         if key in d:
             extra[key] = incoming[key]
 
+    torg, swap, credit = ((flag(d[k]) if k in d else row[k]) for k in ("torg", "swap", "credit"))
+    price_old = row["price_old"]
+    if price != row["price"]:            # цена снизилась — показываем старую зачёркнутой
+        price_old = row["price"] if 0 < price < row["price"] else 0
     con.execute(
         "UPDATE listings SET title = ?, price = ?, city = ?, descr = ?, name = ?, phone = ?, extra = ?,"
-        " sold = ?, updated = ? WHERE id = ?",
+        " sold = ?, updated = ?, price_old = ?, torg = ?, swap = ?, credit = ? WHERE id = ?",
         (title, price, city, descr, name, phone, json.dumps(extra, ensure_ascii=False), sold,
-         int(time.time()), lid),
+         int(time.time()), price_old, torg, swap, credit, lid),
     )
+    new = con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()
+    if 0 < price < row["price"] and not sold:
+        notify_favorites(con, new, "price", {"old": row["price"], "new": price})
+    if sold and not row["sold"]:
+        notify_favorites(con, new, "sold", {})
     con.commit()
-    return public(con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone())
+    return public(new)
+
+
+@app.post("/api/listings/<lid>/bump")
+def bump_listing(lid):
+    """Поднять своё объявление наверх ленты — бесплатно, раз в сутки."""
+    con = db()
+    row = con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()
+    if not row:
+        return err("Объявление не найдено", 404, "not_found")
+    if not edit_rights(row):
+        return err("Нет прав на изменение", 403, "forbidden")
+    if row["sold"]:
+        return err("Проданное объявление нельзя поднять", code="bump_sold")
+    now = int(time.time())
+    wait = bump_wait(row, now)
+    if wait and not is_admin():
+        return jsonify({"error": "Поднять можно раз в сутки", "code": "bump_wait", "wait": wait}), 429
+    con.execute("UPDATE listings SET bumped = ? WHERE id = ?", (now, lid))
+    con.commit()
+    return dict(public(con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()), bump_in=BUMP_EVERY)
 
 
 @app.delete("/api/listings/<lid>")
@@ -606,6 +910,8 @@ def delete_listing(lid):
         return err("Нет прав на удаление", 403, "forbidden")
     media = delete_conversations(con, [r[0] for r in con.execute("SELECT id FROM conversations WHERE listing_id = ?", (lid,))])
     con.execute("DELETE FROM listings WHERE id = ?", (lid,))
+    for table in ("views", "favorites", "notifications"):
+        con.execute(f"DELETE FROM {table} WHERE listing_id = ?", (lid,))
     con.commit()
     delete_photo_files(json.loads(row["photos"]))
     delete_media(media)
@@ -613,10 +919,11 @@ def delete_listing(lid):
 
 
 # ---------------------------------------------------------------- чат
-def chat_limit_hit(con, ip):
-    n = con.execute("SELECT COUNT(*) FROM messages WHERE ip = ? AND created > ?",
-                    (ip, int(time.time()) - 60)).fetchone()[0]
-    return n >= CHAT_MSG_PER_MIN
+def chat_limit_hit(con, ip, who):
+    since = int(time.time()) - 60
+    if con.execute("SELECT COUNT(*) FROM messages WHERE sender_hash = ? AND created > ?", (who, since)).fetchone()[0] >= CHAT_MSG_PER_MIN:
+        return True
+    return con.execute("SELECT COUNT(*) FROM messages WHERE ip = ? AND created > ?", (ip, since)).fetchone()[0] >= CHAT_IP_PER_MIN
 
 
 CONV_SELECT = ("SELECT c.*, l.title, l.price, l.photos, l.sold, l.name AS seller_name, l.owner_hash"
@@ -659,15 +966,22 @@ def msg_public(m, mine):
     return d
 
 
-def add_message(con, conv, sender, body, ip, media=None):
+def add_message(con, conv, sender, body, ip, media=None, who=""):
     now = int(time.time())
     kind, fname, meta, size = media or ("text", "", {}, 0)
     cur = con.execute(
-        "INSERT INTO messages (conv_id, sender, body, kind, media, meta, media_size, created, ip)"
-        " VALUES (?,?,?,?,?,?,?,?,?)", (conv["id"], sender, body, kind, fname, json.dumps(meta), size, now, ip))
+        "INSERT INTO messages (conv_id, sender, body, kind, media, meta, media_size, created, ip, sender_hash)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?)", (conv["id"], sender, body, kind, fname, json.dumps(meta), size, now, ip, who))
     other = "seller_unread" if sender == "buyer" else "buyer_unread"
     con.execute(f"UPDATE conversations SET updated = ?, last_text = ?, last_kind = ?, last_sender = ?, {other} = {other} + 1"
                 " WHERE id = ?", (now, body[:140], kind, sender, conv["id"]))
+    # уведомление получателю: кто написал, по какому объявлению, что именно
+    lst = con.execute("SELECT id, title, photos, owner_hash, name FROM listings WHERE id = ?", (conv["listing_id"],)).fetchone()
+    if lst is not None:
+        to = lst["owner_hash"] if sender == "buyer" else conv["buyer_hash"]
+        actor = conv["buyer_name"] if sender == "buyer" else lst["name"]
+        notify(con, to, "msg", "#/chat/" + conv["id"], grp="chat:" + conv["id"], actor=actor or "", text=body, lst=lst,
+               data={"kind": kind, "from": sender})
     return cur.lastrowid
 
 
@@ -740,22 +1054,24 @@ def file_size(fs):
     return n
 
 
-def media_quota_left(con, ip):
+def media_quota_left(con, ip, who):
     since = int(time.time()) - 86400
-    used = 0
-    for table in ("messages", "support_messages"):
-        used += con.execute(f"SELECT COALESCE(SUM(media_size), 0) FROM {table} WHERE ip = ? AND created > ?",
-                            (ip, since)).fetchone()[0]
-    return MEDIA_DAY_BYTES - used
+    by_ip = sum(con.execute(f"SELECT COALESCE(SUM(media_size), 0) FROM {table} WHERE ip = ? AND created > ?",
+                            (ip, since)).fetchone()[0] for table in ("messages", "support_messages"))
+    mine = con.execute("SELECT COALESCE(SUM(media_size), 0) FROM messages WHERE sender_hash = ? AND created > ?",
+                       (who or "-", since)).fetchone()[0]
+    mine += con.execute("SELECT COALESCE(SUM(m.media_size), 0) FROM support_messages m JOIN support_threads t ON t.id = m.thread_id"
+                        " WHERE t.owner = ? AND m.sender = 'user' AND m.created > ?", (who or "-", since)).fetchone()[0]
+    return min(MEDIA_DAY_BYTES - mine, MEDIA_IP_DAY_BYTES - by_ip)
 
 
-def store_media(con, fs, kind, dur, ip):
+def store_media(con, fs, kind, dur, ip, who=""):
     """Проверяет и сохраняет файл. Возвращает (kind, имя файла, meta, размер).
     Фото пересохраняются (без EXIF/GPS), видео и голосовые — как есть, но только известных форматов."""
     size = file_size(fs)
     if size == 0:
         raise MediaError("media_bad", "Пустой файл")
-    if size > media_quota_left(con, ip):
+    if size > media_quota_left(con, ip, who):
         raise MediaError("media_quota", "Слишком много файлов за сутки. Попробуйте завтра.")
     if shutil.disk_usage(CHAT_DIR).free - size < MIN_FREE_BYTES:
         raise MediaError("disk_full", "На сервере закончилось место")
@@ -859,20 +1175,22 @@ def start_chat():
         return err("Объявление не найдено", 404, "not_found")
     if lst["owner_hash"] == me:
         return err("Это ваше объявление", code="own_listing")
-    if chat_limit_hit(con, ip):
+    if chat_limit_hit(con, ip, me):
         return err("Слишком много сообщений", 429, "rate_limit_chat")
     conv = con.execute("SELECT * FROM conversations WHERE listing_id = ? AND buyer_hash = ?", (lst["id"], me)).fetchone()
     if conv is None:
-        recent = con.execute(
+        hour = int(time.time()) - 3600
+        mine_new = con.execute("SELECT COUNT(*) FROM conversations WHERE buyer_hash = ? AND created > ?", (me, hour)).fetchone()[0]
+        ip_new = con.execute(
             "SELECT COUNT(*) FROM conversations c JOIN messages m ON m.conv_id = c.id AND m.id ="
             " (SELECT MIN(id) FROM messages WHERE conv_id = c.id) WHERE m.ip = ? AND c.created > ?",
-            (ip, int(time.time()) - 3600)).fetchone()[0]
-        if recent >= CHAT_NEW_PER_HOUR:
+            (ip, hour)).fetchone()[0]
+        if mine_new >= CHAT_NEW_PER_HOUR or ip_new >= CHAT_NEW_IP_PER_HOUR:
             return err("Слишком много новых диалогов", 429, "rate_limit_chat")
     media = None
     if fs is not None:
         try:
-            media = store_media(con, fs, kind, dur, ip)
+            media = store_media(con, fs, kind, dur, ip, me)
         except MediaError as e:
             return media_error(e)
     name = clean(fields.get("name"), 30)
@@ -886,7 +1204,7 @@ def start_chat():
         conv = con.execute("SELECT * FROM conversations WHERE id = ?", (cid,)).fetchone()
     elif name:
         con.execute("UPDATE conversations SET buyer_name = ? WHERE id = ?", (name, conv["id"]))
-    add_message(con, conv, "buyer", body, ip, media)
+    add_message(con, conv, "buyer", body, ip, media, me)
     con.commit()
     return {"conv": conv_public(conv_row(con, conv["id"], me), me)}, 201
 
@@ -915,13 +1233,15 @@ def list_chats():
 def chats_unread():
     me = user_hash()
     if not me:
-        return {"unread": 0}
+        return {"unread": 0, "notif_unread": 0, "notif_last": 0}
     con = db()
     n = con.execute(
         "SELECT COALESCE(SUM(CASE WHEN c.buyer_hash = ? THEN c.buyer_unread ELSE c.seller_unread END), 0)"
         " FROM conversations c JOIN listings l ON l.id = c.listing_id"
         " WHERE c.buyer_hash = ? OR l.owner_hash = ?", (me, me, me)).fetchone()[0]
-    return {"unread": n + support_unread_of(con, me)}
+    nu, nlast = con.execute("SELECT COALESCE(SUM(1 - is_read), 0), COALESCE(MAX(id), 0) FROM notifications WHERE owner = ?",
+                            (me,)).fetchone()
+    return {"unread": n + support_unread_of(con, me), "notif_unread": nu, "notif_last": nlast}
 
 
 @app.get("/api/chats/<cid>/messages")
@@ -936,8 +1256,11 @@ def chat_messages(cid):
     msgs = con.execute("SELECT * FROM (SELECT * FROM messages WHERE conv_id = ? AND id > ? ORDER BY id DESC LIMIT 300)"
                        " ORDER BY id", (cid, after)).fetchall()
     mine_unread = "buyer_unread" if role == "buyer" else "seller_unread"
+    seen = con.execute("UPDATE notifications SET is_read = 1 WHERE owner = ? AND grp = ? AND is_read = 0",
+                       (me, "chat:" + cid)).rowcount
     if row[mine_unread]:
         con.execute(f"UPDATE conversations SET {mine_unread} = 0 WHERE id = ?", (cid,))
+    if row[mine_unread] or seen:
         con.commit()
     return {"conv": conv_public(row, me), "messages": [msg_public(m, m["sender"] == role) for m in msgs]}
 
@@ -955,23 +1278,24 @@ def chat_send(cid):
     if banned(con, me):
         return err("Доступ ограничен администратором", 403, "banned")
     ip = client_ip()
-    if chat_limit_hit(con, ip):
+    if chat_limit_hit(con, ip, me):
         return err("Слишком много сообщений", 429, "rate_limit_chat")
     media = None
     if fs is not None:
         try:
-            media = store_media(con, fs, kind, dur, ip)
+            media = store_media(con, fs, kind, dur, ip, me)
         except MediaError as e:
             return media_error(e)
     role = "buyer" if row["buyer_hash"] == me else "seller"
-    mid = add_message(con, row, role, body, ip, media)
+    mid = add_message(con, row, role, body, ip, media, me)
     con.commit()
     return {"message": msg_public(con.execute("SELECT * FROM messages WHERE id = ?", (mid,)).fetchone(), True)}, 201
 
 
 # ---------------------------------------------------------------- сообщения администратору
-SUPPORT_PER_10MIN = 8        # сообщений администратору за 10 минут с одного IP
-SUPPORT_NEW_PER_HOUR = 5     # новых обращений в час с одного IP
+SUPPORT_PER_10MIN = 8        # сообщений администратору за 10 минут с одного устройства
+SUPPORT_IP_PER_10MIN = 60    # и с одного IP
+SUPPORT_NEW_PER_HOUR = 40    # новых обращений в час с одного IP
 
 
 def support_public(t):
@@ -988,6 +1312,8 @@ def add_support_message(con, thread, sender, body, ip, media=None):
     unread = "admin_unread" if sender == "user" else "user_unread"
     con.execute(f"UPDATE support_threads SET updated = ?, last_text = ?, last_kind = ?, last_sender = ?,"
                 f" {unread} = {unread} + 1 WHERE id = ?", (now, body[:140], kind, sender, thread["id"]))
+    if sender != "user":                 # ответ администратора — уведомление человеку
+        notify(con, thread["owner"], "support", "#/support", grp="support", actor="SystemMarket", text=body, data={"kind": kind})
     return cur.lastrowid
 
 
@@ -1003,8 +1329,10 @@ def support_get():
     after = to_int(request.args.get("after", 0), 0, 10**12) or 0
     rows = con.execute("SELECT * FROM (SELECT * FROM support_messages WHERE thread_id = ? AND id > ? ORDER BY id DESC"
                        " LIMIT 300) ORDER BY id", (t["id"], after)).fetchall()
+    seen = con.execute("UPDATE notifications SET is_read = 1 WHERE owner = ? AND grp = 'support' AND is_read = 0", (me,)).rowcount
     if t["user_unread"]:
         con.execute("UPDATE support_threads SET user_unread = 0 WHERE id = ?", (t["id"],))
+    if t["user_unread"] or seen:
         con.commit()
     return {"thread": support_public(t), "messages": [msg_public(m, m["sender"] == "user") for m in rows]}
 
@@ -1018,9 +1346,11 @@ def support_send():
     if not body and fs is None:
         return err("Пустое сообщение", code="empty")
     con, ip, now = db(), client_ip(), int(time.time())
-    n = con.execute("SELECT COUNT(*) FROM support_messages WHERE ip = ? AND sender = 'user' AND created > ?",
-                    (ip, now - 600)).fetchone()[0]
-    if n >= SUPPORT_PER_10MIN:
+    n_ip = con.execute("SELECT COUNT(*) FROM support_messages WHERE ip = ? AND sender = 'user' AND created > ?",
+                       (ip, now - 600)).fetchone()[0]
+    n_me = con.execute("SELECT COUNT(*) FROM support_messages m JOIN support_threads t ON t.id = m.thread_id"
+                       " WHERE t.owner = ? AND m.sender = 'user' AND m.created > ?", (me, now - 600)).fetchone()[0]
+    if n_me >= SUPPORT_PER_10MIN or n_ip >= SUPPORT_IP_PER_10MIN:
         return err("Слишком много сообщений", 429, "rate_limit_chat")
     t = con.execute("SELECT * FROM support_threads WHERE owner = ?", (me,)).fetchone()
     if t is None and con.execute("SELECT COUNT(*) FROM support_threads WHERE ip = ? AND created > ?",
@@ -1029,7 +1359,7 @@ def support_send():
     media = None
     if fs is not None:
         try:
-            media = store_media(con, fs, kind, dur, ip)
+            media = store_media(con, fs, kind, dur, ip, me)
         except MediaError as e:
             return media_error(e)
     u = current_user()
@@ -1127,9 +1457,152 @@ def merge_device(con, dev, acct):
                          last["body"][:140], last["kind"], last["sender"], mine["id"]))
             con.execute("DELETE FROM support_threads WHERE id = ?", (old["id"],))
         changed += 1
+    changed += con.execute("UPDATE notifications SET owner = ? WHERE owner = ?", (acct, dev)).rowcount
+    con.execute("INSERT OR IGNORE INTO favorites (listing_id, owner, created) SELECT listing_id, ?, created FROM favorites"
+                " WHERE owner = ?", (acct, dev))
+    changed += con.execute("DELETE FROM favorites WHERE owner = ?", (dev,)).rowcount
+    for srch in con.execute("SELECT id, params FROM saved_searches WHERE owner = ?", (dev,)).fetchall():
+        if con.execute("SELECT 1 FROM saved_searches WHERE owner = ? AND params = ?", (acct, srch["params"])).fetchone():
+            con.execute("DELETE FROM saved_searches WHERE id = ?", (srch["id"],))
+        else:
+            con.execute("UPDATE saved_searches SET owner = ? WHERE id = ?", (acct, srch["id"]))
+        changed += 1
     if changed or names:
         con.commit()
         delete_media(names)
+
+
+@app.get("/api/notifications")
+def notifications_list():
+    me = user_hash()
+    if not me:
+        return {"items": [], "unread": 0}
+    con = db()
+    after = to_int(request.args.get("after", 0), 0, 10**12) or 0
+    rows = con.execute("SELECT * FROM notifications WHERE owner = ? AND id > ? ORDER BY id DESC LIMIT 100", (me, after)).fetchall()
+    unread = con.execute("SELECT COUNT(*) FROM notifications WHERE owner = ? AND is_read = 0", (me,)).fetchone()[0]
+    return {"items": [notif_public(n) for n in rows], "unread": unread}
+
+
+@app.post("/api/notifications/read")
+def notifications_read():
+    me = user_hash()
+    if not me:
+        return err("Нет ключа устройства", 401, "no_user")
+    d = request.get_json(silent=True) or {}
+    con = db()
+    if d.get("all"):
+        con.execute("UPDATE notifications SET is_read = 1 WHERE owner = ? AND is_read = 0", (me,))
+    else:
+        ids = [i for i in (d.get("ids") or []) if isinstance(i, int)][:200]
+        if ids:
+            con.execute("UPDATE notifications SET is_read = 1 WHERE owner = ? AND id IN (%s)" % ",".join("?" * len(ids)), [me] + ids)
+    con.commit()
+    return {"ok": True, "unread": con.execute("SELECT COUNT(*) FROM notifications WHERE owner = ? AND is_read = 0", (me,)).fetchone()[0]}
+
+
+@app.delete("/api/notifications")
+def notifications_clear():
+    me = user_hash()
+    if not me:
+        return err("Нет ключа устройства", 401, "no_user")
+    con = db()
+    con.execute("DELETE FROM notifications WHERE owner = ?", (me,))
+    con.commit()
+    return {"ok": True}
+
+
+@app.post("/api/favorites")
+def favorites_set():
+    """Избранное на сервере: продавец видит «в избранном у N», покупатель узнаёт о снижении цены."""
+    me = user_hash()
+    if not me:
+        return err("Нет ключа устройства", 401, "no_user")
+    d = request.get_json(silent=True) or {}
+    ids = d.get("ids") if isinstance(d.get("ids"), list) else [d.get("listing_id")]
+    ids = [i for i in ids if isinstance(i, str) and re.fullmatch(r"[a-z0-9]{6,32}", i)][:200]
+    on, quiet = d.get("on", True) is not False, bool(d.get("sync"))
+    con, now = db(), int(time.time())
+    for lid in ids:
+        if not on:
+            con.execute("DELETE FROM favorites WHERE listing_id = ? AND owner = ?", (lid, me))
+            continue
+        row = con.execute("SELECT * FROM listings WHERE id = ?", (lid,)).fetchone()
+        if row is None or row["owner_hash"] == me:
+            continue
+        added = con.execute("INSERT OR IGNORE INTO favorites (listing_id, owner, created) VALUES (?,?,?)", (lid, me, now)).rowcount
+        if added and not quiet and row["owner_hash"]:
+            n = con.execute("SELECT COUNT(*) FROM favorites WHERE listing_id = ?", (lid,)).fetchone()[0]
+            notify(con, row["owner_hash"], "fav", "#/item/" + lid, grp="fav:" + lid, lst=row, data={"n": n})
+    con.commit()
+    return {"ok": True}
+
+
+@app.get("/api/searches")
+def searches_list():
+    me = user_hash()
+    if not me:
+        return {"items": []}
+    rows = db().execute("SELECT * FROM saved_searches WHERE owner = ? ORDER BY id DESC", (me,)).fetchall()
+    return {"items": [{"id": r["id"], "params": json.loads(r["params"]), "label": r["label"], "created": r["created"],
+                       "hits": r["hits"]} for r in rows]}
+
+
+@app.post("/api/searches")
+def searches_add():
+    me = user_hash()
+    if not me:
+        return err("Нет ключа устройства", 401, "no_user")
+    d = request.get_json(silent=True) or {}
+    p = search_params(d.get("params"))
+    if not p:
+        return err("Пустой поиск", code="empty")
+    con = db()
+    params = json.dumps(p, sort_keys=True, ensure_ascii=False)
+    have = con.execute("SELECT * FROM saved_searches WHERE owner = ? AND params = ?", (me, params)).fetchone()
+    if have is None:
+        if con.execute("SELECT COUNT(*) FROM saved_searches WHERE owner = ?", (me,)).fetchone()[0] >= SEARCHES_MAX:
+            return err("Можно сохранить до 20 поисков", code="searches_max")
+        con.execute("INSERT INTO saved_searches (owner, params, label, created) VALUES (?,?,?,?)",
+                    (me, params, clean(d.get("label"), 60), int(time.time())))
+        con.commit()
+        have = con.execute("SELECT * FROM saved_searches WHERE owner = ? AND params = ?", (me, params)).fetchone()
+    return {"id": have["id"], "params": p, "label": have["label"]}, 201
+
+
+@app.delete("/api/searches/<int:sid>")
+def searches_delete(sid):
+    me = user_hash()
+    if not me:
+        return err("Нет ключа устройства", 401, "no_user")
+    con = db()
+    con.execute("DELETE FROM saved_searches WHERE id = ? AND owner = ?", (sid, me))
+    con.commit()
+    return {"ok": True}
+
+
+@app.post("/api/visit")
+def visit():
+    """Посещение сайта (для администратора): при открытии страницы и раз в несколько минут, пока она открыта."""
+    d = request.get_json(silent=True) or {}
+    con, now = db(), int(time.time())
+    ip, ua, day = client_ip(), clean(request.headers.get("User-Agent"), 300), local_day(now)
+    if con.execute("SELECT 1 FROM visits WHERE day = ? LIMIT 1", (day,)).fetchone() is None:
+        # первый заход за сутки — убираем старое
+        con.execute("DELETE FROM visits WHERE day < ?", (day - VISITS_KEEP_DAYS,))
+        con.execute("DELETE FROM notifications WHERE created < ?", (now - 90 * 86400,))
+    u = current_user()
+    lang = d.get("lang") if d.get("lang") in ("ru", "tr", "tk") else ""
+    con.execute(
+        "INSERT INTO visits (visitor, day, ip, ua, lang, app, user_id, first_seen, last_seen, hits) VALUES (?,?,?,?,?,?,?,?,?,?)"
+        " ON CONFLICT(visitor, day) DO UPDATE SET ip = excluded.ip, ua = excluded.ua,"
+        " lang = CASE WHEN excluded.lang <> '' THEN excluded.lang ELSE lang END, app = excluded.app,"
+        " user_id = CASE WHEN excluded.user_id > 0 THEN excluded.user_id ELSE user_id END,"
+        " last_seen = excluded.last_seen, hits = hits + excluded.hits",
+        (viewer_hash(), day, ip, ua, lang, 1 if d.get("app") else 0, u["id"] if u is not None else 0, now, now,
+         1 if d.get("load") else 0))
+    con.commit()
+    return {"ok": True}
 
 
 @app.get("/api/me")
@@ -1152,10 +1625,20 @@ def my_listings():
     chats = dict(con.execute(
         "SELECT c.listing_id, COUNT(*) FROM conversations c JOIN listings l ON l.id = c.listing_id"
         " WHERE l.owner_hash = ? GROUP BY c.listing_id", (me,)).fetchall())
+    now = int(time.time())
+    today = dict(con.execute(
+        "SELECT v.listing_id, COUNT(*) FROM views v JOIN listings l ON l.id = v.listing_id"
+        " WHERE l.owner_hash = ? AND v.last_seen >= ? GROUP BY v.listing_id", (me, day_start(now))).fetchall())
+    favs = dict(con.execute(
+        "SELECT f.listing_id, COUNT(*) FROM favorites f JOIN listings l ON l.id = f.listing_id"
+        " WHERE l.owner_hash = ? GROUP BY f.listing_id", (me,)).fetchall())
     items = []
     for r in rows:
         x = public(r)
         x["chats"] = chats.get(r["id"], 0)        # сколько покупателей написали по объявлению
+        x["views_today"] = today.get(r["id"], 0)
+        x["favs"] = favs.get(r["id"], 0)
+        x["bump_in"] = bump_wait(r, now)
         items.append(x)
     return {"items": items}
 
@@ -1301,6 +1784,8 @@ def admin_overview():
             "support_unread": one("SELECT COALESCE(SUM(admin_unread), 0) FROM support_threads"),
             "media_mb": round(one("SELECT COALESCE(SUM(media_size), 0) FROM messages") / 1048576, 1),
             "disk_free_gb": round(shutil.disk_usage(CHAT_DIR).free / 1073741824, 1),
+            "visitors_today": con.execute("SELECT COUNT(*) FROM visits WHERE day = ?", (local_day(int(time.time())),)).fetchone()[0],
+            "online": con.execute("SELECT COUNT(DISTINCT visitor) FROM visits WHERE last_seen > ?", (int(time.time()) - 300,)).fetchone()[0],
         },
         "google": {"client_id": s.get("google_client_id", ""), "has_secret": bool(s.get("google_client_secret")),
                    "enabled": google_enabled(s), "redirect_uri": redirect_uri()},
@@ -1384,6 +1869,21 @@ def admin_ban(cid):
 def admin_bans():
     rows = db().execute("SELECT hash, reason, created FROM bans ORDER BY created DESC").fetchall()
     return {"items": [dict(r) for r in rows]}
+
+
+@app.post("/api/admin/bans")
+@admin_only
+def admin_ban_add():
+    """Заблокировать посетителя по его хешу (из вкладки «Посетители»)."""
+    d = request.get_json(silent=True) or {}
+    h = str(d.get("hash", ""))
+    if not re.fullmatch(r"[a-f0-9]{64}", h):
+        return err("Неверный посетитель", code="bad_request")
+    con = db()
+    con.execute("INSERT OR REPLACE INTO bans (hash, reason, created) VALUES (?,?,?)",
+                (h, clean(d.get("reason"), 100) or "Посетитель", int(time.time())))
+    con.commit()
+    return {"ok": True}
 
 
 @app.delete("/api/admin/bans/<h>")
@@ -1505,6 +2005,69 @@ def admin_settings():
     return admin_overview()
 
 
+def device_of(ua):
+    u = (ua or "").lower()
+    os_name = ("Android" if "android" in u else "iPhone" if "iphone" in u else "iPad" if "ipad" in u else
+               "Windows" if "windows" in u else "Mac" if "macintosh" in u or "mac os" in u else "Linux" if "linux" in u else "")
+    browser = ("app" if "systemmarketapp" in u else "Edge" if "edg/" in u else "Opera" if "opr/" in u or "opera" in u else
+               "Yandex" if "yabrowser" in u else "Samsung" if "samsungbrowser" in u else
+               "Chrome" if "chrome" in u or "crios" in u else "Firefox" if "firefox" in u or "fxios" in u else
+               "Safari" if "safari" in u else "")
+    return os_name, browser
+
+
+@app.get("/api/admin/visitors")
+@admin_only
+def admin_visitors():
+    """Сколько людей заходило и откуда: за сутки, неделю, месяц; список посетителей с IP."""
+    con, now = db(), int(time.time())
+    today = local_day(now)
+    one = lambda sql, *a: con.execute(sql, a).fetchone()[0]
+    stats = {
+        "online": one("SELECT COUNT(DISTINCT visitor) FROM visits WHERE last_seen > ?", now - 300),
+        "today": one("SELECT COUNT(*) FROM visits WHERE day = ?", today),
+        "today_loads": one("SELECT COALESCE(SUM(hits), 0) FROM visits WHERE day = ?", today),
+        "today_ips": one("SELECT COUNT(DISTINCT ip) FROM visits WHERE day = ?", today),
+        "today_app": one("SELECT COUNT(*) FROM visits WHERE day = ? AND app = 1", today),
+        "today_views": one("SELECT COALESCE(SUM(views), 0) FROM visits WHERE day = ?", today),
+        "yesterday": one("SELECT COUNT(*) FROM visits WHERE day = ?", today - 1),
+        "week": one("SELECT COUNT(DISTINCT visitor) FROM visits WHERE day > ?", today - 7),
+        "month": one("SELECT COUNT(DISTINCT visitor) FROM visits WHERE day > ?", today - 30),
+    }
+    per_day = {r[0]: (r[1], r[2]) for r in con.execute(
+        "SELECT day, COUNT(*), COALESCE(SUM(hits), 0) FROM visits WHERE day > ? GROUP BY day", (today - 14,))}
+    days = [{"ts": d * 86400 - TZ_OFFSET + 43200, "visitors": per_day.get(d, (0, 0))[0], "loads": per_day.get(d, (0, 0))[1]}
+            for d in range(today - 13, today + 1)]
+    users = {r["id"]: r for r in con.execute("SELECT id, name, email FROM users")}
+    bans = ban_set(con)
+    items = []
+    # для каждого посетителя — последний день (IP, браузер, язык), всего заходов и открытых объявлений
+    for r in con.execute("SELECT visitor, MAX(last_seen) AS last, ip, ua, lang, app, user_id, SUM(hits) AS hits,"
+                         " SUM(views) AS views, COUNT(*) AS days,"
+                         " (SELECT MIN(first_seen) FROM visits v2 WHERE v2.visitor = v.visitor) AS first"
+                         " FROM visits v GROUP BY visitor ORDER BY last DESC LIMIT 300"):
+        os_name, browser = device_of(r["ua"])
+        u = users.get(r["user_id"])
+        items.append({"hash": r["visitor"], "ip": r["ip"], "os": os_name, "browser": browser, "app": bool(r["app"]),
+                      "lang": r["lang"], "first": r["first"], "last": r["last"], "hits": r["hits"], "views": r["views"],
+                      "days": r["days"], "online": r["last"] > now - 300, "banned": r["visitor"] in bans,
+                      "user": {"name": u["name"], "email": u["email"]} if u is not None else None})
+    return {"stats": stats, "days": days, "items": items}
+
+
+@app.get("/api/admin/listings")
+@admin_only
+def admin_listings():
+    """Все объявления с IP подавшего, просмотрами, избранным и перепиской — для модерации."""
+    con = db()
+    rows = con.execute("SELECT l.*, (SELECT COUNT(*) FROM favorites f WHERE f.listing_id = l.id) AS favs,"
+                       " (SELECT COUNT(*) FROM conversations c WHERE c.listing_id = l.id) AS chats"
+                       " FROM listings l ORDER BY l.created DESC LIMIT 300").fetchall()
+    bans = ban_set(con)
+    return {"items": [dict(public(r), ip=r["ip"], favs=r["favs"], chats=r["chats"], owner=r["owner_hash"],
+                           banned=bool(r["owner_hash"]) and r["owner_hash"] in bans) for r in rows]}
+
+
 @app.post("/api/admin/wipe")
 @admin_only
 def admin_wipe():
@@ -1520,6 +2083,9 @@ def admin_wipe():
     photos = [n for r in con.execute("SELECT photos FROM listings") for n in json.loads(r[0])]
     names = delete_conversations(con, [r[0] for r in con.execute("SELECT id FROM conversations")])
     n = con.execute("DELETE FROM listings").rowcount
+    con.execute("DELETE FROM views")
+    con.execute("DELETE FROM favorites")
+    con.execute("DELETE FROM notifications WHERE listing_id <> ''")
     con.commit()
     delete_photo_files(photos)
     delete_media(names)

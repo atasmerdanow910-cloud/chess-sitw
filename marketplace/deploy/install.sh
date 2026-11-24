@@ -22,6 +22,20 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq python3-venv nginx curl >/dev/null
 
+echo "==> Файл подкачки (защита от нехватки памяти на маленьком сервере)"
+if [ "$(swapon --noheadings 2>/dev/null | wc -l)" -eq 0 ] && [ "$(awk '/MemTotal/ {print $2}' /proc/meminfo)" -lt 2000000 ]; then
+  if [ "$(df --output=avail -k / | tail -1)" -gt 3000000 ] && [ ! -e /swapfile ]; then
+    if (fallocate -l 1G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=1024 status=none) \
+       && chmod 600 /swapfile && mkswap /swapfile >/dev/null && swapon /swapfile; then
+      grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+      echo "   подкачка 1 ГБ включена"
+    else
+      rm -f /swapfile
+      echo "   подкачку включить не удалось — сайт работает и без неё"
+    fi
+  fi
+fi
+
 echo "==> Пользователь и папки"
 id -u systemmarket >/dev/null 2>&1 || useradd --system --home "$DATA" --shell /usr/sbin/nologin systemmarket
 mkdir -p "$APP" "$DATA/uploads" "$DATA/chat" "$WEB"
@@ -97,7 +111,8 @@ User=systemmarket
 Group=systemmarket
 WorkingDirectory=$APP
 EnvironmentFile=$ENVF
-ExecStart=$APP/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 --timeout 90 app:app
+# 2 процесса по 4 потока: до 8 запросов одновременно при той же памяти; процессы обновляются после 2000 запросов
+ExecStart=$APP/venv/bin/gunicorn --workers 2 --threads 4 --worker-class gthread --max-requests 2000 --max-requests-jitter 200 --bind 127.0.0.1:8000 --timeout 90 app:app
 Restart=always
 RestartSec=3
 
@@ -116,6 +131,12 @@ APPBLOCK=$(cat <<EOF
     client_max_body_size 40m;
     root $WEB;
     index index.html;
+    # сжатие: страница сайта и ответы API весят в 3–5 раз меньше
+    gzip on;
+    gzip_comp_level 5;
+    gzip_min_length 1024;
+    gzip_vary on;
+    gzip_types application/json image/svg+xml application/manifest+json text/plain text/css application/javascript;
 
     location /api/ {
         proxy_pass http://127.0.0.1:8000;

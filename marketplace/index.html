@@ -73,7 +73,7 @@
   --ok:#4cc38a; --ok-s:rgba(76,195,138,.13);
   --warn:#e0b25b; --warn-s:rgba(224,178,91,.13);
   --err:#f0726b; --err-s:rgba(240,114,107,.13); --err-f:#c93d36;
-  --heart:#ff5c7a;
+  --heart:#ff5c7a; --chart-1:#4f8cf7;
   --glow-2:rgba(118,92,255,.11); --glow-3:rgba(24,170,160,.07);
   color-scheme:dark;
 }
@@ -98,7 +98,7 @@
   --ok:#14805a; --ok-s:rgba(20,128,90,.1);
   --warn:#9a6205; --warn-s:rgba(154,98,5,.1);
   --err:#cc3f37; --err-s:rgba(204,63,55,.09); --err-f:#cc3f37;
-  --heart:#e11d48;
+  --heart:#e11d48; --chart-1:#1f5fd6;
   --glow-2:rgba(124,58,237,.08); --glow-3:rgba(13,148,136,.07);
   color-scheme:light;
 }
@@ -123,7 +123,7 @@
     --ok:#14805a; --ok-s:rgba(20,128,90,.1);
     --warn:#9a6205; --warn-s:rgba(154,98,5,.1);
     --err:#cc3f37; --err-s:rgba(204,63,55,.09); --err-f:#cc3f37;
-    --heart:#e11d48;
+    --heart:#e11d48; --chart-1:#1f5fd6;
     --glow-2:rgba(124,58,237,.08); --glow-3:rgba(13,148,136,.07);
     color-scheme:light;
   }
@@ -950,8 +950,8 @@ body.sheet-open .toast{bottom:calc(92px + env(safe-area-inset-bottom))}
 .recbar .btn{--h:42px;width:42px;padding:0;border-radius:50%}
 
 /* ---------- 12. Админ-панель ---------- */
-.adm-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
-@media (min-width:760px){.adm-stats{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.adm-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 12px}
+@media (min-width:560px){.adm-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .adm-stats div{padding:12px;border-radius:var(--r3);background:var(--card);border:1px solid var(--line)}
 .adm-stats b{display:block;font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .adm-stats span{font-size:.74rem;color:var(--text-2)}
@@ -970,6 +970,81 @@ body.sheet-open .toast{bottom:calc(92px + env(safe-area-inset-bottom))}
 .adm-help li{margin:5px 0}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;padding:2px 6px;border-radius:6px;background:var(--card-2);word-break:break-all}
 #admRoot .field + .field{margin-top:10px}
+
+/* ---------- 14. Уведомления, просмотры, новые возможности ---------- */
+.hbtn.bell{width:40px;padding:0;border-radius:50%;overflow:visible}
+.hbtn.bell .ubadge{position:absolute;top:-4px;right:-4px}
+.hbtn.bell.on{box-shadow:0 0 0 2px var(--accent)}
+.hbtn.bell.on .i{color:var(--accent)}
+.ntools{display:flex;gap:16px;justify-content:flex-end;margin:-6px 2px 8px}
+.link-btn .kic{margin-right:5px}
+.link-btn.danger{color:var(--err)}
+.nday{margin:18px 6px 8px;font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.nday:first-child{margin-top:2px}
+.nrow{align-items:flex-start}
+.nrow .nline{font-size:.86rem;line-height:1.35;color:var(--text-2)}
+.nrow.unread{background:var(--accent-s)}
+.nrow.unread .nline{color:var(--text);font-weight:600}
+.nrow .clast{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cth.nic{background:var(--tone-s);color:var(--tone)}
+.cth.nic .i{width:24px;height:24px}
+.cth.nth{overflow:visible;background:none}
+.cth.nth img{border-radius:16px}
+.nbadge{position:absolute;right:-5px;bottom:-5px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--tone);color:#fff;
+  box-shadow:0 0 0 2px var(--glass-solid)}
+.nbadge .i{width:13px;height:13px}
+.vstats{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;color:var(--text-2);font-size:.86rem;font-variant-numeric:tabular-nums}
+.vstats > span{display:inline-flex;align-items:center;gap:6px}
+.vstats .i{width:16px;height:16px;color:var(--text-3)}
+.vstats .live{color:var(--ok);font-weight:600}
+.vstats .live i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px var(--ok-s);animation:pulse 1.6s ease-in-out infinite}
+:root[data-motion="reduced"] .vstats .live i{animation:none}
+.price-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
+.pold{color:var(--text-3);font-size:1.05rem;font-weight:600;font-variant-numeric:tabular-nums}
+.pdown{align-self:center;gap:4px}
+.pdown .i,.pdrop .i{width:13px;height:13px}
+.pdrop{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:6px;border-radius:50%;background:var(--ok-s);color:var(--ok);vertical-align:2px}
+.tag.flag-t{color:var(--ok);background:var(--ok-s);border-color:transparent}
+.sec-head{display:flex;align-items:baseline;gap:8px;margin:6px 2px 10px}
+.sec-head h3{margin:0;font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+.sec-head small{margin-left:8px;color:var(--text-3);font-weight:600;font-size:.85rem;font-variant-numeric:tabular-nums}
+.lmeta em.plus{font-style:normal;color:var(--ok);font-weight:700;margin-left:3px}
+.lact .icon-btn:disabled{opacity:.4}
+.ss-hits{margin-left:8px;color:var(--ok);font-size:.78rem;font-weight:700}
+.fm-auto .grid2{gap:12px}
+#fmRealty .chips + .lbl{margin-top:8px}
+#flagRows .srow[hidden]{display:none}
+.toast .tmsg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+/* админ-панель: посетители по дням (один ряд — без легенды; подсказка на каждом столбце; таблица рядом) */
+.chart-head{display:flex;align-items:center;gap:10px}
+.chart-head h3{flex:1;margin:0}
+.vchart{position:relative;height:190px;margin-top:12px}
+.vgrid span{position:absolute;left:30px;right:0;bottom:calc(22px + var(--y) * (100% - 46px));border-top:1px solid var(--line)}
+.vgrid em{position:absolute;left:-30px;top:-7px;width:24px;text-align:right;font-style:normal;font-size:.66rem;line-height:1;color:var(--text-3);font-variant-numeric:tabular-nums}
+.vbars{position:absolute;left:30px;right:0;top:0;bottom:0;display:grid;grid-template-columns:repeat(14,minmax(0,1fr))}
+.vcol{position:relative;padding:0;border:0;border-radius:8px;background:none;color:inherit;cursor:pointer}
+.vcol:focus-visible{outline-offset:-2px}
+.vbar{position:absolute;left:50%;bottom:22px;width:62%;max-width:18px;height:calc(var(--h) * (100% - 46px));transform:translateX(-50%);
+  border-radius:4px 4px 0 0;background:var(--chart-1);transition:opacity var(--t1)}
+.vcol:hover .vbar,.vcol:focus-visible .vbar{opacity:.75}
+.vx{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:.66rem;color:var(--text-3);font-variant-numeric:tabular-nums}
+.vx.today{color:var(--text);font-weight:700}
+.vval{position:absolute;left:-8px;right:-8px;bottom:calc(26px + var(--h) * (100% - 46px));text-align:center;font-size:.72rem;font-weight:700;color:var(--text);
+  font-variant-numeric:tabular-nums}
+.vtip{position:absolute;z-index:3;transform:translate(-50%,-100%);padding:7px 11px;border-radius:12px;background:var(--glass-solid);border:1px solid var(--line-2);
+  box-shadow:var(--shadow-sm);font-size:.76rem;color:var(--text-2);white-space:nowrap;pointer-events:none}
+.vtip b{display:block;color:var(--text);font-size:.95rem;font-variant-numeric:tabular-nums}
+.vtable{width:100%;margin-top:12px;border-collapse:collapse;font-size:.85rem;font-variant-numeric:tabular-nums}
+.vtable th,.vtable td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right}
+.vtable th:first-child,.vtable td:first-child{text-align:left}
+.vtable th{font-size:.72rem;font-weight:700;color:var(--text-3)}
+.vrow{align-items:flex-start}
+.vdot{width:10px;height:10px;margin-top:6px;border-radius:50%;background:var(--line-3);flex:none}
+.vdot.on{background:var(--ok);box-shadow:0 0 0 3px var(--ok-s)}
+.vip{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92rem}
+.arow .who small{white-space:normal}
+.gcard .gic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.gcard .gic .g{width:22px;height:22px}
 
 /* ---------- 13. Анимации ---------- */
 @keyframes view-in{from{opacity:0;transform:translate3d(0,10px,0)}}
@@ -1017,6 +1092,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
     <a class="brand" href="#/" id="brand" data-i18n-aria="to_home"><img src="/favicon.svg" alt="" width="32" height="32"><span>System<b>Market</b></span></a>
     <span class="top-title" id="topTitle" aria-hidden="true"></span>
     <span class="grow"></span>
+    <a class="hbtn bell" id="bellBtn" href="#/notifications" data-i18n-aria="notifications"><svg class="i"><use href="#i-bell"/></svg><span class="ubadge" id="bellBadge" hidden></span></a>
     <button class="hbtn" id="langBtn" type="button" aria-haspopup="menu" data-i18n-aria="language"><svg class="i"><use href="#i-globe"/></svg><span id="langCode">RU</span></button>
     <a class="hbtn me" id="meBtn" href="#/settings" data-i18n-aria="nav_settings"><span id="meAva"><svg class="i"><use href="#i-gear"/></svg></span></a>
   </div>
@@ -1110,6 +1186,15 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
       </div>
 
       <div class="field">
+        <span class="lbl" data-i18n="flags">Условия сделки</span>
+        <div class="fm-sw" id="flagRows">
+          <button type="button" class="srow" id="f_torg" role="switch" aria-checked="false"><span class="sic t-green"><svg class="i"><use href="#i-tag"/></svg></span><span class="st"><b data-i18n="flag_torg">Торг уместен</b></span><span class="switch" aria-hidden="true"></span></button>
+          <button type="button" class="srow" id="f_swap" role="switch" aria-checked="false"><span class="sic t-blue"><svg class="i"><use href="#i-swap"/></svg></span><span class="st"><b data-i18n="flag_swap">Возможен обмен</b></span><span class="switch" aria-hidden="true"></span></button>
+          <button type="button" class="srow" id="f_credit" role="switch" aria-checked="false"><span class="sic t-violet"><svg class="i"><use href="#i-card"/></svg></span><span class="st"><b data-i18n="flag_credit">Кредит или рассрочка</b></span><span class="switch" aria-hidden="true"></span></button>
+        </div>
+      </div>
+
+      <div class="field">
         <label for="fDesc" data-i18n="description">Описание</label>
         <textarea id="fDesc" name="desc" maxlength="3000" data-i18n-ph="f_desc_ph" placeholder="Состояние, комплектация, причина продажи…"></textarea>
       </div>
@@ -1169,6 +1254,15 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
       <button class="icon-btn plain" type="button" data-fm-close data-i18n-aria="close"><svg class="i"><use href="#i-x"/></svg></button></div>
     <div class="fm-body">
       <div class="fm-sec"><span class="lbl" data-i18n="category">Категория</span><div class="chips wrap" id="fmCats"></div></div>
+      <div class="fm-sec fm-auto" id="fmAuto" hidden><div class="grid2">
+        <div class="field"><label for="fmBrand" data-i18n="spec_brand">Марка</label><select id="fmBrand"></select></div>
+        <div class="field"><label for="fmGear" data-i18n="spec_gear">Коробка</label><select id="fmGear"></select></div>
+        <div class="field"><label for="fmYfrom" data-i18n="year_from">Год от</label><input id="fmYfrom" type="number" inputmode="numeric" min="1950" max="2035" placeholder="2010"></div>
+        <div class="field"><label for="fmYto" data-i18n="year_to">Год до</label><input id="fmYto" type="number" inputmode="numeric" min="1950" max="2035" placeholder="2025"></div>
+        <div class="field"><label for="fmFuel" data-i18n="spec_fuel">Топливо</label><select id="fmFuel"></select></div>
+        <div class="field"><label for="fmKmax" data-i18n="mileage_max">Пробег до, км</label><input id="fmKmax" type="number" inputmode="numeric" min="0" placeholder="150000"></div>
+      </div></div>
+      <div class="fm-sec" id="fmRealty" hidden><span class="lbl" data-i18n="spec_deal">Тип сделки</span><div class="chips wrap" id="fmDeal"></div><span class="lbl" data-i18n="spec_rooms">Комнат</span><div class="chips wrap" id="fmRooms"></div></div>
       <div class="field"><label for="fmCity" data-i18n="city">Город</label><select id="fmCity"></select></div>
       <div class="field"><span class="lbl" data-i18n="price_range">Цена, TMT</span>
         <div class="grid2"><input id="fmMin" type="number" inputmode="numeric" min="0" data-i18n-ph="price_from" placeholder="от">
@@ -1177,6 +1271,8 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
       <div class="fm-sw">
         <button type="button" class="srow" id="fmPhoto" role="switch" aria-checked="false"><span class="sic t-blue"><svg class="i"><use href="#i-image"/></svg></span><span class="st"><b data-i18n="with_photo">С фото</b></span><span class="switch" aria-hidden="true"></span></button>
         <button type="button" class="srow" id="fmSold" role="switch" aria-checked="false"><span class="sic t-gray"><svg class="i"><use href="#i-tag"/></svg></span><span class="st"><b data-i18n="show_sold">С проданными</b></span><span class="switch" aria-hidden="true"></span></button>
+        <button type="button" class="srow" id="fmSwap" role="switch" aria-checked="false"><span class="sic t-blue"><svg class="i"><use href="#i-swap"/></svg></span><span class="st"><b data-i18n="flag_swap">Возможен обмен</b></span><span class="switch" aria-hidden="true"></span></button>
+        <button type="button" class="srow" id="fmCredit" role="switch" aria-checked="false"><span class="sic t-violet"><svg class="i"><use href="#i-card"/></svg></span><span class="st"><b data-i18n="flag_credit">Кредит или рассрочка</b></span><span class="switch" aria-hidden="true"></span></button>
       </div>
     </div>
     <div class="row fm-actions"><button class="btn ghost" type="button" id="fmReset" data-i18n="reset">Сбросить</button>
@@ -1263,6 +1359,10 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
   <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.8 21.4 20H2.6z"/><path d="M12 10.2v4.3M12 17.2h.01"/></symbol>
   <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
   <symbol id="i-updown" viewBox="0 0 24 24"><path d="m8 9.6 4-4 4 4M8 14.4l4 4 4-4"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h14.5M15 4.5 18.5 8 15 11.5M20 16H5.5M9 12.5 5.5 16 9 19.5"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.6"/><path d="M3 10h18M7 15h3"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5.5M6.5 11 12 5.5l5.5 5.5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v13.5M6.5 13l5.5 5.5 5.5-5.5"/></symbol>
 </svg>
 
 <script>
@@ -1643,6 +1743,66 @@ Object.assign(TXT, {
   mb: [' МБ', ' MB', ' MB'],
   kb: [' КБ', ' KB', ' KB'],
 });
+/* ---- уведомления, просмотры, новые возможности ---- */
+Object.assign(TXT, {
+  notifications: ['Уведомления', 'Bildirimler', 'Duýduryşlar'],
+  page_notifications: ['Уведомления', 'Bildirimler', 'Duýduryşlar'],
+  sub_notifications: ['Кто написал, кто смотрит и что изменилось', 'Kim yazdı, kim baktı, ne değişti', 'Kim ýazdy, kim seretdi we näme üýtgedi'],
+  n_read_all: ['Прочитать все', 'Tümünü okundu say', 'Hemmesini okalan et'],
+  n_clear_q: ['Очистить все уведомления?', 'Tüm bildirimler temizlensin mi?', 'Ähli duýduryşlar arassalansynmy?'],
+  n_clear_sub: ['Сообщения, объявления и поиски останутся.', 'Mesajlar, ilanlar ve aramalar kalır.', 'Hatlar, bildirişler we gözlegler galar.'],
+  n_empty: ['Уведомлений пока нет', 'Henüz bildirim yok', 'Entek duýduryş ýok'],
+  n_empty_sub: ['Здесь появится, кто вам написал, кто посмотрел и добавил в избранное ваши объявления, снижение цен и новые объявления по сохранённым поискам',
+    'Size kimin yazdığı, ilanlarınıza kimin baktığı ve favorilere eklediği, fiyat düşüşleri ve kayıtlı aramalarınıza yeni ilanlar burada görünür',
+    'Size kimiň ýazandygy, bildirişleriňize kimiň seredendigi we saýlananlara goşandygy, arzanlamalar we saklanan gözlegler boýunça täze bildirişler şu ýerde görüner'],
+  today: ['Сегодня', 'Bugün', 'Şu gün'],
+  yesterday_d: ['Вчера', 'Dün', 'Düýn'],
+  nt_msg: ['Новое сообщение от {name}', '{name} size yazdı', '{name} size ýazdy'],
+  nt_msgs: ['{name}: новых сообщений — {n}', '{name}: {n} yeni mesaj', '{name}: {n} täze hat'],
+  nt_support: ['Администратор ответил вам', 'Yönetici size yanıt verdi', 'Administrator size jogap berdi'],
+  nt_views: ['Ваше объявление посмотрел {n} человек|Ваше объявление посмотрели {n} человека|Ваше объявление посмотрели {n} человек',
+    'İlanınızı {n} kişi gördü', 'Bildirişiňizi {n} adam gördi'],
+  nt_fav: ['Добавили в избранное — уже у {n} человека|Добавили в избранное — уже у {n} человек|Добавили в избранное — уже у {n} человек',
+    'Favorilere eklendi — {n} kişide', 'Saýlananlara goşuldy — {n} adamda'],
+  nt_price: ['Цена снизилась', 'Fiyat düştü', 'Bahasy arzanlady'],
+  nt_sold: ['Объявление из избранного продано', 'Favorideki ilan satıldı', 'Saýlanan bildiriş satyldy'],
+  nt_match: ['Новое объявление по поиску «{label}»', '«{label}» aramanıza yeni ilan', '«{label}» gözlegi boýunça täze bildiriş'],
+  nt_matches: ['По поиску «{label}» новых объявлений: {n}', '«{label}» aramanıza {n} yeni ilan', '«{label}» gözlegi boýunça {n} täze bildiriş'],
+  n_viewed: ['{n} человек посмотрел|{n} человека посмотрели|{n} человек посмотрели', '{n} kişi gördü', '{n} adam gördi'],
+  n_today: ['сегодня {n}', 'bugün {n}', 'şu gün {n}'],
+  n_watching: ['{n} смотрит сейчас|{n} смотрят сейчас|{n} смотрят сейчас', 'şu an {n} kişi bakıyor', 'häzir {n} adam seredýär'],
+  n_favs: ['в избранном у {n} человека|в избранном у {n} человек|в избранном у {n} человек', '{n} kişinin favorisinde', '{n} adamyň saýlananlarynda'],
+  price_down: ['Цена снижена', 'Fiyat düştü', 'Arzanlady'],
+  flags: ['Условия сделки', 'Satış koşulları', 'Söwda şertleri'],
+  flag_torg: ['Торг уместен', 'Pazarlık payı var', 'Söwdalaşmak bolýar'],
+  flag_swap: ['Возможен обмен', 'Takas olur', 'Çalşyp bolýar'],
+  flag_credit: ['Кредит или рассрочка', 'Kredi veya taksit', 'Karz ýa-da möhletli töleg'],
+  bump: ['Поднять в поиске', 'Öne çıkar', 'Ýokary galdyr'],
+  bump_in: ['Поднять можно через {t}', '{t} sonra öne çıkarılabilir', '{t} soň ýokary galdyryp bolar'],
+  bumped: ['Объявление поднято наверх', 'İlan öne çıkarıldı', 'Bildiriş ýokary galdyryldy'],
+  h_short: ['ч', 'sa', 'sag'],
+  m_short: ['мин', 'dk', 'min'],
+  e_bump_wait: ['Поднять можно раз в сутки', 'Günde bir kez öne çıkarılabilir', 'Günde bir gezek ýokary galdyryp bolýar'],
+  e_bump_sold: ['Проданное объявление нельзя поднять', 'Satılmış ilan öne çıkarılamaz', 'Satylan bildirişi ýokary galdyryp bolmaýar'],
+  e_searches_max: ['Можно сохранить до 20 поисков', 'En fazla 20 arama kaydedilebilir', 'Iň köp 20 gözleg saklap bolýar'],
+  seller_more: ['Другие объявления продавца', 'Satıcının diğer ilanları', 'Satyjynyň beýleki bildirişleri'],
+  save_search: ['Следить за поиском', 'Aramayı takip et', 'Gözlege yzarla'],
+  saved_ok: ['Слежу', 'Takipte', 'Yzarlanýar'],
+  search_saved: ['Поиск сохранён — пришлём уведомление о новых объявлениях', 'Arama kaydedildi — yeni ilanlarda bildirim göndereceğiz', 'Gözleg saklandy — täze bildirişler barada habar bereris'],
+  saved_searches: ['Слежу за поиском', 'Takip ettiğim aramalar', 'Yzarlanýan gözlegler'],
+  ss_hits: ['новых: {n}', 'yeni: {n}', 'täze: {n}'],
+  s_push: ['Уведомления браузера', 'Tarayıcı bildirimleri', 'Brauzer duýduryşlary'],
+  s_push_sub: ['Покажем, кто написал, даже когда вкладка свёрнута', 'Sekme simge durumundayken bile kimin yazdığını gösteririz', 'Bölüm ýygnalan bolsa-da, kimiň ýazandygyny görkezeris'],
+  push_denied: ['Разрешите уведомления в настройках браузера', 'Tarayıcı ayarlarından bildirimlere izin verin', 'Brauzeriň sazlamalarynda duýduryşlara rugsat beriň'],
+  year_from: ['Год от', 'Yıl (en az)', 'Ýyly (iň az)'],
+  year_to: ['Год до', 'Yıl (en çok)', 'Ýyly (iň köp)'],
+  mileage_max: ['Пробег до, км', 'En fazla km', 'Geçen ýoly (iň köp), km'],
+  any: ['Любая', 'Hepsi', 'Islendik'],
+  any_m: ['Любой', 'Hepsi', 'Islendik'],
+  more_filters: ['Ещё фильтры', 'Diğer filtreler', 'Goşmaça süzgüçler'],
+  g_enter: ['Войти', 'Giriş yap', 'Gir'],
+  g_off_admin: ['Не включён — включите в админ-панели', 'Kapalı — yönetim panelinden açın', 'Öçük — admin panelinde açyň'],
+});
 
 /* Значения, которые хранятся в базе по-русски, но показываются на выбранном языке */
 const VAL = {
@@ -1762,7 +1922,7 @@ function applyStatic(root){
    data-theme (нет = как в системе), data-glass, data-accent, data-motion, data-text. */
 const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 const PREF_DEFAULT = {theme: 'dark', glass: 'rich', accent: 'blue', motion: !REDUCED, bigText: false,
-  notify: true, sound: false, vibrate: true, saver: false, quality: 'high', poll: 15};
+  notify: true, sound: false, vibrate: true, push: false, saver: false, quality: 'high', poll: 15};
 const prefs = {
   data: null,
   load(){
@@ -1815,7 +1975,10 @@ function chime(){
   });
 }
 const canVibrate = () => typeof navigator.vibrate === 'function' && !IN_APP;   // в приложении вибрации нет: APK собран без этого разрешения
-function buzz(ms){ if (canVibrate()) try { navigator.vibrate(ms); } catch(e){} }
+function buzz(ms){                      // браузер разрешает вибрацию только после первого касания страницы
+  const act = navigator.userActivation;
+  if (canVibrate() && !(act && !act.hasBeenActive)) try { navigator.vibrate(ms); } catch(e){}
+}
 function notifyNew(){
   if (prefs.get('notify')) toast(t('new_msg'), 'info', {label: t('op_open'), href: '#/chats'});
   if (prefs.get('sound')) chime();
@@ -2054,6 +2217,7 @@ function renderMe(){
   $('#meAva').innerHTML = u && u.picture ? '<img src="' + esc(u.picture) + '" alt="" referrerpolicy="no-referrer">'
     : u ? '<b>' + esc((u.name || '?').trim().charAt(0).toUpperCase()) + '</b>' : ic('i-gear');
   $('#meBtn').classList.toggle('on', state.page === 'settings');
+  $('#bellBtn').classList.toggle('on', state.page === 'notifications');
 }
 function renderShell(){
   const p = state.page, home = p === 'home';
@@ -2087,7 +2251,7 @@ function watchTitle(){
 const favs = {
   all(){ return store.get('sm_fav_v2', []); },
   has(id){ return this.all().includes(id); },
-  toggle(id){ const a = this.all(), i = a.indexOf(id); i >= 0 ? a.splice(i, 1) : a.unshift(id); store.set('sm_fav_v2', a); return i < 0; }
+  toggle(id){ const a = this.all(), i = a.indexOf(id); i >= 0 ? a.splice(i, 1) : a.unshift(id); store.set('sm_fav_v2', a); favSync([id], i < 0); return i < 0; }
 };
 const mine = {
   all(){ return store.get('sm_my_v2', {}); },
@@ -2182,18 +2346,28 @@ async function loadMe(){
   renderMe();
   if (!document.querySelector('.sheet.open')){
     if (state.page === 'settings') renderSettings();
-    else if (state.page === 'home') updateQaMy();
+    else if (state.page === 'home'){ updateQaMy(); homeGoogleCard(); }
   }
 }
 /* ============ Состояние экранов ============ */
 const state = {page: 'home', stats: null, focusSearch: false};
 const feed = {items: [], total: 0, loading: false, req: 0};
-const search = {q: '', cat: 'all', city: '', min: '', max: '', sort: 'new', photo: false, sold: false, items: [], total: 0, loading: false, req: 0};
-const SEARCH_RESET = {cat: 'all', city: '', min: '', max: '', sort: 'new', photo: false, sold: false};
+const search = {q: '', cat: 'all', city: '', min: '', max: '', sort: 'new', photo: false, sold: false,
+  brand: '', yfrom: '', yto: '', gear: '', fuel: '', kmax: '', deal: '', rooms: '', swap: false, credit: false,
+  items: [], total: 0, loading: false, req: 0};
+const SEARCH_RESET = {cat: 'all', city: '', min: '', max: '', sort: 'new', photo: false, sold: false, brand: '', yfrom: '', yto: '', gear: '', fuel: '', kmax: '', deal: '', rooms: '', swap: false, credit: false};
+const ADV = ['brand', 'yfrom', 'yto', 'gear', 'fuel', 'kmax', 'deal', 'rooms', 'swap', 'credit'];
+/* фильтры марки и года — только для авто, сделки и комнат — для недвижимости */
+function pruneFilters(o){
+  if (o.cat !== 'auto') Object.assign(o, {brand: '', yfrom: '', yto: '', gear: '', fuel: '', kmax: ''});
+  if (o.cat !== 'realty') Object.assign(o, {deal: '', rooms: ''});
+  return o;
+}
 const act = {tab: 'my'};
 const chatsSeg = {v: 'all', data: null};
 let lastListHash = '#/', myCache = null;
-const filtersOn = () => (search.cat !== 'all') + !!search.city + !!(search.min || search.max) + search.photo + search.sold;
+const advOn = o => !!o.brand + !!(o.yfrom || o.yto) + !!o.gear + !!o.fuel + !!o.kmax + !!o.deal + !!o.rooms + o.swap + o.credit;
+const filtersOn = () => (search.cat !== 'all') + !!search.city + !!(search.min || search.max) + search.photo + search.sold + advOn(search);
 const searchActive = () => !!(search.q.trim() || filtersOn() || search.sort !== 'new');
 
 /* ============ Общие блоки ============ */
@@ -2208,7 +2382,8 @@ function cardHTML(x){
       (x.sold ? '<span class="flag">' + esc(t('sold')) + '</span>' : isNew ? '<span class="flag new">' + esc(t('badge_new')) + '</span>' : '') +
       (x.photos.length > 1 ? '<span class="pcount">' + ic('i-camera') + x.photos.length + '</span>' : '') + '</a>' +
     '<button class="heart' + (on ? ' on' : '') + '" data-fav="' + x.id + '" type="button" aria-pressed="' + on + '" aria-label="' + esc(t('fav_add')) + '">' + ic('i-heart') + '</button>' +
-    '<a href="#/item/' + x.id + '" class="body"><span class="price">' + esc(money(x.price)) + '</span>' +
+    '<a href="#/item/' + x.id + '" class="body"><span class="price">' + esc(money(x.price)) +
+      (x.price_old > x.price ? '<span class="pdrop" title="' + esc(t('price_down')) + '">' + ic('i-down') + '</span>' : '') + '</span>' +
       '<span class="title">' + esc(x.title) + '</span><span class="meta">' + ic('i-pin') + '<span>' + esc(valT(x.city)) + ' · ' + esc(ago(x.created)) + '</span></span></a></article>';
 }
 function skeletonCards(n){
@@ -2326,7 +2501,7 @@ function renderHome(){
       '<a class="qa-i t-green" href="#/activity?tab=my"><span class="qic">' + ic('i-list') + '</span><span><b>' + esc(t('page_my')) + '</b><small id="qaMy">…</small></span></a>' +
       '<a class="qa-i t-rose" href="#/activity?tab=fav"><span class="qic">' + ic('i-heart') + '</span><span><b>' + esc(t('page_fav')) + '</b><small data-fav-count>' +
         esc(tp('n_saved', favs.all().length)) + '</small></span></a>' +
-    '</div>' + appCardHTML() +
+    '</div>' + appCardHTML() + '<div id="gSlot"></div>' +
     '<div class="sec"><h2>' + esc(t('categories')) + '</h2></div><nav class="chips" id="homeCats" aria-label="' + esc(t('categories')) + '">' + catChips() + '</nav>' +
     '<div id="recent"></div>' +
     '<div class="sec"><h2>' + esc(t('feed_new')) + '<span class="count" id="feedCount"></span></h2><a class="link-btn" href="#/search?sort=new">' + esc(t('seg_all')) + '</a></div>' +
@@ -2336,6 +2511,17 @@ function renderHome(){
   renderRecent();
   loadFeed(true);
   updateQaMy();
+  homeGoogleCard();
+}
+/* «Войти через Google» на главной — гостям, когда вход включён; можно закрыть */
+function homeGoogleCard(){
+  const slot = $('#gSlot');
+  if (!slot) return;
+  if (ME.user || !ME.google || store.get('sm_gcard_hide', false)){ slot.innerHTML = ''; return; }
+  slot.innerHTML = '<div class="appcard gcard"><span class="gic">' + GOOGLE_G + '</span><span><b>' + esc(t('login_google')) + '</b><small>' + esc(t('guest_google')) + '</small></span>' +
+    '<a class="btn sm gbtn" href="' + esc(googleUrl()) + '">' + esc(t('g_enter')) + '</a>' +
+    '<button class="icon-btn plain sm" type="button" id="gHide" aria-label="' + esc(t('close')) + '">' + ic('i-x') + '</button></div>';
+  $('#gHide').onclick = () => { store.set('sm_gcard_hide', true); slot.innerHTML = ''; };
 }
 async function renderRecent(){
   const ids = recent.all();
@@ -2387,6 +2573,15 @@ function searchFromQuery(qs){
   search.min = num(qs.get('min')); search.max = num(qs.get('max'));
   search.sort = ['new', 'cheap', 'exp', 'popular'].includes(qs.get('sort')) ? qs.get('sort') : 'new';
   search.photo = qs.get('photo') === '1'; search.sold = qs.get('sold') === '1';
+  const inRange = (v, lo, hi) => { const n = parseInt(v, 10); return n >= lo && n <= hi ? String(n) : ''; };
+  search.brand = BRANDS.includes(qs.get('brand')) ? qs.get('brand') : '';
+  search.gear = GEARS.includes(qs.get('gear')) ? qs.get('gear') : '';
+  search.fuel = FUELS.includes(qs.get('fuel')) ? qs.get('fuel') : '';
+  search.deal = DEALS.includes(qs.get('deal')) ? qs.get('deal') : '';
+  search.yfrom = inRange(qs.get('yfrom'), 1950, 2035); search.yto = inRange(qs.get('yto'), 1950, 2035);
+  search.kmax = inRange(qs.get('kmax'), 1, 5000000); search.rooms = inRange(qs.get('rooms'), 1, 4);
+  search.swap = qs.get('swap') === '1'; search.credit = qs.get('credit') === '1';
+  pruneFilters(search);
 }
 function searchHash(){
   const q = new URLSearchParams();
@@ -2398,6 +2593,7 @@ function searchHash(){
   if (search.sort !== 'new') q.set('sort', search.sort);
   if (search.photo) q.set('photo', '1');
   if (search.sold) q.set('sold', '1');
+  ADV.forEach(k => { if (search[k]) q.set(k, search[k] === true ? '1' : search[k]); });
   const s = q.toString();
   return '#/search' + (s ? '?' + s : '');
 }
@@ -2409,8 +2605,54 @@ function syncSearchUrl(){
 }
 function searchParams(src, extra){
   return Object.assign({q: src.q.trim(), cat: src.cat === 'all' ? '' : src.cat, city: src.city, min_price: src.min, max_price: src.max, sort: src.sort,
-    with_photos: src.photo ? '1' : '', with_sold: src.sold ? '1' : ''}, extra || {});
+    with_photos: src.photo ? '1' : '', with_sold: src.sold ? '1' : '', brand: src.brand, gear: src.gear, fuel: src.fuel, deal: src.deal,
+    yfrom: src.yfrom, yto: src.yto, kmax: src.kmax, rooms: src.rooms, swap: src.swap ? '1' : '', credit: src.credit ? '1' : ''}, extra || {});
 }
+/* сводка «Ещё фильтры» на чипе: Toyota · 2015–2020 · Автомат */
+function advLabel(){
+  const s = search, y = s.yfrom && s.yto ? s.yfrom + '–' + s.yto : s.yfrom ? '≥ ' + s.yfrom : s.yto ? '≤ ' + s.yto : '';
+  return [s.brand && valT(s.brand), y, s.gear && valT(s.gear), s.fuel && valT(s.fuel), s.kmax && '≤ ' + fmtNum(s.kmax) + ' ' + t('km'),
+    s.deal && valT(s.deal), s.rooms && t('spec_rooms') + ': ' + (+s.rooms >= 4 ? '4+' : s.rooms), s.swap && t('flag_swap'), s.credit && t('flag_credit')]
+    .filter(Boolean).join(' · ');
+}
+/* текущий поиск для «Следить за поиском» */
+function searchObj(s){
+  return {q: s.q.trim(), cat: s.cat === 'all' ? '' : s.cat, city: s.city, min: s.min, max: s.max, photo: s.photo ? 1 : 0, brand: s.brand, yfrom: s.yfrom,
+    yto: s.yto, gear: s.gear, fuel: s.fuel, kmax: s.kmax, deal: s.deal, rooms: s.rooms, swap: s.swap ? 1 : 0, credit: s.credit ? 1 : 0};
+}
+function searchLabel(){
+  return [search.q.trim(), search.brand && valT(search.brand), search.cat !== 'all' && !search.brand ? catName(search.cat) : '',
+    search.city && valT(search.city)].filter(Boolean).join(' · ') || t('cat_all');
+}
+async function saveSearch(btn){
+  btn.disabled = true;
+  try {
+    await request('POST', '/api/searches', {params: searchObj(search), label: searchLabel()});
+    btn.innerHTML = ic('i-check', 'i kic') + esc(t('saved_ok'));
+    toast(t('search_saved'), 'ok');
+    startUnreadPoll();
+  } catch(e){ btn.disabled = false; toast(e.message, 'err'); }
+}
+function applySaved(p){
+  const str = v => v ? String(v) : '';
+  Object.assign(search, SEARCH_RESET, {q: p.q || '', cat: p.cat || 'all', city: p.city || '', min: str(p.min), max: str(p.max), photo: !!p.photo,
+    brand: p.brand || '', yfrom: str(p.yfrom), yto: str(p.yto), gear: p.gear || '', fuel: p.fuel || '', kmax: str(p.kmax), deal: p.deal || '',
+    rooms: str(p.rooms), swap: !!p.swap, credit: !!p.credit});
+  const q = $('#q'); if (q){ q.value = search.q; $('#qClear').hidden = !search.q; }
+  applySearch();
+}
+async function loadSaved(){
+  let r;
+  try { r = await request('GET', '/api/searches'); } catch(e){ return; }
+  const el = $('#ssList');
+  if (!el) return;
+  savedList = r.items;
+  el.innerHTML = r.items.length ? '<div class="sec" style="margin-top:8px"><h2>' + esc(t('saved_searches')) + '</h2></div><div class="qhist">' +
+    r.items.map(s => '<div class="qh"><button type="button" class="qh-go" data-ss="' + s.id + '">' + ic('i-bell') + '<span>' + esc(s.label || t('cat_all')) +
+      (s.hits ? '<small class="ss-hits">' + esc(t('ss_hits', {n: s.hits})) + '</small>' : '') + '</span></button>' +
+      '<button type="button" class="qh-x" data-ssx="' + s.id + '" aria-label="' + esc(t('clear')) + '">' + ic('i-x') + '</button></div>').join('') + '</div>' : '';
+}
+let savedList = [];
 function priceLabel(min, max){
   const a = min ? fmtNum(min) : '', b = max ? fmtNum(max) : '';
   return a && b ? a + ' – ' + b + ' TMT' : a ? '≥ ' + a + ' TMT' : b ? '≤ ' + b + ' TMT' : t('any_price');
@@ -2441,16 +2683,20 @@ function renderSearch(focus){
     const k = b.dataset.fc;
     if (k === 'photo' || k === 'sold'){ search[k] = !search[k]; applySearch(); }
     else if (k === 'reset'){ Object.assign(search, SEARCH_RESET); applySearch(); }
-    else if (k === 'price') openFilters();
-    else if (k === 'cat') openMenu(b, CATS.map(c => ({value: c, label: catName(c), icon: 'c-' + c})), search.cat, v => { search.cat = v; applySearch(); });
+    else if (k === 'price' || k === 'adv') openFilters();
+    else if (k === 'cat') openMenu(b, CATS.map(c => ({value: c, label: catName(c), icon: 'c-' + c})), search.cat, v => { search.cat = v; pruneFilters(search); applySearch(); });
     else if (k === 'city') openMenu(b, [{value: '', label: t('all_cities'), icon: 'i-pin'}].concat(CITIES.map(c => ({value: c, label: valT(c)}))), search.city, v => { search.city = v; applySearch(); });
     else if (k === 'sort') openMenu(b, ['new', 'cheap', 'exp', 'popular'].map(s => ({value: s, label: t('sort_' + s)})), search.sort, v => { search.sort = v; applySearch(); });
   };
   $('#sBody').onclick = async e => {
+    const ss = e.target.closest('[data-ss]'), ssx = e.target.closest('[data-ssx]'), save = e.target.closest('#saveSearch');
+    if (save){ saveSearch(save); return; }
+    if (ss){ const p = savedList.find(s => String(s.id) === ss.dataset.ss); if (p) applySaved(p.params); return; }
+    if (ssx){ try { await request('DELETE', '/api/searches/' + ssx.dataset.ssx); } catch(err){ toast(err.message, 'err'); return; } loadSaved(); return; }
     const go = e.target.closest('[data-q]'), x = e.target.closest('[data-qx]'), c = e.target.closest('[data-scat]');
     if (go){ search.q = go.dataset.q; qEl.value = search.q; $('#qClear').hidden = false; qhist.add(search.q); applySearch(); }
     else if (x){ qhist.drop(x.dataset.qx); renderSearchStart(); }
-    else if (c){ search.cat = c.dataset.scat; applySearch(); }
+    else if (c){ search.cat = c.dataset.scat; pruneFilters(search); applySearch(); }
     else if (e.target.closest('#qhClear')){
       if (await confirmDialog({title: t('q_clear_q'), text: t('q_clear_sub'), ok: t('clear'), danger: true, icon: 'i-history'})){
         qhist.clear(); renderSearchStart(); toast(t('history_cleared'), 'ok');
@@ -2475,6 +2721,7 @@ function renderChipsRow(){
     chip('sort', search.sort !== 'new', ic('i-sort') + '<span>' + esc(t('sort_' + search.sort)) + '</span>' + chev) +
     chip('photo', search.photo, ic('i-image') + '<span>' + esc(t('with_photo')) + '</span>', true) +
     chip('sold', search.sold, ic('i-tag') + '<span>' + esc(t('show_sold')) + '</span>', true) +
+    (advOn(search) ? chip('adv', true, ic('i-sliders') + '<span>' + esc(advLabel()) + '</span>' + chev) : '') +
     (n || search.sort !== 'new' ? '<button class="chip ghost" type="button" data-fc="reset">' + ic('i-x') + '<span>' + esc(t('reset')) + '</span></button>' : '');
   $('#fCount').hidden = !n;
   $('#fCount').textContent = n;
@@ -2516,7 +2763,8 @@ function renderResults(reset){
     setSentinel('');
     return;
   }
-  if (reset || !$('#sGrid')) body.innerHTML = '<div class="rhead"><span>' + esc(t('found', {n: fmtNum(search.total)})) + '</span></div><div id="sGrid"></div>';
+  if (reset || !$('#sGrid')) body.innerHTML = '<div class="rhead"><span>' + esc(t('found', {n: fmtNum(search.total)})) + '</span>' +
+    '<button class="link-btn" type="button" id="saveSearch">' + ic('i-bell', 'i kic') + esc(t('save_search')) + '</button></div><div id="sGrid"></div>';
   appendCards($('#sGrid'), search.items, reset);
   setSentinel(search.items.length < search.total ? moreBtnHTML() : '', () => runSearch(false));
 }
@@ -2524,7 +2772,7 @@ function renderSearchStart(){
   const body = $('#sBody');
   if (!body) return;
   const h = qhist.all();
-  body.innerHTML =
+  body.innerHTML = '<div id="ssList"></div>' +
     (h.length
       ? '<div class="sec" style="margin-top:8px"><h2>' + esc(t('search_history')) + '</h2><button class="link-btn" type="button" id="qhClear">' + esc(t('clear')) + '</button></div>' +
         '<div class="qhist">' + h.map(q => '<div class="qh"><button type="button" class="qh-go" data-q="' + esc(q) + '">' + ic('i-history') + '<span>' + esc(q) + '</span></button>' +
@@ -2535,12 +2783,19 @@ function renderSearchStart(){
       return '<button type="button" class="cat-tile" data-scat="' + c + '"><span class="ct-ic">' + ic('c-' + c) + '</span><b>' + esc(catName(c)) + '</b>' +
         '<small>' + (n ? fmtNum(n) : '') + '</small></button>';
     }).join('') + '</div>';
+  loadSaved();
 }
 
 /* ---- окно фильтров: изменения применяются кнопкой «Показать N» ---- */
 const fm = {open: false, d: null, timer: 0, req: 0};
 function openFilters(){
   fm.d = {q: search.q, cat: search.cat, city: search.city, min: search.min, max: search.max, sort: search.sort, photo: search.photo, sold: search.sold};
+  ADV.forEach(k => { fm.d[k] = search[k]; });
+  const opts = (list, any) => '<option value="">' + esc(any) + '</option>' + list.map(v => '<option value="' + esc(v) + '">' + esc(valT(v)) + '</option>').join('');
+  $('#fmBrand').innerHTML = opts(BRANDS, t('any')); $('#fmGear').innerHTML = opts(GEARS, t('any'));
+  $('#fmFuel').innerHTML = opts(FUELS, t('any_m'));
+  $('#fmBrand').value = fm.d.brand; $('#fmGear').value = fm.d.gear; $('#fmFuel').value = fm.d.fuel;
+  $('#fmYfrom').value = fm.d.yfrom; $('#fmYto').value = fm.d.yto; $('#fmKmax').value = fm.d.kmax;
   $('#fmCity').innerHTML = '<option value="">' + esc(t('all_cities')) + '</option>' + CITIES.map(c => '<option value="' + esc(c) + '">' + esc(valT(c)) + '</option>').join('');
   $('#fmCity').value = fm.d.city;
   $('#fmMin').value = fm.d.min; $('#fmMax').value = fm.d.max;
@@ -2559,10 +2814,24 @@ function drawFilters(){
     esc(t('sort_' + s)) + '</button>').join('');
   $('#fmPhoto').setAttribute('aria-checked', String(d.photo));
   $('#fmSold').setAttribute('aria-checked', String(d.sold));
+  $('#fmSwap').setAttribute('aria-checked', String(!!d.swap));
+  $('#fmCredit').setAttribute('aria-checked', String(!!d.credit));
+  $('#fmAuto').hidden = d.cat !== 'auto';
+  $('#fmRealty').hidden = d.cat !== 'realty';
+  $('#fmDeal').innerHTML = [''].concat(DEALS).map(v => '<button type="button" class="chip' + (d.deal === v ? ' on' : '') + '" data-fdeal="' + esc(v) + '">' +
+    esc(v ? valT(v) : t('any')) + '</button>').join('');
+  $('#fmRooms').innerHTML = ['', '1', '2', '3', '4'].map(v => '<button type="button" class="chip' + (String(d.rooms) === v ? ' on' : '') + '" data-frooms="' + v + '">' +
+    esc(v ? (v === '4' ? '4+' : v) : t('any_m')) + '</button>').join('');
 }
 function readFilterInputs(){
   const num = v => { const n = parseInt(v, 10); return n > 0 ? String(n) : ''; };
   fm.d.city = $('#fmCity').value; fm.d.min = num($('#fmMin').value); fm.d.max = num($('#fmMax').value);
+  const year = v => { const n = parseInt(v, 10); return n >= 1950 && n <= 2035 ? String(n) : ''; };
+  if (fm.d.cat === 'auto'){
+    fm.d.brand = $('#fmBrand').value; fm.d.gear = $('#fmGear').value; fm.d.fuel = $('#fmFuel').value;
+    fm.d.yfrom = year($('#fmYfrom').value); fm.d.yto = year($('#fmYto').value); fm.d.kmax = num($('#fmKmax').value);
+  }
+  pruneFilters(fm.d);
 }
 function countFilters(){
   clearTimeout(fm.timer);
@@ -2589,22 +2858,29 @@ function closeFilters(){
 $('#filterModal').addEventListener('click', e => {
   if (e.target.closest('[data-fm-close]')){ closeFilters(); return; }
   const c = e.target.closest('[data-fcat]'), s = e.target.closest('[data-fsort]');
-  if (c) fm.d.cat = c.dataset.fcat;
+  const dl = e.target.closest('[data-fdeal]'), rm = e.target.closest('[data-frooms]');
+  if (c){ readFilterInputs(); fm.d.cat = c.dataset.fcat; pruneFilters(fm.d); }
   else if (s) fm.d.sort = s.dataset.fsort;
+  else if (dl) fm.d.deal = dl.dataset.fdeal;
+  else if (rm) fm.d.rooms = rm.dataset.frooms;
+  else if (e.target.closest('#fmSwap')) fm.d.swap = !fm.d.swap;
+  else if (e.target.closest('#fmCredit')) fm.d.credit = !fm.d.credit;
   else if (e.target.closest('#fmPhoto')) fm.d.photo = !fm.d.photo;
   else if (e.target.closest('#fmSold')) fm.d.sold = !fm.d.sold;
   else return;
   drawFilters(); countFilters();
 });
-['#fmCity', '#fmMin', '#fmMax'].forEach(sel => $(sel).addEventListener(sel === '#fmCity' ? 'change' : 'input', countFilters));
+['#fmCity', '#fmBrand', '#fmGear', '#fmFuel'].forEach(sel => $(sel).addEventListener('change', countFilters));
+['#fmMin', '#fmMax', '#fmYfrom', '#fmYto', '#fmKmax'].forEach(sel => $(sel).addEventListener('input', countFilters));
 $('#fmReset').onclick = () => {
   Object.assign(fm.d, SEARCH_RESET);
-  $('#fmCity').value = ''; $('#fmMin').value = ''; $('#fmMax').value = '';
+  ['#fmCity', '#fmMin', '#fmMax', '#fmBrand', '#fmGear', '#fmFuel', '#fmYfrom', '#fmYto', '#fmKmax'].forEach(sel => { $(sel).value = ''; });
   drawFilters(); countFilters();
 };
 $('#fmApply').onclick = () => {
   readFilterInputs();
   Object.assign(search, {cat: fm.d.cat, city: fm.d.city, min: fm.d.min, max: fm.d.max, sort: fm.d.sort, photo: fm.d.photo, sold: fm.d.sold});
+  ADV.forEach(k => { search[k] = fm.d[k]; });
   closeFilters();
   if (state.page === 'search') applySearch(); else location.hash = searchHash();
 };
@@ -2706,9 +2982,12 @@ function drawMy(){
       '<div class="lmain"><a class="lt" href="#/item/' + x.id + '">' + esc(x.title) + '</a>' +
         '<div class="lmid"><span class="lp">' + esc(money(x.price)) + '</span>' +
           (x.sold ? '<span class="pill mute">' + esc(t('sold')) + '</span>' : '<span class="pill ok">' + esc(t('st_active')) + '</span>') + '</div>' +
-        '<div class="lmeta"><span>' + ic('i-eye') + fmtNum(x.views) + '</span><span>' + ic('i-chat') + fmtNum(x.chats || 0) + '</span><span>' + ic('i-clock') + esc(ago(x.created)) + '</span></div></div>' +
+        '<div class="lmeta"><span>' + ic('i-eye') + fmtNum(x.views) + (x.views_today ? '<em class="plus">+' + fmtNum(x.views_today) + '</em>' : '') + '</span>' +
+          '<span>' + ic('i-heart') + fmtNum(x.favs || 0) + '</span><span>' + ic('i-chat') + fmtNum(x.chats || 0) + '</span><span>' + ic('i-clock') + esc(ago(x.created)) + '</span></div></div>' +
       '<div class="lact"><button class="btn ghost sm" type="button" data-my="edit">' + ic('i-edit') + '<span>' + esc(t('act_edit')) + '</span></button>' +
         '<button class="btn ghost sm" type="button" data-my="sold">' + ic(x.sold ? 'i-history' : 'i-tag') + '<span>' + esc(t(x.sold ? 'act_unsold' : 'act_sold')) + '</span></button>' +
+        '<button class="icon-btn sm" type="button" data-my="bump" aria-label="' + esc(bumpLabel(x)) + '" title="' + esc(bumpLabel(x)) + '"' +
+          (x.sold || x.bump_in > 0 ? ' disabled' : '') + '>' + ic('i-up') + '</button>' +
         '<button class="icon-btn sm danger" type="button" data-my="del" aria-label="' + esc(t('delete')) + '">' + ic('i-trash') + '</button></div></article>').join('') +
     (ME.user ? '' : '<p class="note-sm">' + esc(t('device_note')) + '</p>');
 }
@@ -2718,6 +2997,7 @@ async function myAction(btn){
   if (!x) return;
   const a = btn.dataset.my;
   if (a === 'edit'){ location.hash = '#/edit/' + id; return; }
+  if (a === 'bump'){ if (await doBump(x, btn) && state.page === 'activity' && act.tab === 'my') drawMy(); return; }
   if (a === 'sold'){
     btn.disabled = true; btn.classList.add('loading');
     try {
@@ -2764,6 +3044,7 @@ async function renderFavs(){
     '<div class="grid">' + r.items.map(cardHTML).join('') + '</div>';
   $('#favClear').onclick = async () => {
     if (!(await confirmDialog({title: t('fav_clear_q'), text: t('fav_clear_sub'), ok: t('clear'), danger: true, icon: 'i-heart'}))) return;
+    favSync(favs.all(), false);
     store.set('sm_fav_v2', []);
     toast(t('fav_cleared'), 'ok');
     renderFavs();
@@ -2848,6 +3129,8 @@ function renderSettings(){
       srow({cls: 'acct', lead: '<span class="acct-ava">' + ava + '</span>', title: u ? u.name : t('guest'),
         sub: esc(u ? u.email : t(ME.google ? 'guest_google' : 'guest_sub')), right: u ? '<span class="pill ok">Google</span>' : ''}),
       !u && ME.google ? srow({href: googleUrl(), lead: '<span class="sic t-gray">' + GOOGLE_G + '</span>', title: t('login_google'), sub: esc(t('login_optional'))}) : '',
+      !u && !ME.google && adminKey() ? srow({href: '#/admin?tab=settings', lead: '<span class="sic t-gray">' + GOOGLE_G + '</span>', title: t('login_google'),
+        sub: esc(t('g_off_admin'))}) : '',
       u ? srow({act: 'logout', icon: 'i-logout', tone: 't-red', title: t('logout'), sub: esc(t('acc_synced')), cls: 'danger'}) : '',
       srow({act: 'device', icon: 'i-key', tone: 't-amber', title: t('s_device'), sub: esc(t('s_device_sub', {k: '••••' + key.slice(-4)}))}),
       srow({act: 'clearData', icon: 'i-history', tone: 't-gray', title: t('s_clear_data'), sub: esc(t('s_clear_data_sub'))})
@@ -2864,7 +3147,8 @@ function renderSettings(){
     group(t('g_notify'), [
       srow({sw: 'notify', icon: 'i-bell', tone: 't-red', title: t('s_notify'), sub: esc(t('s_notify_sub'))}),
       srow({sw: 'sound', icon: 'i-volume', tone: 't-violet', title: t('s_sound'), sub: esc(t('s_sound_sub'))}),
-      canVibrate() ? srow({sw: 'vibrate', icon: 'i-vibrate', tone: 't-teal', title: t('s_vibrate'), sub: esc(t('s_vibrate_sub'))}) : ''
+      canVibrate() ? srow({sw: 'vibrate', icon: 'i-vibrate', tone: 't-teal', title: t('s_vibrate'), sub: esc(t('s_vibrate_sub'))}) : '',
+      canPush() ? srow({sw: 'push', icon: 'i-bell', tone: 't-amber', title: t('s_push'), sub: esc(t('s_push_sub'))}) : ''
     ]) +
     group(t('g_net'), [
       srow({icon: 'i-wifi', tone: 't-green', title: t('s_conn'), sub: '<span id="connVal">' + connHTML() + '</span>',
@@ -2891,6 +3175,10 @@ function renderSettings(){
       prefs.set(k, on);
       sw.setAttribute('aria-checked', String(on));
       if (k === 'sound' && on){ unlockAudio(); chime(); }
+      if (k === 'push' && on) Notification.requestPermission().then(p => {
+        if (p === 'granted') return;
+        prefs.set('push', false); sw.setAttribute('aria-checked', 'false'); toast(t('push_denied'), 'err');
+      });
       if (k === 'vibrate' && on) buzz(30);
       return;
     }
@@ -2973,6 +3261,7 @@ function renderPage(){
   else if (p === 'activity') renderActivity();
   else if (p === 'settings') renderSettings();
   else if (p === 'admin') renderAdminPage();
+  else if (p === 'notifications') renderNotifs();
   else renderHome();
   state.focusSearch = false;
   if (p === 'home' || p === 'search') observeSentinel();
@@ -2980,6 +3269,292 @@ function renderPage(){
   if (motionOn()){ v.classList.remove('enter'); void v.offsetWidth; v.classList.add('enter'); }
 }
 $('#view').addEventListener('animationend', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('enter'); });
+
+/* ============ Уведомления ============
+   Сервер пишет уведомление на каждое событие: сообщение (кто написал, по какому объявлению),
+   ответ администратора, просмотры и избранное ваших объявлений, снижение цены и продажа в избранном,
+   новые объявления по поиску, за которым вы следите. Опрос /api/chats/unread сообщает число непрочитанных
+   и номер последнего уведомления; новые показываются всплывающей плашкой, звуком и уведомлением браузера. */
+const notif = {last: store.get('sm_nlast', null), unread: 0, hiddenAt: 0, items: []};
+const N_IC = {msg: ['i-chat', 't-blue'], support: ['i-shield', 't-green'], views: ['i-eye', 't-violet'], fav: ['i-heart', 't-rose'],
+  price: ['i-down', 't-green'], sold: ['i-tag', 't-gray'], match: ['i-search', 't-amber']};
+const canPush = () => 'Notification' in window && !IN_APP;
+function setBell(n){
+  notif.unread = n;
+  const b = $('#bellBadge');
+  b.hidden = !n;
+  b.textContent = n > 99 ? '99+' : String(n);
+}
+function notifText(n){
+  const d = n.data || {}, c = n.count || 1, media = d.kind && d.kind !== 'text' ? t('k_' + d.kind) : '';
+  if (n.kind === 'msg'){
+    const who = n.actor ? valT(n.actor) : t(d.from === 'seller' ? 'seller' : 'buyer');
+    return {title: who, line: c > 1 ? t('nt_msgs', {name: who, n: c}) : t('nt_msg', {name: who}), text: n.text || media, sub: n.ltitle};
+  }
+  if (n.kind === 'support') return {title: 'SystemMarket', line: t('nt_support'), text: n.text || media};
+  if (n.kind === 'views') return {title: n.ltitle, line: tp('nt_views', d.n || 1)};
+  if (n.kind === 'fav') return {title: n.ltitle, line: tp('nt_fav', d.n || c)};
+  if (n.kind === 'price') return {title: n.ltitle, line: t('nt_price') + ': ' + money(d.old) + ' → ' + money(d.new)};
+  if (n.kind === 'sold') return {title: n.ltitle, line: t('nt_sold')};
+  if (n.kind === 'match') return {title: n.ltitle, line: c > 1 ? t('nt_matches', {label: n.actor, n: c}) : t('nt_match', {label: n.actor}),
+    text: d.price != null ? money(d.price) : ''};
+  return {title: n.ltitle || 'SystemMarket', line: n.text || ''};
+}
+function chatOpenFor(n){                // переписка уже открыта — о ней не напоминаем
+  if (!$('#chatSheet').classList.contains('open')) return false;
+  return (n.kind === 'msg' && chat.mode === 'conv' && n.link === '#/chat/' + chat.id) || (n.kind === 'support' && chat.mode === 'support');
+}
+function alertNotif(n, count){
+  const x = notifText(n), msg = x.line + (x.text ? ': ' + x.text : '');
+  if (prefs.get('notify')) toast(count > 1 ? msg + ' · +' + (count - 1) : msg, 'info', {label: t('op_open'), href: n.link || '#/notifications'});
+  if (prefs.get('sound')) chime();
+  if (prefs.get('vibrate')) buzz(40);
+  if (document.hidden && prefs.get('push') && canPush() && Notification.permission === 'granted'){
+    try {
+      const bn = new Notification(x.title || 'SystemMarket', {body: msg, icon: '/favicon-192.png', tag: 'sm-' + n.id});
+      bn.onclick = () => { window.focus(); location.hash = n.link || '#/notifications'; bn.close(); };
+    } catch(e){}
+  }
+}
+/* вызывается при каждом опросе; true — показали уведомление (тогда общее «Новое сообщение» не нужно) */
+async function checkNotifs(r){
+  setBell(r.notif_unread || 0);
+  const now = r.notif_last || 0, seen = notif.last;
+  if (seen === null || now < seen){       // первый запуск на устройстве или уведомления очищены
+    notif.last = now; store.set('sm_nlast', now);
+    return false;
+  }
+  if (now === seen) return false;
+  notif.last = now; store.set('sm_nlast', now);
+  if (state.page === 'notifications' && !document.querySelector('.sheet.open')) renderNotifs(true);
+  let d;
+  try { d = await request('GET', '/api/notifications?after=' + seen); } catch(e){ return false; }
+  const fresh = d.items.filter(n => !n.read && !chatOpenFor(n));
+  if (!fresh.length) return false;
+  alertNotif(fresh[0], fresh.length);
+  return true;
+}
+function dayLabel(sec){
+  const d = new Date(sec * 1000), y = new Date();
+  if (d.toDateString() === y.toDateString()) return t('today');
+  y.setDate(y.getDate() - 1);
+  return d.toDateString() === y.toDateString() ? t('yesterday_d') : fmtDay(d);
+}
+function notifRowHTML(n){
+  const x = notifText(n), k = N_IC[n.kind] || ['i-bell', 't-gray'];
+  const lead = n.thumb ? '<span class="cth nth"><img alt="" loading="lazy" src="' + esc(n.thumb) + '"><span class="nbadge ' + k[1] + '">' + ic(k[0]) + '</span></span>'
+    : '<span class="cth nic ' + k[1] + '">' + ic(k[0]) + '</span>';
+  return '<a class="crow nrow' + (n.read ? '' : ' unread') + '" href="' + esc(n.link || '#/notifications') + '">' + lead +
+    '<span class="cmain"><span class="ctop"><span class="cname">' + esc(x.title) + '</span><time>' + esc(ago(n.created)) + '</time></span>' +
+    '<span class="nline">' + esc(x.line) + '</span>' + (x.text ? '<span class="clast">' + esc(x.text) + '</span>' : '') + '</span></a>';
+}
+function drawNotifs(){
+  const box = $('#nList'), items = notif.items;
+  $('#nTools').hidden = !items.length;
+  if (!items.length){ box.innerHTML = emptyHTML('i-bell', t('n_empty'), t('n_empty_sub')); return; }
+  let html = '', day = '';
+  items.forEach(n => {
+    const dd = dayLabel(n.created);
+    if (dd !== day){ html += (day ? '</div>' : '') + '<div class="nday">' + esc(dd) + '</div><div class="clist">'; day = dd; }
+    html += notifRowHTML(n);
+  });
+  box.innerHTML = html + '</div>';
+}
+async function renderNotifs(quiet){
+  if (!quiet){
+    $('#view').innerHTML = pageHead('notifications', t('sub_notifications')) +
+      '<div class="ntools" id="nTools" hidden><button class="link-btn" type="button" id="nReadAll">' + ic('i-check', 'i kic') + esc(t('n_read_all')) + '</button>' +
+      '<button class="link-btn danger" type="button" id="nClear">' + ic('i-trash', 'i kic') + esc(t('clear')) + '</button></div><div id="nList">' + skeletonRows(5) + '</div>';
+    $('#nReadAll').onclick = async () => {
+      try { await request('POST', '/api/notifications/read', {all: true}); } catch(e){ toast(e.message, 'err'); return; }
+      notif.items.forEach(n => { n.read = true; }); setBell(0); drawNotifs();
+    };
+    $('#nClear').onclick = async () => {
+      if (!(await confirmDialog({title: t('n_clear_q'), text: t('n_clear_sub'), ok: t('clear'), danger: true, icon: 'i-bell'}))) return;
+      try { await request('DELETE', '/api/notifications'); } catch(e){ toast(e.message, 'err'); return; }
+      notif.items = []; setBell(0); notif.last = 0; store.set('sm_nlast', 0); drawNotifs();
+    };
+  }
+  let d;
+  try { d = await request('GET', '/api/notifications'); }
+  catch(e){
+    if (!quiet && state.page === 'notifications' && $('#nList')){ $('#nList').innerHTML = errorHTML(e.message, 'nRetry'); $('#nRetry').onclick = () => renderNotifs(); }
+    return;
+  }
+  if (state.page !== 'notifications' || !$('#nList')) return;
+  notif.items = d.items;
+  drawNotifs();
+  if (d.unread){                         // открыли список — значок гаснет, новые остаются подсвечены до ухода со страницы
+    setBell(0);
+    request('POST', '/api/notifications/read', {all: true}).catch(() => {});
+  }
+}
+
+/* ============ Посещения (для администратора) и избранное на сервере ============ */
+function visitPing(load){ request('POST', '/api/visit', {load: !!load, lang: LANG, app: IN_APP}).catch(() => {}); }
+setInterval(() => { if (!document.hidden && readLang()) visitPing(false); }, 180000);
+function favSync(ids, on, sync){ if (ids.length) request('POST', '/api/favorites', {ids: ids.slice(0, 200), on, sync: !!sync}).catch(() => {}); }
+function syncFavsOnce(){                // избранное с прошлых версий сайта — на сервер, без уведомлений продавцам
+  const ids = favs.all(), key = ids.join(',');
+  if (ids.length && store.get('sm_fav_sent', '') !== key){ favSync(ids, true, true); store.set('sm_fav_sent', key); }
+}
+
+/* ============ Объявление: кто смотрит, условия, «Поднять», другие объявления продавца ============ */
+function fmtWait(sec){
+  let h = Math.floor(sec / 3600), m = Math.ceil((sec - h * 3600) / 60);
+  if (m === 60){ h++; m = 0; }
+  return (h ? h + ' ' + t('h_short') : '') + (h && m ? ' ' : '') + (m || !h ? Math.max(m, 1) + ' ' + t('m_short') : '');
+}
+function viewStatsHTML(x){
+  return '<div class="vstats"><span>' + ic('i-eye') + esc(tp('n_viewed', x.views || 0)) + '</span>' +
+    (x.views_today ? '<span>' + esc(t('n_today', {n: fmtNum(x.views_today)})) + '</span>' : '') +
+    (x.favs ? '<span>' + ic('i-heart') + esc(tp('n_favs', x.favs)) + '</span>' : '') +
+    (x.watching ? '<span class="live"><i aria-hidden="true"></i>' + esc(tp('n_watching', x.watching)) + '</span>' : '') + '</div>';
+}
+function flagTags(x){
+  return (x.torg ? '<span class="tag flag-t">' + ic('i-tag') + esc(t('flag_torg')) + '</span>' : '') +
+    (x.swap ? '<span class="tag flag-t">' + ic('i-swap') + esc(t('flag_swap')) + '</span>' : '') +
+    (x.credit ? '<span class="tag flag-t">' + ic('i-card') + esc(t('flag_credit')) + '</span>' : '');
+}
+function bumpLabel(x){ return x.sold ? t('e_bump_sold') : x.bump_in > 0 ? t('bump_in', {t: fmtWait(x.bump_in)}) : t('bump'); }
+async function doBump(x, btn){
+  btn.disabled = true; btn.classList.add('loading');
+  try {
+    const upd = await request('POST', '/api/listings/' + encodeURIComponent(x.id) + '/bump', {}, {'X-Edit-Token': editToken(x.id)});
+    Object.assign(x, {bumped: upd.bumped, bump_in: upd.bump_in});
+    toast(t('bumped'), 'ok');
+    needsReload = true;
+    return true;
+  } catch(e){ toast(e.message, 'err'); btn.disabled = false; return false; }
+  finally { btn.classList.remove('loading'); }
+}
+function bindBump(x){
+  const b = $('#bumpBtn');
+  if (b) b.onclick = async () => { if (await doBump(x, b)){ b.disabled = true; b.querySelector('span').textContent = bumpLabel(x); } };
+}
+async function renderSellerMore(x){
+  let r;
+  try { r = await api.list({seller_of: x.id, exclude: x.id, limit: 12}); } catch(e){ return; }
+  const el = $('#sellerMore');
+  if (!el || !current || current.id !== x.id || !r.items.length) return;
+  el.innerHTML = '<div class="sec-head"><h3>' + esc(t('seller_more')) + '<small>' + fmtNum(r.total) + '</small></h3></div>' +
+    '<div class="strip">' + r.items.map(i => '<a class="mini" href="#/item/' + i.id + '"><span class="ph sq">' + photoBox(i.photos[0], i.title) + '</span>' +
+      '<span class="mb"><span class="price">' + esc(money(i.price)) + '</span><span class="title">' + esc(i.title) + '</span></span></a>').join('') + '</div>';
+}
+
+/* ---- отметки в форме: Торг, Обмен, Кредит ---- */
+const flagOn = k => $('#f_' + k).getAttribute('aria-checked') === 'true';
+const setFlag = (k, on) => $('#f_' + k).setAttribute('aria-checked', String(!!on));
+$('#flagRows').addEventListener('click', e => {
+  const b = e.target.closest('[role="switch"]');
+  if (b) b.setAttribute('aria-checked', String(b.getAttribute('aria-checked') !== 'true'));
+});
+function flagsForCat(c){                // кредит — там, где он бывает
+  const credit = ['auto', 'realty', 'phones', 'electronics'].includes(c);
+  $('#f_credit').hidden = !credit;
+  if (!credit) setFlag('credit', false);
+}
+
+/* ============ Админ-панель: посетители и объявления ============ */
+function niceMax(m){                    // верх шкалы: 2, 4, 6, 10, 20, 40… — половина всегда целая (людей не делим)
+  m = Math.max(1, m);
+  for (let p = 1; ; p *= 10) for (const f of [2, 4, 6, 10]) if (f * p >= m) return f * p;
+}
+/* столбцы по дням: один ряд — без легенды, подписи у максимума и сегодня, подсказка на каждом столбце, таблица рядом */
+function visitorsChart(days){
+  const max = Math.max.apply(null, days.map(d => d.visitors)), top = niceMax(max), last = days.length - 1;
+  return '<div class="vchart" role="group" aria-label="Посетители по дням за 14 дней">' +
+    '<div class="vgrid" aria-hidden="true"><span style="--y:1"><em>' + fmtNum(top) + '</em></span><span style="--y:.5"><em>' + fmtNum(top / 2) + '</em></span>' +
+      '<span style="--y:0"><em>0</em></span></div>' +
+    '<div class="vbars">' + days.map((d, i) => {
+      const h = d.visitors / top, date = new Date(d.ts * 1000), label = (i === last || (d.visitors === max && max > 0)) && d.visitors;
+      return '<button type="button" class="vcol" data-i="' + i + '" aria-label="' + esc(fmtDay(date) + ': ' + d.visitors + ' чел., открытий ' + d.loads) + '">' +
+        (label ? '<span class="vval" style="--h:' + h + '">' + fmtNum(d.visitors) + '</span>' : '') +
+        '<span class="vbar" style="--h:' + h + '"></span><span class="vx' + (i === last ? ' today' : '') + '">' + date.getDate() + '</span></button>';
+    }).join('') + '</div><div class="vtip" id="vTip" hidden><b></b><span></span></div></div>';
+}
+function visitorsTable(days){
+  return '<table class="vtable" id="vTable" hidden><thead><tr><th>Дата</th><th>Посетители</th><th>Открытия</th></tr></thead><tbody>' +
+    days.slice().reverse().map(d => '<tr><td>' + esc(fmtDay(new Date(d.ts * 1000))) + '</td><td>' + fmtNum(d.visitors) + '</td><td>' + fmtNum(d.loads) + '</td></tr>').join('') +
+    '</tbody></table>';
+}
+function bindChart(days){
+  const tip = $('#vTip'), chartEl = $('.vchart');
+  if (!tip) return;
+  const show = col => {
+    const d = days[+col.dataset.i], cr = chartEl.getBoundingClientRect(), r = col.getBoundingClientRect(), bar = col.querySelector('.vbar').getBoundingClientRect();
+    tip.querySelector('b').textContent = fmtNum(d.visitors) + ' чел.';
+    tip.querySelector('span').textContent = fmtDay(new Date(d.ts * 1000)) + ' · открытий ' + fmtNum(d.loads);
+    tip.hidden = false;
+    const w = tip.offsetWidth, cx = r.left + r.width / 2 - cr.left;
+    tip.style.left = Math.max(w / 2, Math.min(cr.width - w / 2, cx)) + 'px';
+    tip.style.top = Math.max(0, bar.top - cr.top - 8) + 'px';
+  };
+  $$('.vcol').forEach(col => {
+    col.addEventListener('pointerenter', () => show(col));
+    col.addEventListener('focus', () => show(col));
+    col.addEventListener('click', () => show(col));
+  });
+  chartEl.addEventListener('pointerleave', () => { tip.hidden = true; });
+  $$('.vcol').forEach(col => col.addEventListener('blur', () => { tip.hidden = true; }));
+}
+function visitorRowHTML(v){
+  const dev = [v.os, v.browser === 'app' ? 'приложение' : v.browser].filter(Boolean).join(' · ') || 'устройство';
+  return '<div class="urow vrow"><span class="vdot' + (v.online ? ' on' : '') + '" title="' + (v.online ? 'на сайте сейчас' : '') + '"></span>' +
+    '<span class="who"><b class="vip">' + esc(v.ip || '—') + '</b>' +
+    '<small>' + esc(dev + (v.lang ? ' · ' + v.lang.toUpperCase() : '') + (v.user ? ' · ' + v.user.name + ' (' + v.user.email + ')' : '')) + '</small>' +
+    '<small>' + esc('заходов ' + v.hits + ' · открыл объявлений ' + v.views + ' · дней ' + v.days + ' · ' + ago(v.last)) + '</small></span>' +
+    '<button class="btn ' + (v.banned ? 'ghost' : 'danger') + ' sm" type="button" data-vban="' + esc(v.hash) + '" data-on="' + (v.banned ? 0 : 1) + '" data-ip="' + esc(v.ip) + '">' +
+      ic('i-ban') + (v.banned ? 'Разблокировать' : 'Блок') + '</button></div>';
+}
+async function admVisitors(body, tab){
+  const r = await adminReq('GET', '/api/admin/visitors');
+  if (adm.tab !== tab) return;
+  const s = r.stats;
+  body.innerHTML =
+    '<div class="adm-stats">' + [['Сейчас на сайте', s.online], ['Людей сегодня', s.today], ['Открытий сегодня', s.today_loads], ['Разных IP сегодня', s.today_ips],
+      ['Вчера', s.yesterday], ['За 7 дней', s.week], ['За 30 дней', s.month], ['Из приложения сегодня', s.today_app]]
+      .map(([k, v]) => '<div><b>' + fmtNum(v) + '</b><span>' + esc(k) + '</span></div>').join('') + '</div>' +
+    '<div class="box"><div class="chart-head"><h3>Посетители по дням</h3><button class="link-btn" type="button" id="vTableBtn">Таблица</button></div>' +
+      visitorsChart(r.days) + visitorsTable(r.days) + '</div>' +
+    '<div class="box"><h3>Кто заходил · последние 30 дней</h3>' +
+      (r.items.length ? r.items.map(visitorRowHTML).join('') : '<p class="meta">Пока никого</p>') + '</div>';
+  bindChart(r.days);
+  $('#vTableBtn').onclick = () => { const tb = $('#vTable'); tb.hidden = !tb.hidden; $('#vTableBtn').textContent = tb.hidden ? 'Таблица' : 'Скрыть таблицу'; };
+  body.onclick = async e => {
+    const b = e.target.closest('[data-vban]');
+    if (!b) return;
+    const on = b.dataset.on === '1';
+    if (on && !(await confirmDialog({title: 'Заблокировать посетителя?', text: 'IP ' + (b.dataset.ip || '—') + '. Он не сможет писать сообщения и подавать объявления.',
+      ok: 'Заблокировать', danger: true, icon: 'i-ban'}))) return;
+    try {
+      if (on) await adminReq('POST', '/api/admin/bans', {hash: b.dataset.vban, reason: 'Посетитель ' + (b.dataset.ip || '')});
+      else await adminReq('DELETE', '/api/admin/bans/' + encodeURIComponent(b.dataset.vban));
+      toast(on ? 'Заблокирован' : 'Разблокирован', 'ok');
+      admVisitors(body, tab);
+    } catch(err){ toast(err.message, 'err'); }
+  };
+}
+async function admListings(body, tab){
+  const r = await adminReq('GET', '/api/admin/listings');
+  if (adm.tab !== tab) return;
+  body.innerHTML = r.items.length ? '<div class="clist">' + r.items.map(x => '<div class="urow arow"><a class="cth" href="#/item/' + x.id + '">' +
+      (x.photos[0] ? '<img alt="" loading="lazy" src="' + esc(x.photos[0].thumb) + '">' : LOGO_IMG) + '</a>' +
+      '<span class="who"><b>' + esc(x.title) + (x.sold ? ' <span class="tag">продано</span>' : '') + (x.banned ? ' <span class="tag ban">блок</span>' : '') + '</b>' +
+      '<small>' + esc(money(x.price) + ' · ' + valT(x.name) + ' · ' + x.phone) + '</small>' +
+      '<small>' + esc('IP ' + (x.ip || '—') + ' · просмотров ' + x.views + ' · в избранном ' + x.favs + ' · переписок ' + x.chats + ' · ' + ago(x.created)) + '</small></span>' +
+      '<button class="icon-btn sm danger" type="button" data-adel="' + x.id + '" aria-label="Удалить">' + ic('i-trash') + '</button></div>').join('') + '</div>'
+    : '<div class="empty"><b>Объявлений нет</b><p></p></div>';
+  body.onclick = async e => {
+    const b = e.target.closest('[data-adel]');
+    if (!b) return;
+    if (!(await confirmDialog({title: 'Удалить объявление?', text: 'Объявление, его фото и переписка по нему будут удалены.', ok: 'Удалить', danger: true}))) return;
+    try {
+      await request('DELETE', '/api/listings/' + encodeURIComponent(b.dataset.adel), undefined, {'X-Edit-Token': adminKey()});
+      toast(t('deleted'), 'ok'); needsReload = true; loadStats(); admListings(body, tab);
+    } catch(err){ toast(err.message, 'err'); }
+  };
+}
 
 /* ============ Объявление ============ */
 let current = null;
@@ -3027,9 +3602,10 @@ function renderDetail(x){
       (x.sold ? '<div class="sold-banner">' + ic('i-tag') + esc(t('sold_banner')) + '</div>' : '') + '</div>' +
     (ph.length > 1 ? '<div class="thumbs" id="thumbs">' + ph.map((p, i) => '<img alt="" src="' + esc(p.thumb) + '" data-i="' + i + '"' + (i ? '' : ' class="on"') + '>').join('') + '</div>' : '') +
     '<div class="detail">' +
-      '<div><div class="price">' + esc(money(x.price)) + '</div><h1>' + esc(x.title) + '</h1></div>' +
+      '<div><div class="price-row"><span class="price">' + esc(money(x.price)) + '</span>' + (x.price_old > x.price ? '<s class="pold">' + esc(money(x.price_old)) + '</s>' +
+        '<span class="pill ok nodot pdown">' + ic('i-down') + esc(t('price_down')) + '</span>' : '') + '</div><h1>' + esc(x.title) + '</h1></div>' +
       '<div class="tags"><span class="tag catg">' + ic('c-' + x.cat) + esc(catName(x.cat)) + '</span><span class="tag">' + ic('i-pin') + esc(valT(x.city)) + '</span>' +
-        '<span class="tag">' + ic('i-clock') + esc(ago(x.created)) + '</span><span class="tag">' + ic('i-eye') + fmtNum(x.views) + '</span></div>' +
+        '<span class="tag">' + ic('i-clock') + esc(ago(x.created)) + '</span>' + flagTags(x) + '</div>' + viewStatsHTML(x) +
       (specs.length ? '<div class="box"><h3>' + esc(t('specs')) + '</h3><dl class="specs">' + specs.map(r => '<div><dt>' + esc(t(r[0])) + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl></div>' : '') +
       (x.desc ? '<div class="box"><h3>' + esc(t('description')) + '</h3><p class="desc">' + esc(x.desc) + '</p></div>' : '') +
       '<div class="box"><div class="seller"><div class="avatar">' + esc((valT(x.name) || 'S').trim().charAt(0).toUpperCase()) + '</div>' +
@@ -3039,8 +3615,9 @@ function renderDetail(x){
         '<button class="ln" type="button" id="copyLink">' + ic('i-link') + esc(t('link')) + '</button></div>' +
       (own ? '<div class="owner"><button class="btn line" type="button" id="editBtn">' + ic('i-edit') + esc(t('edit')) + '</button>' +
         '<button class="btn line" type="button" id="soldBtn">' + ic(x.sold ? 'i-history' : 'i-tag') + esc(t(x.sold ? 'unmark_sold' : 'mark_sold')) + '</button>' +
-        '<button class="btn danger wide" type="button" id="delBtn">' + ic('i-trash') + esc(t('delete')) + '</button></div>' : '') +
-      '<div id="similar"></div>' +
+        '<button class="btn line wide" type="button" id="bumpBtn"' + (x.bump_in > 0 || x.sold ? ' disabled' : '') + '>' + ic('i-up') +
+          '<span>' + esc(bumpLabel(x)) + '</span></button>' + '<button class="btn danger wide" type="button" id="delBtn">' + ic('i-trash') + esc(t('delete')) + '</button></div>' : '') +
+      '<div id="sellerMore"></div><div id="similar"></div>' +
       (own ? '' : '<a class="report" href="#/support?listing=' + x.id + '">' + ic('i-flag') + esc(t('report')) + '</a>') +
       '<div class="foot">' + esc(t('listing_no', {id: x.id})) + '</div>' +
     '</div>' +
@@ -3076,6 +3653,8 @@ function renderDetail(x){
     try { await api.remove(x.id); mine.drop(x.id); needsReload = true; myCache = null; toast(t('deleted'), 'ok'); loadStats(); closeSheet(); }
     catch(err){ del.disabled = false; toast(err.message); }
   };
+  bindBump(x);
+  renderSellerMore(x);
   renderSimilar(x);
 }
 async function renderSimilar(x){
@@ -3146,6 +3725,7 @@ function setCat(c){
   $$('[data-pick]').forEach(x => x.classList.toggle('on', x.dataset.pick === c));
   $('#autoFields').classList.toggle('show', c === 'auto');
   $('#realtyFields').classList.toggle('show', c === 'realty');
+  flagsForCat(c);
 }
 function renderPhotos(){
   $('#photoGrid').innerHTML = draft.map((p, i) =>
@@ -3180,6 +3760,7 @@ function resetForm(){
   const keep = {name: $('#fName').value, phone: $('#fPhone').value};
   $('#addForm').reset(); $('#fName').value = keep.name; $('#fPhone').value = keep.phone;
   setCat('');
+  ['torg', 'swap', 'credit'].forEach(k => setFlag(k, false));
   $$('.err').forEach(x => x.classList.remove('show'));
   renderPhotos();
 }
@@ -3200,6 +3781,7 @@ async function openEdit(id){
   const setv = (sel, v) => { $(sel).value = v == null ? '' : v; };
   setv('#fTitle', x.title); setv('#fPrice', x.price); setv('#fCity', x.city); setv('#fDesc', x.desc);
   setv('#fName', x.name === 'Продавец' ? '' : x.name); setv('#fPhone', x.phone);
+  ['torg', 'swap', 'credit'].forEach(k => setFlag(k, x[k]));
   if (x.cat === 'auto'){ setv('#fBrand', e.brand || 'Другая'); setv('#fModel', e.model); setv('#fYear', e.year); setv('#fMileage', e.mileage); setv('#fGear', e.gear || GEARS[0]); setv('#fFuel', e.fuel || FUELS[0]); }
   if (x.cat === 'realty'){ setv('#fDeal', e.deal || DEALS[0]); setv('#fRooms', e.rooms); setv('#fArea', e.area); setv('#fFloor', e.floor); }
 }
@@ -3218,6 +3800,7 @@ async function submitForm(e){
   const fields = {title: v('fTitle'), price: v('fPrice'), city: v('fCity'), desc: v('fDesc'), name: v('fName'), phone: v('fPhone')};
   const sec = draftCat === 'auto' ? '#autoFields' : draftCat === 'realty' ? '#realtyFields' : null;
   if (sec) $$(sec + ' [name]').forEach(el => { fields[el.name] = el.value.trim(); });
+  ['torg', 'swap', 'credit'].forEach(k => { fields[k] = flagOn(k) ? '1' : '0'; });
   store.set('sm_contact', {name: fields.name, phone: fields.phone});
 
   sending = true;
@@ -3292,11 +3875,15 @@ function setUnread(n){
   setTitle();
 }
 async function pollUnread(){
-  if (document.hidden) return;
+  if (document.hidden){
+    if (!(prefs.get('push') && canPush()) || Date.now() - notif.hiddenAt < 40000) return;
+    notif.hiddenAt = Date.now();
+  }
   let r;
   try { r = await api.unread(); } catch(e){ return; }
   const inChat = $('#chatSheet').classList.contains('open') && !chat.mode.startsWith('a');
-  if (lastUnread >= 0 && r.unread > lastUnread && !inChat) notifyNew();
+  const shown = await checkNotifs(r);
+  if (lastUnread >= 0 && r.unread > lastUnread && !inChat && !shown) notifyNew();
   const changed = r.unread !== lastUnread;
   lastUnread = r.unread;
   setUnread(r.unread);
@@ -3724,9 +4311,9 @@ async function renderAdmin(){
   if (state.page !== 'admin') return;
   const s = ov.stats;
   $('#admRoot').innerHTML =
-    '<div class="adm-stats">' + [['Объявлений', s.listings], ['Переписок', s.chats], ['Сообщений', s.messages], ['Аккаунтов Google', s.users],
+    '<div class="adm-stats">' + [['Сейчас на сайте', s.online], ['Посетителей сегодня', s.visitors_today], ['Объявлений', s.listings], ['Переписок', s.chats], ['Сообщений', s.messages], ['Аккаунтов Google', s.users],
       ['Файлы в чатах, МБ', s.media_mb], ['Свободно, ГБ', s.disk_free_gb]].map(([k, v]) => '<div><b>' + esc(String(v)) + '</b><span>' + esc(k) + '</span></div>').join('') + '</div>' +
-    '<div class="seg adm-tabs" id="admTabs">' + [['support', 'Обращения' + (s.support_unread ? ' · ' + s.support_unread : '')], ['chats', 'Чаты'], ['users', 'Люди'], ['settings', 'Настройки']]
+    '<div class="seg adm-tabs" id="admTabs">' + [['support', 'Обращения' + (s.support_unread ? ' · ' + s.support_unread : '')], ['visitors', 'Посетители'], ['listings', 'Объявления'], ['chats', 'Чаты'], ['users', 'Аккаунты'], ['settings', 'Настройки']]
       .map(([k, v]) => '<button type="button" data-atab="' + k + '"' + (k === adm.tab ? ' class="on"' : '') + '>' + esc(v) + '</button>').join('') + '</div>' +
     '<div id="admBody"></div>';
   $('#admTabs').onclick = e => {
@@ -3773,6 +4360,10 @@ async function renderAdminTab(ov){
         try { await adminReq('POST', '/api/admin/users/' + b.dataset.ublock + '/block', {blocked: b.dataset.on === '1'}); renderAdminTab(ov); }
         catch(err){ toast(err.message); }
       };
+    } else if (tab === 'visitors'){
+      await admVisitors(body, tab);
+    } else if (tab === 'listings'){
+      await admListings(body, tab);
     } else {
       const g = ov.google;
       const bans = (await adminReq('GET', '/api/admin/bans')).items;
@@ -3822,7 +4413,7 @@ async function renderAdminTab(ov){
    объявление и переписка въезжают справа, форма — снизу; при закрытии страница под ними не перерисовывается. */
 let sheetFromList = false, firstRender = true, needsReload = false, sheetTrail = [];
 const SHEETS = ['item', 'add', 'edit', 'chat', 'write', 'support', 'achat', 'asup'];
-const PAGES = ['home', 'search', 'chats', 'activity', 'settings', 'admin'];
+const PAGES = ['home', 'search', 'chats', 'activity', 'settings', 'admin', 'notifications'];
 function openSheet(id){
   if (id !== 'chatSheet') stopChatPoll();
   if (menuClose) menuClose();
@@ -3898,6 +4489,7 @@ function route(){
   if (page === 'fav' || page === 'my'){ act.tab = page; page = 'activity'; }
   if (!PAGES.includes(page)) page = 'home';
   if (page === 'activity' && ['my', 'fav', 'ops'].includes(query.get('tab'))) act.tab = query.get('tab');
+  if (page === 'admin' && ['support', 'visitors', 'listings', 'chats', 'users', 'settings'].includes(query.get('tab'))) adm.tab = query.get('tab');
   const hash = location.hash || '#/';
   const wasOpen = !!document.querySelector('.sheet.open');
   const sameList = wasOpen && page === state.page && hash === lastListHash;
@@ -3997,14 +4589,16 @@ function start(l){
   document.documentElement.lang = LANG;
   $('#langCode').textContent = LANG_CODE[LANG];
   applyStatic(document);
-  buildForm(); renderPhotos(); setFormMode('add');
+  buildForm(); renderPhotos(); setFormMode('add'); flagsForCat('');
   $('#quick').innerHTML = ['quick1', 'quick2', 'quick3', 'quick4'].map(k => '<button type="button" data-q>' + esc(t(k)) + '</button>').join('');
   toggleSendMic();
   checkVersion();
   route();
   loadStats();
   loadMe();
-  claimMine().then(() => { if (store.get('sm_chat', false) || mine.ids().length) startUnreadPoll(); });
+  claimMine().then(startUnreadPoll);    // уведомления проверяем у всех: о сообщениях, просмотрах, избранном, поисках
+  syncFavsOnce();
+  visitPing(true);
   if (!net.online) renderNet();
 }
 applyPrefs();
