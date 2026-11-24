@@ -51,7 +51,7 @@ class HomeScreen extends ConsumerWidget {
                   SliverToBoxAdapter(child: SectionHeader(title: l.categories)),
                   SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 96,
+                      height: 100,
                       child: ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
                         scrollDirection: Axis.horizontal,
@@ -303,7 +303,7 @@ class _CategoryItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadius.md),
       onTap: onTap,
       child: SizedBox(
-        width: 72,
+        width: 84,
         child: Column(
           children: [
             Container(

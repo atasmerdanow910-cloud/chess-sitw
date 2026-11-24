@@ -29,6 +29,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _busy = false;
   bool _showPassword = false;
 
+  void _submitPhoneLogin() {
+    if (_busy || !_form.currentState!.validate()) return;
+    _run(() => ref.read(authProvider.notifier).login(_phone.text, _password.text));
+  }
+
   Future<void> _run(Future<void> Function() action) async {
     setState(() => _busy = true);
     try {
@@ -88,6 +93,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: _password,
               obscureText: !_showPassword,
               autofillHints: const [AutofillHints.password],
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _submitPhoneLogin(),
               decoration: InputDecoration(
                 labelText: l.password,
                 prefixIcon: const Icon(Icons.lock_outline),
@@ -100,13 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(
-              onPressed: _busy
-                  ? null
-                  : () {
-                      if (_form.currentState!.validate()) {
-                        _run(() => ref.read(authProvider.notifier).login(_phone.text, _password.text));
-                      }
-                    },
+              onPressed: _busy ? null : _submitPhoneLogin,
               child: _busy
                   ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
                   : Text(l.login),
