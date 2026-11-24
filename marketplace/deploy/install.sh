@@ -24,9 +24,9 @@ apt-get install -y -qq python3-venv nginx curl >/dev/null
 
 echo "==> Пользователь и папки"
 id -u systemmarket >/dev/null 2>&1 || useradd --system --home "$DATA" --shell /usr/sbin/nologin systemmarket
-mkdir -p "$APP" "$DATA/uploads" "$WEB"
+mkdir -p "$APP" "$DATA/uploads" "$DATA/chat" "$WEB"
 chown -R systemmarket:systemmarket "$DATA"
-chmod 755 "$DATA" "$DATA/uploads"
+chmod 755 "$DATA" "$DATA/uploads" "$DATA/chat"
 
 SCHEME=https
 [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ] || SCHEME=http
@@ -35,9 +35,11 @@ SITE_URL="$SCHEME://$DOMAIN"
 echo "==> Скачиваю код"
 TMP=$(mktemp -d)
 curl -fsSL "$RAW/server/app.py" -o "$TMP/app.py"
+curl -fsSL "$RAW/server/oauth.py" -o "$TMP/oauth.py"
 curl -fsSL "$RAW/server/requirements.txt" -o "$TMP/requirements.txt"
 curl -fsSL "$RAW/index.html" -o "$TMP/index.html"
 install -m 644 "$TMP/app.py" "$APP/app.py"
+install -m 644 "$TMP/oauth.py" "$APP/oauth.py"
 install -m 644 "$TMP/requirements.txt" "$APP/requirements.txt"
 sed "s#__SITE_URL__#$SITE_URL#g" "$TMP/index.html" > "$TMP/index.out"
 install -m 644 "$TMP/index.out" "$WEB/index.html"
@@ -45,6 +47,11 @@ for f in favicon.svg favicon-48.png favicon-192.png favicon-512.png maskable-512
   curl -fsSL "$RAW/static/$f" -o "$TMP/$f"
   install -m 644 "$TMP/$f" "$WEB/$f"
 done
+# Приложение для Android (собирается на GitHub — может ещё не быть в этой версии)
+if curl -fsSL "$RAW/static/systemmarket.apk" -o "$TMP/systemmarket.apk" 2>/dev/null && [ -s "$TMP/systemmarket.apk" ]; then
+  install -m 644 "$TMP/systemmarket.apk" "$WEB/systemmarket.apk"
+  echo "   приложение Android: $SITE_URL/systemmarket.apk"
+fi
 rm -rf "$TMP"
 
 echo "==> robots.txt и sitemap.xml для Google"
@@ -71,6 +78,12 @@ if [ ! -f "$ENVF" ]; then
   echo "==> Создаю ключ администратора"
   printf 'SM_DATA=%s\nSM_ADMIN_TOKEN=%s\n' "$DATA" "$(python3 -c 'import secrets;print(secrets.token_urlsafe(18))')" > "$ENVF"
   chmod 640 "$ENVF"; chown root:systemmarket "$ENVF"
+fi
+# Адрес сайта — для входа через Google (redirect URI)
+if grep -q '^SM_SITE_URL=' "$ENVF"; then
+  sed -i "s#^SM_SITE_URL=.*#SM_SITE_URL=$SITE_URL#" "$ENVF"
+else
+  echo "SM_SITE_URL=$SITE_URL" >> "$ENVF"
 fi
 
 echo "==> Служба systemd"
@@ -112,6 +125,29 @@ APPBLOCK=$(cat <<EOF
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_read_timeout 90s;
         proxy_request_buffering on;
+    }
+    location /auth/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+    # Фото, видео и голосовые из переписки: только известные типы, без угадывания (nosniff)
+    location /chat-media/ {
+        alias $DATA/chat/;
+        types { image/jpeg jpg; video/mp4 mp4; video/quicktime mov; video/webm webm; audio/webm weba; audio/ogg ogg; audio/mp4 m4a; audio/mpeg mp3; }
+        default_type application/octet-stream;
+        add_header Cache-Control "private, max-age=31536000, immutable";
+        add_header X-Content-Type-Options nosniff;
+        add_header Content-Security-Policy "sandbox";
+        add_header X-Robots-Tag "noindex, nofollow";
+        try_files \$uri =404;
+    }
+    location = /systemmarket.apk {
+        types { application/vnd.android.package-archive apk; }
+        add_header Cache-Control "no-cache";
+        add_header Content-Disposition 'attachment; filename="SystemMarket.apk"';
     }
     location /uploads/ {
         alias $DATA/uploads/;
