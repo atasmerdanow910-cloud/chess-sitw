@@ -1,0 +1,128 @@
+name: CI
+
+# Runs on every push: server tests + lint, app analysis + tests, and builds the Android APK.
+# The APK appears under "Actions → this run → Artifacts".
+#
+# Settings → Secrets and variables → Actions:
+#   Variables:
+#     API_URLS                 e.g. https://api.yourdomain.com (comma separated for backup servers)
+#     GOOGLE_SERVER_CLIENT_ID  Google "Web client ID" (optional)
+#   Secrets (release signing — keep the same key forever, or users cannot update the app):
+#     ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.50.1"
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kerwen
+          POSTGRES_PASSWORD: ci_only_password
+          POSTGRES_DB: kerwen_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U kerwen"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm test
+        env:
+          TEST_DATABASE_URL: postgres://kerwen:ci_only_password@127.0.0.1:5432/kerwen_test
+      - name: Dependency audit (production)
+        run: npm audit --omit=dev --audit-level=high
+
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  apk:
+    needs: app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Release signing key (from secrets, if set)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release.jks
+            printf 'storeFile=release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+              "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > android/key.properties
+            echo "Signing with the release key."
+          else
+            echo "::warning::No release key in secrets: APK is signed with a temporary debug key (testing only)."
+          fi
+      - name: Build APKs
+        env:
+          API_URLS: ${{ vars.API_URLS }}
+          GOOGLE_ID: ${{ vars.GOOGLE_SERVER_CLIENT_ID }}
+        run: |
+          DEFINES=()
+          [ -n "$API_URLS" ] && DEFINES+=("--dart-define=API_URLS=$API_URLS")
+          [ -n "$GOOGLE_ID" ] && DEFINES+=("--dart-define=GOOGLE_SERVER_CLIENT_ID=$GOOGLE_ID")
+          # One APK for all phones (simplest to share) + smaller per-CPU APKs.
+          flutter build apk --release --obfuscate --split-debug-info=build/symbols "${DEFINES[@]}"
+          flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols "${DEFINES[@]}"
+          mkdir -p ../dist
+          cp build/app/outputs/flutter-apk/app-release.apk ../dist/kerwen-market.apk
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk ../dist/kerwen-market-arm64.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk ../dist/kerwen-market-armv7.apk
+          ls -la ../dist
+      - uses: actions/upload-artifact@v5
+        with:
+          name: kerwen-market-apk
+          path: dist/*.apk
+          retention-days: 30

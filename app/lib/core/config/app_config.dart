@@ -8,11 +8,14 @@ abstract final class AppConfig {
     defaultValue: 'http://10.0.2.2:3000',
   );
 
-  static List<String> get apiUrls => _apiUrls
-      .split(',')
-      .map((s) => s.trim().replaceAll(RegExp(r'/+$'), ''))
-      .where((s) => s.isNotEmpty)
-      .toList();
+  static List<String> get apiUrls {
+    final urls = _apiUrls
+        .split(',')
+        .map((s) => s.trim().replaceAll(RegExp(r'/+$'), ''))
+        .where((s) => s.isNotEmpty)
+        .toList();
+    return urls.isEmpty ? const ['http://10.0.2.2:3000'] : urls;
+  }
 
   /// Google "Web client ID" used to get an ID token for the server.
   /// Empty = the Google button is hidden (phone + password still works).

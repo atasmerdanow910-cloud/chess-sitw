@@ -1,0 +1,60 @@
+# Kerwen Market — production stack on one server.
+# Start:   cd deploy && docker compose up -d --build
+# Logs:    docker compose logs -f api
+name: kerwen
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kerwen
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}
+      POSTGRES_DB: kerwen
+    # Small server (512 MB - 2 GB RAM): keep Postgres memory low.
+    command: postgres -c shared_buffers=64MB -c max_connections=40 -c work_mem=4MB
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kerwen -d kerwen"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ../server
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://kerwen:${POSTGRES_PASSWORD}@db:5432/kerwen
+      MEDIA_DIR: /data/media
+      TRUST_PROXY: "true"
+      NODE_OPTIONS: --max-old-space-size=256
+    volumes:
+      - media:/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+    # Not published to the internet: only Caddy talks to it.
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+
+volumes:
+  db-data:
+  media:
+  caddy-data:
+  caddy-config:

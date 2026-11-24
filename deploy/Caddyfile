@@ -1,0 +1,15 @@
+# HTTPS with a free Let's Encrypt certificate, renewed automatically.
+{$DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+	request_body {
+		max_size 32MB
+	}
+	reverse_proxy api:3000
+	# No access log on purpose: logs must not hold personal data.
+}
