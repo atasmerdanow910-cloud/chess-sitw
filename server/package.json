@@ -15,7 +15,7 @@
     "create-owner": "node dist/src/scripts/create-owner.js",
     "lint": "eslint src test",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "tsc -p tsconfig.json && node --test --test-concurrency=1 --test-reporter=spec dist/test/"
+    "test": "tsc -p tsconfig.json && node --test --test-concurrency=1 --test-reporter=spec 'dist/test/*.test.js'"
   },
   "dependencies": {
     "@nestjs/common": "^12.6.0",

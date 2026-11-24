@@ -26,6 +26,7 @@ export const zText = (max: number) =>
     .string()
     .trim()
     .max(max)
+    // eslint-disable-next-line no-control-regex -- intentionally rejecting control characters
     .refine((s) => !/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(s), 'invalid characters');
 
 export const zPage = z

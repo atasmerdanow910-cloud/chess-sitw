@@ -27,6 +27,7 @@ import { MediaStorage } from './storage.js';
 const purposeSchema = z
   .object({ purpose: z.enum(['product', 'logo', 'banner', 'chat_photo', 'chat_video', 'voice']) })
   .strict();
+// eslint-disable-next-line no-useless-assignment -- used in a decorator below
 const fetchSchema = z.object({ e: z.coerce.number().int(), s: z.string().min(10).max(64) }).strict();
 
 const MAX_UPLOAD = Math.max(...Object.values(UPLOAD_LIMITS));
@@ -48,7 +49,7 @@ export class MediaController {
     @UploadedFile() file: { buffer: Buffer } | undefined,
   ) {
     if (!file?.buffer) throw badRequest('file_missing');
-    if ((query.purpose === 'banner') && user.role !== 'owner') throw badRequest('file_type_not_allowed');
+    if (query.purpose === 'banner' && user.role !== 'owner') throw badRequest('file_type_not_allowed');
     const stored = await this.mediaService.upload(user.id, query.purpose, file.buffer);
     const scope = query.purpose.startsWith('chat') || query.purpose === 'voice' ? 'private' : 'public';
     return { ...stored, url: signedMediaUrl(stored.id, scope) };
