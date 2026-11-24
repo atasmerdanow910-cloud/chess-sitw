@@ -1,0 +1,15 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+*.keystore
+key.properties
+service-account*.json
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
