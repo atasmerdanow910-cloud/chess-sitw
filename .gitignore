@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 marketplace/server/data/
+
+# сборка Android
+android/build/

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 5–5.1: тёмная строка состояния (светлых значков там ещё нет) -->
+    <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:statusBarColor">#FF0D1014</item>
+        <item name="android:navigationBarColor">#FF0D1014</item>
+        <item name="android:colorPrimary">#FF0A7A3D</item>
+        <item name="android:colorAccent">#FF0A7A3D</item>
+    </style>
+</resources>
