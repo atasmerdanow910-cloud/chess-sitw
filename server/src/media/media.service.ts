@@ -82,8 +82,9 @@ export class MediaService {
       }
     }
     if (purpose === 'voice') {
+      // Phones record voice as AAC in an MP4/3GP/WebM container; store it as audio.
       kind = 'audio';
-      if (mime === 'video/webm') mime = 'audio/webm';
+      mime = mime.replace(/^video\//, 'audio/');
     }
 
     const id = randomUUID();

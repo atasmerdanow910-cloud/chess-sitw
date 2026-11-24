@@ -1,0 +1,4 @@
+# Keep rules for plugins that use reflection (release builds are minified).
+-keep class io.flutter.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.play.core.**
