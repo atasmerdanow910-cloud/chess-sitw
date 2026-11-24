@@ -474,6 +474,8 @@ def list_listings():
     if hi:
         where.append("price <= ? AND price > 0")
         params.append(hi)
+    if a.get("with_photos") == "1":
+        where.append("photos <> '[]'")    # только объявления с фото
     ex = a.get("exclude", "")
     if re.fullmatch(r"[a-z0-9]{6,32}", ex):
         where.append("id <> ?")
@@ -1145,8 +1147,17 @@ def my_listings():
     me = user_hash()
     if not me:
         return {"items": []}
-    rows = db().execute("SELECT * FROM listings WHERE owner_hash = ? ORDER BY created DESC LIMIT 100", (me,)).fetchall()
-    return {"items": [public(r) for r in rows]}
+    con = db()
+    rows = con.execute("SELECT * FROM listings WHERE owner_hash = ? ORDER BY created DESC LIMIT 100", (me,)).fetchall()
+    chats = dict(con.execute(
+        "SELECT c.listing_id, COUNT(*) FROM conversations c JOIN listings l ON l.id = c.listing_id"
+        " WHERE l.owner_hash = ? GROUP BY c.listing_id", (me,)).fetchall())
+    items = []
+    for r in rows:
+        x = public(r)
+        x["chats"] = chats.get(r["id"], 0)        # сколько покупателей написали по объявлению
+        items.append(x)
+    return {"items": items}
 
 
 @app.get("/auth/google")
