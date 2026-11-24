@@ -991,6 +991,7 @@ const TXT = {
   app_get: ["Скачать", "İndir", "Ýükle"],
   app_row: ["Приложение для Android", "Android uygulaması", "Android programmasy"],
   admin_panel: ["Админ-панель", "Yönetim paneli", "Admin paneli"],
+  about_your_ad: ["Пишет по вашему объявлению", "İlanınız hakkında yazıyor", "Bildirişiňiz barada ýazýar"],
   e_no_user: ['Обновите страницу и попробуйте снова', 'Sayfayı yenileyip tekrar deneyin', 'Sahypany täzeläp, täzeden synanyşyň'],
 };
 /* Значения, которые хранятся в базе по-русски, но показываются на выбранном языке */
@@ -1806,7 +1807,7 @@ function chatHeader(item){
   if (m === 'support'){ name = 'SystemMarket'; role = t('sp_admin'); ava = LOGO_IMG; }
   else if (m === 'asup'){ name = (c && c.name) || 'Гость'; role = ['Обращение', c && c.email, c && c.lang && c.lang.toUpperCase()].filter(Boolean).join(' · '); }
   else if (m === 'achat' && c){ name = (c.buyer_name || 'Покупатель') + ' → ' + (c.seller_name || 'Продавец'); role = 'Переписка покупателя с продавцом'; }
-  else if (c){ name = otherName(c); role = c.role === 'seller' ? t('buyer') : t('seller'); }
+  else if (c){ name = otherName(c); role = c.role === 'seller' ? t('about_your_ad') : t('seller'); }
   else if (item){ name = valT(item.name || 'Продавец'); role = t('seller'); }
   $('#chatAva').innerHTML = ava || esc((name || 'S').trim().charAt(0).toUpperCase());
   $('#chatName').textContent = name;
@@ -2377,6 +2378,26 @@ function openLangPicker(first){
   $('#langPick').hidden = false;
 }
 
+/* ============ Новая версия сайта ============ */
+// Сайт может быть открыт часами (особенно в приложении). Когда на сервер выкладывают
+// новую версию, страница сама перезагружается — но не посреди письма или подачи объявления.
+let siteVersion = '';
+async function checkVersion(){
+  let v = '';
+  try {
+    const r = await fetch('/index.html', {method: 'HEAD', cache: 'no-store'});
+    if (!r.ok) return;
+    v = r.headers.get('ETag') || r.headers.get('Last-Modified') || '';
+  } catch(e){ return; }
+  if (!v) return;
+  if (!siteVersion){ siteVersion = v; return; }
+  if (v === siteVersion) return;
+  const busy = $('#formSheet').classList.contains('open') || !!$('#msgText').value.trim() || !!rec.mr;
+  if (!busy) location.reload();
+}
+setInterval(() => { if (!document.hidden) checkVersion(); }, 120000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkVersion(); });
+
 /* ============ Запуск ============ */
 function start(l){
   if (/^\/panel\/?$/.test(location.pathname)) history.replaceState(null, '', '/#/admin');   // sstymmarket.click/panel
@@ -2389,6 +2410,7 @@ function start(l){
   buildForm(); renderPhotos(); setFormMode('add');
   $('#quick').innerHTML = ['quick1', 'quick2', 'quick3', 'quick4'].map(k => '<button type="button" data-q>' + esc(t(k)) + '</button>').join('');
   toggleSendMic();
+  checkVersion();
   route();
   loadStats();
   loadMe();
