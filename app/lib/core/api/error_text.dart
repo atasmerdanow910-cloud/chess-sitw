@@ -29,7 +29,7 @@ String errorText(BuildContext context, Object error) {
     'product_limit_reached' => l.errProductLimit,
     'shop_blocked' => l.errShopBlocked,
     'wrong_password' => l.errWrongPassword,
-    'too_many_requests' => l.errTooMany,
+    'too_many_requests' || 'upload_quota_exceeded' => l.errTooMany,
     'validation_failed' => l.errValidation,
     'order_cannot_cancel' || 'status_transition_invalid' => l.errStatusChanged,
     'review_exists' => l.errReviewExists,

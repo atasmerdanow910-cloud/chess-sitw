@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { AdminService } from '../admin/admin.service.js';
+import { MediaService } from '../media/media.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { formatDate } from '../notifications/texts.js';
 
@@ -26,5 +27,20 @@ export class SubscriptionReminderJob {
     }
     await this.admin.markReminded(shops.map((s) => s.id));
     return shops.length;
+  }
+}
+
+/** Every night: remove abandoned uploads to keep the disk clean. */
+@Injectable()
+export class MediaCleanupJob {
+  private readonly logger = new Logger(MediaCleanupJob.name);
+
+  constructor(private readonly mediaService: MediaService) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  async run(): Promise<number> {
+    const removed = await this.mediaService.cleanupOrphans();
+    if (removed > 0) this.logger.log(`Removed ${removed} unused files`);
+    return removed;
   }
 }

@@ -155,6 +155,21 @@ describe('seller panel, catalog and media', () => {
     await ctx.http.get(expired).expect(404);
   });
 
+  it('abandoned uploads are cleaned up, attached ones are kept', async () => {
+    const { media: mediaTable } = await import('../src/db/schema.js');
+    const attached = await uploadImage(ctx, sellerA);
+    await createProduct(ctx, sellerA, { title: 'Keeps photo', mediaIds: [attached] });
+    const orphan = await uploadImage(ctx, sellerA);
+    const old = new Date(Date.now() - 4 * 86_400_000);
+    await ctx.db.update(mediaTable).set({ createdAt: old });
+    const { MediaService } = await import('../src/media/media.service.js');
+    const removed = await ctx.app.get(MediaService).cleanupOrphans();
+    assert.ok(removed >= 1);
+    const left = await ctx.db.select({ id: mediaTable.id }).from(mediaTable);
+    assert.ok(left.some((m) => m.id === attached));
+    assert.ok(!left.some((m) => m.id === orphan));
+  });
+
   it('favorites work per user', async () => {
     const product = await createProduct(ctx, sellerA, { title: 'Favorite me' });
     const buyer = await registerBuyer(ctx);

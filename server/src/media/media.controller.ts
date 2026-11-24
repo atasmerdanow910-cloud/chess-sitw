@@ -40,7 +40,7 @@ export class MediaController {
     @InjectDb() private readonly db: Db,
   ) {}
 
-  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post()
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_UPLOAD, files: 1, fields: 2 } }))
   async upload(

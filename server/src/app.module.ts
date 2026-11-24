@@ -21,7 +21,7 @@ import { AuditService } from './common/audit.js';
 import { getEnv } from './config/env.js';
 import { DbModule } from './db/db.js';
 import { HealthController } from './health.controller.js';
-import { SubscriptionReminderJob } from './jobs/reminders.js';
+import { MediaCleanupJob, SubscriptionReminderJob } from './jobs/reminders.js';
 import { MeController } from './me/me.controller.js';
 import { MeService } from './me/me.service.js';
 import { MediaController } from './media/media.controller.js';
@@ -81,6 +81,7 @@ import { SellerService } from './seller/seller.service.js';
     MeService,
     AdminService,
     SubscriptionReminderJob,
+    MediaCleanupJob,
   ],
 })
 export class AppModule {}
