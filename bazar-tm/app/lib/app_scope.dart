@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'core/settings/app_settings.dart';
 import 'core/theme/tokens.dart';
+import 'data/auth_store.dart';
 import 'data/stores.dart';
 import 'l10n/app_localizations.dart';
 
@@ -21,6 +22,7 @@ class AppScope extends InheritedWidget {
   const AppScope({
     super.key,
     required this.settings,
+    required this.auth,
     required this.products,
     required this.cart,
     required this.favorites,
@@ -33,6 +35,7 @@ class AppScope extends InheritedWidget {
   });
 
   final AppSettings settings;
+  final AuthStore auth;
   final ProductStore products;
   final CartStore cart;
   final FavoritesStore favorites;

@@ -30,3 +30,9 @@ String formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}.${d.month.
 
 /// Time as HH:mm.
 String formatTime(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+/// Stored phone "+99365123456" → "+993 65 123456". Anything else is shown as it is.
+String formatPhone(String phone) {
+  final m = RegExp(r'^\+993(\d{2})(\d{6})$').firstMatch(phone);
+  return m == null ? phone : '+993 ${m[1]} ${m[2]}';
+}

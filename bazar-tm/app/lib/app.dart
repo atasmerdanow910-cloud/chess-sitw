@@ -6,6 +6,7 @@ import 'core/l10n/turkmen_fallback.dart';
 import 'core/settings/app_settings.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/tokens.dart';
+import 'data/auth_store.dart';
 import 'data/stores.dart';
 import 'features/onboarding/language_screen.dart';
 import 'features/shell/root_shell.dart';
@@ -13,9 +14,10 @@ import 'l10n/app_localizations.dart';
 
 /// Root widget: creates the stores once, then rebuilds MaterialApp when language or theme change.
 class BazarApp extends StatefulWidget {
-  const BazarApp({super.key, required this.settings});
+  const BazarApp({super.key, required this.settings, required this.auth});
 
   final AppSettings settings;
+  final AuthStore auth;
 
   @override
   State<BazarApp> createState() => _BazarAppState();
@@ -35,7 +37,21 @@ class _BazarAppState extends State<BazarApp> {
   final ValueNotifier<CatalogRequest?> _catalogRequest = ValueNotifier(null);
 
   @override
+  void initState() {
+    super.initState();
+    widget.auth.restore().catchError((Object _) {});
+    // The server keeps the user's language for messages and notifications.
+    widget.settings.addListener(_syncLocale);
+  }
+
+  void _syncLocale() {
+    final locale = widget.settings.locale;
+    if (locale != null) widget.auth.updateLocale(locale.languageCode);
+  }
+
+  @override
   void dispose() {
+    widget.settings.removeListener(_syncLocale);
     for (final n in <ChangeNotifier>[_products, _cart, _favorites, _orders, _chats, _tab, _catalogRequest]) {
       n.dispose();
     }
@@ -47,6 +63,7 @@ class _BazarAppState extends State<BazarApp> {
     final settings = widget.settings;
     return AppScope(
       settings: settings,
+      auth: widget.auth,
       products: _products,
       cart: _cart,
       favorites: _favorites,

@@ -28,6 +28,9 @@ class SellerPanelScreen extends StatelessWidget {
     final l = context.l10n;
     final p = context.palette;
     final shop = MockData.shop(context.app.seller.shopId);
+    // A real seller (signed in through the server) sees their own shop name; products and orders
+    // are still demo data until Day 3–5.
+    final realShop = context.app.auth.user?.shop;
     return DefaultTabController(
       length: 4,
       child: PageScaffold(
@@ -38,10 +41,10 @@ class SellerPanelScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(AppSpace.lg, 0, AppSpace.lg, AppSpace.sm),
               child: Row(
                 children: [
-                  ShopAvatar(shop, size: 36),
+                  ShopAvatar(realShop == null ? shop : _realShopLook(shop, realShop.name), size: 36),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(shop.name, style: context.text.titleMedium, overflow: TextOverflow.ellipsis),
+                    child: Text(realShop?.name ?? shop.name, style: context.text.titleMedium, overflow: TextOverflow.ellipsis),
                   ),
                 ],
               ),
@@ -72,6 +75,20 @@ class SellerPanelScreen extends StatelessWidget {
     );
   }
 }
+
+/// The seller's real shop drawn like the demo one (same colour), with its own initials.
+Shop _realShopLook(Shop demo, String name) => Shop(
+  id: demo.id,
+  name: name,
+  descriptionRu: '',
+  descriptionTk: '',
+  market: '',
+  hours: '',
+  rating: 0,
+  reviews: 0,
+  verified: false,
+  color: demo.color,
+);
 
 EdgeInsets _listPadding(BuildContext context) =>
     EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.sm, AppSpace.lg, AppSpace.xxl + MediaQuery.paddingOf(context).bottom);
@@ -157,9 +174,14 @@ class _SubscriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final p = context.palette;
-    final soon = seller.endsSoon;
+    final realShop = context.app.auth.user?.shop;
+    final paidUntil = realShop?.subscriptionUntil ?? seller.paidUntil;
+    // New sellers start with the free trial month (spec, section 9).
+    final plan = realShop != null ? SubscriptionPlan.trial : seller.plan;
+    final daysLeft = (paidUntil.difference(DateTime.now()).inHours / 24).ceil().clamp(0, 9999);
+    final soon = daysLeft <= 5;
     final fill = soon ? p.warn : p.chart1;
-    final ratio = (seller.daysLeft / 30).clamp(0.0, 1.0);
+    final ratio = (daysLeft / 30).clamp(0.0, 1.0);
     return SurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,14 +191,14 @@ class _SubscriptionCard extends StatelessWidget {
               Icon(Icons.workspace_premium_outlined, color: p.textSecondary, size: 20),
               const SizedBox(width: 8),
               Expanded(child: Text(l.subscription, style: context.text.titleMedium)),
-              Text(l.planName(planLabel(l, seller.plan)), style: context.text.labelMedium?.copyWith(color: p.textSecondary)),
+              Text(l.planName(planLabel(l, plan)), style: context.text.labelMedium?.copyWith(color: p.textSecondary)),
             ],
           ),
           const SizedBox(height: AppSpace.md),
-          Text(l.paidUntil(formatDate(seller.paidUntil)), style: context.text.titleLarge),
+          Text(l.paidUntil(formatDate(paidUntil)), style: context.text.titleLarge),
           const SizedBox(height: AppSpace.md),
           Semantics(
-            label: l.daysLeft(seller.daysLeft),
+            label: l.daysLeft(daysLeft),
             // Meter: the track is a light step of the fill's own hue, so the bar reads end to end.
             child: Container(
               height: 8,
@@ -196,7 +218,7 @@ class _SubscriptionCard extends StatelessWidget {
           Row(
             children: [
               if (soon) ...[Icon(Icons.warning_amber_rounded, size: 18, color: p.warn), const SizedBox(width: 6)],
-              Text(l.daysLeft(seller.daysLeft), style: context.text.bodyMedium?.copyWith(color: p.textSecondary)),
+              Text(l.daysLeft(daysLeft), style: context.text.bodyMedium?.copyWith(color: p.textSecondary)),
             ],
           ),
           if (soon) ...[

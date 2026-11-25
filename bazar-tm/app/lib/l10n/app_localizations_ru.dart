@@ -667,6 +667,111 @@ class AppLocalizationsRu extends AppLocalizations {
   String get statistics => 'Статистика';
 
   @override
+  String get signOut => 'Выйти';
+
+  @override
+  String get signOutAll => 'Выйти на всех устройствах';
+
+  @override
+  String get signOutAllQuestion => 'Выйти на всех устройствах?';
+
+  @override
+  String get signOutAllText => 'Понадобится заново войти на каждом телефоне.';
+
+  @override
+  String get changePassword => 'Сменить пароль';
+
+  @override
+  String get currentPassword => 'Текущий пароль';
+
+  @override
+  String get newPassword => 'Новый пароль';
+
+  @override
+  String get repeatPassword => 'Повторите пароль';
+
+  @override
+  String get passwordsDontMatch => 'Пароли не совпадают';
+
+  @override
+  String get passwordRules => 'Не короче 8 символов. Не 12345678 и не номер телефона.';
+
+  @override
+  String get passwordChanged => 'Пароль изменён. На других телефонах нужно войти заново.';
+
+  @override
+  String get mustChangePassword => 'Вы вошли с временным паролем. Придумайте свой.';
+
+  @override
+  String get forgotPasswordText => 'Напишите или позвоните владельцу площадки: он выдаст временный пароль, а потом вы придумаете новый.';
+
+  @override
+  String get roleBuyer => 'Покупатель';
+
+  @override
+  String get roleSeller => 'Торговец';
+
+  @override
+  String get roleOwner => 'Владелец площадки';
+
+  @override
+  String get ownerPanel => 'Панель владельца';
+
+  @override
+  String get signedIn => 'Вы вошли в аккаунт';
+
+  @override
+  String get accountCreated => 'Аккаунт создан';
+
+  @override
+  String get sellerActivated => 'Готово! Ваш магазин открыт, первый месяц бесплатно.';
+
+  @override
+  String get serverNotConnected => 'Это демо-сборка: сервер ещё не подключён. Вход заработает, когда сервер будет запущен.';
+
+  @override
+  String get signInFirst => 'Сначала войдите в аккаунт';
+
+  @override
+  String get errInvalidCredentials => 'Неверный номер или пароль';
+
+  @override
+  String get errPhoneTaken => 'Этот номер уже зарегистрирован. Войдите с ним.';
+
+  @override
+  String get errWeakPassword => 'Слишком простой пароль';
+
+  @override
+  String get errTooManyAttempts => 'Слишком много неверных паролей. Попробуйте через 15 минут.';
+
+  @override
+  String get errTooManyRequests => 'Слишком много попыток. Подождите немного.';
+
+  @override
+  String get errAccountBlocked => 'Аккаунт заблокирован. Свяжитесь с владельцем площадки.';
+
+  @override
+  String get errGoogleUnavailable => 'Google сейчас недоступен. Войдите по номеру телефона и паролю.';
+
+  @override
+  String get errInviteInvalid => 'Код неверный, уже использован или устарел';
+
+  @override
+  String get errAlreadySeller => 'У этого аккаунта уже есть магазин';
+
+  @override
+  String get errWrongPassword => 'Текущий пароль неверный';
+
+  @override
+  String get errNetwork => 'Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.';
+
+  @override
+  String get errSessionExpired => 'Сессия закончилась, войдите снова';
+
+  @override
+  String get errUnknown => 'Что-то пошло не так. Попробуйте ещё раз.';
+
+  @override
   String get retry => 'Повторить';
 
   @override

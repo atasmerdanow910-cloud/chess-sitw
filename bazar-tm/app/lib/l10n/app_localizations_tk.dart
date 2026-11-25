@@ -627,6 +627,111 @@ class AppLocalizationsTk extends AppLocalizations {
   String get statistics => 'Statistika';
 
   @override
+  String get signOut => 'Çykmak';
+
+  @override
+  String get signOutAll => 'Ähli enjamlardan çykmak';
+
+  @override
+  String get signOutAllQuestion => 'Ähli enjamlardan çykmalymy?';
+
+  @override
+  String get signOutAllText => 'Her telefonda täzeden girmeli bolarsyňyz.';
+
+  @override
+  String get changePassword => 'Paroly çalyşmak';
+
+  @override
+  String get currentPassword => 'Häzirki parol';
+
+  @override
+  String get newPassword => 'Täze parol';
+
+  @override
+  String get repeatPassword => 'Paroly gaýtalaň';
+
+  @override
+  String get passwordsDontMatch => 'Parollar gabat gelmeýär';
+
+  @override
+  String get passwordRules => 'Iň az 8 nyşan. 12345678 we telefon belgisi bolmaly däl.';
+
+  @override
+  String get passwordChanged => 'Parol çalyşyldy. Beýleki telefonlarda täzeden girmeli.';
+
+  @override
+  String get mustChangePassword => 'Wagtlaýyn parol bilen girdiňiz. Öz parolyňyzy oýlap tapyň.';
+
+  @override
+  String get forgotPasswordText => 'Meýdançanyň eýesine ýazyň ýa-da jaň ediň: ol wagtlaýyn parol berer, soňra täzesini oýlap taparsyňyz.';
+
+  @override
+  String get roleBuyer => 'Alyjy';
+
+  @override
+  String get roleSeller => 'Söwdagär';
+
+  @override
+  String get roleOwner => 'Meýdançanyň eýesi';
+
+  @override
+  String get ownerPanel => 'Eýesiniň paneli';
+
+  @override
+  String get signedIn => 'Hasabyňyza girdiňiz';
+
+  @override
+  String get accountCreated => 'Hasap döredildi';
+
+  @override
+  String get sellerActivated => 'Taýýar! Dükanyňyz açyldy, ilkinji aý mugt.';
+
+  @override
+  String get serverNotConnected => 'Bu demo ýygnamasy: serwer entek birikdirilmedi. Serwer işledilende giriş işlär.';
+
+  @override
+  String get signInFirst => 'Ilki hasabyňyza giriň';
+
+  @override
+  String get errInvalidCredentials => 'Belgi ýa-da parol nädogry';
+
+  @override
+  String get errPhoneTaken => 'Bu belgi eýýäm hasaba alnan. Onuň bilen giriň.';
+
+  @override
+  String get errWeakPassword => 'Parol gaty ýönekeý';
+
+  @override
+  String get errTooManyAttempts => 'Nädogry parol köp girizildi. 15 minutdan soň synanyşyň.';
+
+  @override
+  String get errTooManyRequests => 'Synanyşyk köp boldy. Biraz garaşyň.';
+
+  @override
+  String get errAccountBlocked => 'Hasap petiklendi. Meýdançanyň eýesi bilen habarlaşyň.';
+
+  @override
+  String get errGoogleUnavailable => 'Google häzir elýeterli däl. Telefon belgisi we parol bilen giriň.';
+
+  @override
+  String get errInviteInvalid => 'Kod nädogry, eýýäm ulanylan ýa-da möhleti geçen';
+
+  @override
+  String get errAlreadySeller => 'Bu hasabyň eýýäm dükany bar';
+
+  @override
+  String get errWrongPassword => 'Häzirki parol nädogry';
+
+  @override
+  String get errNetwork => 'Serwer bilen baglanyşyk ýok. Internedi barlap, gaýtadan synanyşyň.';
+
+  @override
+  String get errSessionExpired => 'Sessiýa tamamlandy, täzeden giriň';
+
+  @override
+  String get errUnknown => 'Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.';
+
+  @override
   String get retry => 'Gaýtadan synanyş';
 
   @override

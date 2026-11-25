@@ -1286,6 +1286,216 @@ abstract class AppLocalizations {
   /// **'Статистика'**
   String get statistics;
 
+  /// No description provided for @signOut.
+  ///
+  /// In ru, this message translates to:
+  /// **'Выйти'**
+  String get signOut;
+
+  /// No description provided for @signOutAll.
+  ///
+  /// In ru, this message translates to:
+  /// **'Выйти на всех устройствах'**
+  String get signOutAll;
+
+  /// No description provided for @signOutAllQuestion.
+  ///
+  /// In ru, this message translates to:
+  /// **'Выйти на всех устройствах?'**
+  String get signOutAllQuestion;
+
+  /// No description provided for @signOutAllText.
+  ///
+  /// In ru, this message translates to:
+  /// **'Понадобится заново войти на каждом телефоне.'**
+  String get signOutAllText;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сменить пароль'**
+  String get changePassword;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In ru, this message translates to:
+  /// **'Текущий пароль'**
+  String get currentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In ru, this message translates to:
+  /// **'Новый пароль'**
+  String get newPassword;
+
+  /// No description provided for @repeatPassword.
+  ///
+  /// In ru, this message translates to:
+  /// **'Повторите пароль'**
+  String get repeatPassword;
+
+  /// No description provided for @passwordsDontMatch.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пароли не совпадают'**
+  String get passwordsDontMatch;
+
+  /// No description provided for @passwordRules.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не короче 8 символов. Не 12345678 и не номер телефона.'**
+  String get passwordRules;
+
+  /// No description provided for @passwordChanged.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пароль изменён. На других телефонах нужно войти заново.'**
+  String get passwordChanged;
+
+  /// No description provided for @mustChangePassword.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вы вошли с временным паролем. Придумайте свой.'**
+  String get mustChangePassword;
+
+  /// No description provided for @forgotPasswordText.
+  ///
+  /// In ru, this message translates to:
+  /// **'Напишите или позвоните владельцу площадки: он выдаст временный пароль, а потом вы придумаете новый.'**
+  String get forgotPasswordText;
+
+  /// No description provided for @roleBuyer.
+  ///
+  /// In ru, this message translates to:
+  /// **'Покупатель'**
+  String get roleBuyer;
+
+  /// No description provided for @roleSeller.
+  ///
+  /// In ru, this message translates to:
+  /// **'Торговец'**
+  String get roleSeller;
+
+  /// No description provided for @roleOwner.
+  ///
+  /// In ru, this message translates to:
+  /// **'Владелец площадки'**
+  String get roleOwner;
+
+  /// No description provided for @ownerPanel.
+  ///
+  /// In ru, this message translates to:
+  /// **'Панель владельца'**
+  String get ownerPanel;
+
+  /// No description provided for @signedIn.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вы вошли в аккаунт'**
+  String get signedIn;
+
+  /// No description provided for @accountCreated.
+  ///
+  /// In ru, this message translates to:
+  /// **'Аккаунт создан'**
+  String get accountCreated;
+
+  /// No description provided for @sellerActivated.
+  ///
+  /// In ru, this message translates to:
+  /// **'Готово! Ваш магазин открыт, первый месяц бесплатно.'**
+  String get sellerActivated;
+
+  /// No description provided for @serverNotConnected.
+  ///
+  /// In ru, this message translates to:
+  /// **'Это демо-сборка: сервер ещё не подключён. Вход заработает, когда сервер будет запущен.'**
+  String get serverNotConnected;
+
+  /// No description provided for @signInFirst.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сначала войдите в аккаунт'**
+  String get signInFirst;
+
+  /// No description provided for @errInvalidCredentials.
+  ///
+  /// In ru, this message translates to:
+  /// **'Неверный номер или пароль'**
+  String get errInvalidCredentials;
+
+  /// No description provided for @errPhoneTaken.
+  ///
+  /// In ru, this message translates to:
+  /// **'Этот номер уже зарегистрирован. Войдите с ним.'**
+  String get errPhoneTaken;
+
+  /// No description provided for @errWeakPassword.
+  ///
+  /// In ru, this message translates to:
+  /// **'Слишком простой пароль'**
+  String get errWeakPassword;
+
+  /// No description provided for @errTooManyAttempts.
+  ///
+  /// In ru, this message translates to:
+  /// **'Слишком много неверных паролей. Попробуйте через 15 минут.'**
+  String get errTooManyAttempts;
+
+  /// No description provided for @errTooManyRequests.
+  ///
+  /// In ru, this message translates to:
+  /// **'Слишком много попыток. Подождите немного.'**
+  String get errTooManyRequests;
+
+  /// No description provided for @errAccountBlocked.
+  ///
+  /// In ru, this message translates to:
+  /// **'Аккаунт заблокирован. Свяжитесь с владельцем площадки.'**
+  String get errAccountBlocked;
+
+  /// No description provided for @errGoogleUnavailable.
+  ///
+  /// In ru, this message translates to:
+  /// **'Google сейчас недоступен. Войдите по номеру телефона и паролю.'**
+  String get errGoogleUnavailable;
+
+  /// No description provided for @errInviteInvalid.
+  ///
+  /// In ru, this message translates to:
+  /// **'Код неверный, уже использован или устарел'**
+  String get errInviteInvalid;
+
+  /// No description provided for @errAlreadySeller.
+  ///
+  /// In ru, this message translates to:
+  /// **'У этого аккаунта уже есть магазин'**
+  String get errAlreadySeller;
+
+  /// No description provided for @errWrongPassword.
+  ///
+  /// In ru, this message translates to:
+  /// **'Текущий пароль неверный'**
+  String get errWrongPassword;
+
+  /// No description provided for @errNetwork.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.'**
+  String get errNetwork;
+
+  /// No description provided for @errSessionExpired.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сессия закончилась, войдите снова'**
+  String get errSessionExpired;
+
+  /// No description provided for @errUnknown.
+  ///
+  /// In ru, this message translates to:
+  /// **'Что-то пошло не так. Попробуйте ещё раз.'**
+  String get errUnknown;
+
   /// No description provided for @retry.
   ///
   /// In ru, this message translates to:

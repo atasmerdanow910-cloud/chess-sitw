@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app_scope.dart';
+import '../../core/format/money.dart';
 import '../../core/theme/tokens.dart';
 import '../../data/models.dart';
 import '../../ui/common.dart';
@@ -16,6 +17,9 @@ String? normalizeTmPhone(String input) {
   if (local == null || local.startsWith('0')) return null;
   return '+993 ${local.substring(0, 2)} ${local.substring(2)}';
 }
+
+/// The form the server stores: "+99365123456".
+String? canonicalTmPhone(String input) => normalizeTmPhone(input)?.replaceAll(' ', '');
 
 /// Checkout of one shop's items: contact, address, note on cash payment, confirmation.
 Future<void> showCheckoutSheet(BuildContext context, Shop shop) async {
@@ -47,6 +51,16 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
   final _phone = TextEditingController(text: '+993 ');
   final _address = TextEditingController();
   final _comment = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final user = AppScope.of(context).auth.user;
+    if (user != null) {
+      _name.text = user.name;
+      if (user.phone != null) _phone.text = formatPhone(user.phone!);
+    }
+  }
 
   @override
   void dispose() {

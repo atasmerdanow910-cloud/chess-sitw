@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Talks to the Bazar TM server (from Day 2: sign-in). -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="Bazar TM"
+        android:allowBackup="false"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

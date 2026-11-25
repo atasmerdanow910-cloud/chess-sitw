@@ -3,6 +3,7 @@ import 'package:bazar_tm/data/mock_data.dart';
 import 'package:bazar_tm/features/chat/chat_screen.dart';
 import 'package:bazar_tm/features/orders/orders_screen.dart';
 import 'package:bazar_tm/features/product/product_screen.dart';
+import 'package:bazar_tm/features/profile/change_password_screen.dart';
 import 'package:bazar_tm/features/profile/favorites_screen.dart';
 import 'package:bazar_tm/features/profile/login_screen.dart';
 import 'package:bazar_tm/features/seller/product_edit_screen.dart';
@@ -12,6 +13,7 @@ import 'package:bazar_tm/features/shop/shop_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'fake_server.dart';
 import 'helpers.dart';
 
 /// Opens every screen in both languages and both themes. Any layout overflow or exception
@@ -20,49 +22,59 @@ void main() {
   for (final width in [360.0, 412.0]) {
     for (final locale in ['ru', 'tk']) {
       for (final theme in ['light', 'dark']) {
-        testWidgets('every screen renders: $locale, $theme, ${width.toInt()} px', (tester) async {
-          await pumpApp(tester, prefs: {'locale': locale, 'theme': theme, 'seller_preview': true});
-          tester.view.physicalSize = Size(width * 3, 780 * 3);
-          await tester.pumpAndSettle();
-
-          final shell = tester.element(find.byType(RootShell));
-          final app = AppScope.of(shell);
-          final nav = Navigator.of(shell);
-
-          for (var i = 0; i < 5; i++) {
-            app.tab.value = i;
+        for (final signedIn in [false, true]) {
+          testWidgets('every screen renders: $locale, $theme, ${width.toInt()} px, ${signedIn ? 'seller' : 'guest'}', (tester) async {
+            // Signed in: a seller with a long shop name, as the server describes them.
+            final server = FakeServer()..addUser('+99365123456', 'Bazar-2026', name: 'Annagurbanguly Durdymuhammedow', role: 'seller');
+            final auth = signedIn ? server.auth() : demoAuth();
+            if (signedIn) {
+              await tester.runAsync(() => auth.login(phone: '+99365123456', password: 'Bazar-2026'));
+            }
+            await pumpApp(tester, prefs: {'locale': locale, 'theme': theme, 'seller_preview': true}, auth: auth);
+            tester.view.physicalSize = Size(width * 3, 780 * 3);
             await tester.pumpAndSettle();
-          }
 
-          Future<void> open(Widget screen, {Future<void> Function()? inside}) async {
-            nav.push(MaterialPageRoute<void>(builder: (_) => screen));
-            await tester.pumpAndSettle();
-            if (inside != null) await inside();
-            nav.pop();
-            await tester.pumpAndSettle();
-          }
+            final shell = tester.element(find.byType(RootShell));
+            final app = AppScope.of(shell);
+            final nav = Navigator.of(shell);
 
-          await open(ProductScreen(product: MockData.product('p5')));
-          await open(ProductScreen(product: MockData.product('p4'))); // sold out
-          await open(ShopScreen(shop: MockData.shop('s1')));
-          await open(ChatScreen(conversation: app.chats.items.first));
-          await open(const LoginScreen());
-          await open(const FavoritesScreen());
-          await open(const OrdersScreen());
-          await open(ProductEditScreen(product: MockData.product('p1')));
-          await open(const ProductEditScreen());
-          await open(
-            const SellerPanelScreen(),
-            inside: () async {
-              final tabs = DefaultTabController.of(tester.element(find.byType(TabBarView)));
-              for (var i = 1; i < tabs.length; i++) {
-                tabs.animateTo(i);
-                await tester.pumpAndSettle();
-              }
-            },
-          );
-          expect(tester.takeException(), isNull);
-        });
+            for (var i = 0; i < 5; i++) {
+              app.tab.value = i;
+              await tester.pumpAndSettle();
+            }
+
+            Future<void> open(Widget screen, {Future<void> Function()? inside}) async {
+              nav.push(MaterialPageRoute<void>(builder: (_) => screen));
+              await tester.pumpAndSettle();
+              if (inside != null) await inside();
+              nav.pop();
+              await tester.pumpAndSettle();
+            }
+
+            await open(ProductScreen(product: MockData.product('p5')));
+            await open(ProductScreen(product: MockData.product('p4'))); // sold out
+            await open(ShopScreen(shop: MockData.shop('s1')));
+            await open(ChatScreen(conversation: app.chats.items.first));
+            await open(const LoginScreen());
+            await open(const ChangePasswordScreen());
+            await open(const ChangePasswordScreen(forced: true));
+            await open(const FavoritesScreen());
+            await open(const OrdersScreen());
+            await open(ProductEditScreen(product: MockData.product('p1')));
+            await open(const ProductEditScreen());
+            await open(
+              const SellerPanelScreen(),
+              inside: () async {
+                final tabs = DefaultTabController.of(tester.element(find.byType(TabBarView)));
+                for (var i = 1; i < tabs.length; i++) {
+                  tabs.animateTo(i);
+                  await tester.pumpAndSettle();
+                }
+              },
+            );
+            expect(tester.takeException(), isNull);
+          });
+        }
       }
     }
   }
