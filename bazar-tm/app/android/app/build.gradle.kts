@@ -31,9 +31,17 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Test builds are signed with the debug key; the release key arrives on Day 9
+            // (kept in a GitHub secret, never in git).
             signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
+    // The APK is also shared directly over slow mobile internet, so native libraries stay
+    // compressed inside it: about half the download, Android unpacks them once on install.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
 }

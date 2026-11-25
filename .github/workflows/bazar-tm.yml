@@ -76,10 +76,15 @@ jobs:
       - run: flutter analyze
       - run: flutter test
 
+      # The run number is the version code, so every new test build installs as an update.
+      # Both APKs get the same version code, so a phone can switch between them.
       - name: Build APK (obfuscated release)
         run: |
-          flutter build apk --release --obfuscate --split-debug-info=build/symbols/universal
-          flutter build apk --release --split-per-abi --target-platform android-arm64 --obfuscate --split-debug-info=build/symbols/arm64
+          flutter build apk --release --build-number=$GITHUB_RUN_NUMBER \
+            --obfuscate --split-debug-info=build/symbols/universal
+          flutter build apk --release --build-number=$GITHUB_RUN_NUMBER \
+            --split-per-abi --target-platform android-arm64 -P force-version-code-ignoring-abi=true \
+            --obfuscate --split-debug-info=build/symbols/arm64
           mkdir -p dist
           cp build/app/outputs/flutter-apk/app-release.apk dist/bazar-tm.apk
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk dist/bazar-tm-arm64.apk
