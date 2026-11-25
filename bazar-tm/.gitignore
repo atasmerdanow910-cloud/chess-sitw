@@ -1,0 +1,23 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+key.properties
+
+# Node
+node_modules/
+dist/
+coverage/
+*.log
+npm-debug.log*
+
+# Flutter / Dart (app/.gitignore has the full list)
+app/build/
+app/.dart_tool/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
