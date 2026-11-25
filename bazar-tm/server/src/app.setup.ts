@@ -1,7 +1,16 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { HttpStatus, INestApplication, ValidationError, ValidationPipe } from '@nestjs/common';
 import type { Express } from 'express';
 import helmet from 'helmet';
+import { ApiError } from './common/api-error';
 import { AppConfig } from './config/env';
+
+/** Field names only: values (passwords, phones) never go back into an error. */
+function fieldNames(errors: ValidationError[], parent = ''): string[] {
+  return errors.flatMap((e) => {
+    const path = parent ? `${parent}.${e.property}` : e.property;
+    return e.children?.length ? fieldNames(e.children, path) : [path];
+  });
+}
 
 /**
  * Security and API settings shared by the real server and the tests,
@@ -24,12 +33,15 @@ export function configureApp(app: INestApplication, config: AppConfig): void {
     maxAge: 600,
   });
 
-  // Every request body is validated against its DTO; unknown fields are rejected.
+  // Every request body is validated against its DTO; unknown fields (for example a forged
+  // "role" or "shopId") are rejected, not silently ignored.
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      exceptionFactory: (errors) =>
+        new ApiError('validation_failed', HttpStatus.BAD_REQUEST, 'Request has invalid or unknown fields', { fields: fieldNames(errors) }),
     }),
   );
 }
